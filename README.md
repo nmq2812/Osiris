@@ -11,12 +11,12 @@
 -   ❤️ **Danh Sách Yêu Thích:** Lưu sản phẩm yêu thích để mua sau.
 -   📦 **Quản Lý Đơn Hàng:** Theo dõi trạng thái đơn hàng trực tiếp.
 -   🏪 **Hệ Thống Quản Lý Cửa Hàng:** Admin có thể thêm, sửa, xoá sản phẩm, quản lý khách hàng.
--   🤖 **Tích Hợp AI:** Gợi ý sản phẩm thông minh dựa trên hành vi người dùng.
+-   🤖 **Tích Hợp AI:** Gợi ý sản phẩm thông minh dựa trên sản phẩm yêu thích.
 
 ## 🛠️ Công Nghệ Sử Dụng
 
 -   **Frontend:** Next.js, TypeScript, Zustand, Tailwind CSS, ShadCN
--   **Backend:** Spring Boot, PostgreSQL
+-   **Backend:** Spring Boot, MySQL
 -   **Authentication:** JWT + Cookie-based Auth
 -   **AI Recommendation:** RAG (Retrieval-Augmented Generation)
 
@@ -47,18 +47,9 @@ npm run dev  # Chạy frontend trên localhost:3000
 
 **Backend:** Vào thư mục `backend/` và chạy Spring Boot server.
 
-```sh
-mvn spring-boot:run  # Chạy backend trên localhost:8088
-```
 
-## 🤝 Đóng Góp
 
-Mọi đóng góp đều được hoan nghênh! Vui lòng tạo Pull Request hoặc mở Issue nếu có bất kỳ ý tưởng nào.
-
-## 📜 Giấy Phép
-
-Dự án này được phát hành theo giấy phép MIT. Bạn có thể sử dụng, chỉnh sửa nhưng vui lòng giữ lại thông tin tác giả.
 
 ---
 
-📌 **Liên hệ:** [Email](mailto:your-email@example.com) | [GitHub](https://github.com/your-username) | [Website](https://your-website.com)
+📌 **Liên hệ:** [Email](mailto:21020383@vnu.edu.vn) | [GitHub](https://github.com/nmq2812).
