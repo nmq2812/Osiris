@@ -1,43 +1,131 @@
-"use server";
+"use client";
 
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { useState, useEffect } from "react";
+import Image from "next/image";
+import Link from "next/link";
+import { categories, carouselData, featuredProducts } from "@/app/mockData";
+
+// Shadcn UI Components
+import {
+    Card,
+    CardContent,
+    CardDescription,
+    CardFooter,
+    CardHeader,
+    CardTitle,
+} from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import {
+    Table,
+    TableBody,
+    TableCaption,
+    TableCell,
+    TableHead,
+    TableHeader,
+    TableRow,
+} from "@/components/ui/table";
+import {
+    Carousel,
+    CarouselContent,
+    CarouselItem,
+    CarouselNext,
+    CarouselPrevious,
+} from "@/components/ui/carousel";
+import { Badge } from "@/components/ui/badge";
+import { Separator } from "@/components/ui/separator";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import {
+    Sheet,
+    SheetContent,
+    SheetDescription,
+    SheetHeader,
+    SheetTitle,
+    SheetTrigger,
+} from "@/components/ui/sheet";
+import {
+    Accordion,
+    AccordionContent,
+    AccordionItem,
+    AccordionTrigger,
+} from "@/components/ui/accordion";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import {
+    Popover,
+    PopoverContent,
+    PopoverTrigger,
+} from "@/components/ui/popover";
 
-const HomePage = () => {
+// Icons
+import {
+    ShoppingCart,
+    Heart,
+    Search,
+    Star,
+    ChevronRight,
+    Mail,
+    Info,
+    AlertTriangle,
+} from "lucide-react";
+import FAQSection from "@/components/home/FAQ";
+import FeaturedCategoriesSection from "@/components/home/featuredCategories";
+import FeaturedProductsSection from "@/components/home/featuredProducts";
+import FooterSection from "@/components/home/footer";
+import HeaderSection from "@/components/home/header";
+import HeroCarouselSection from "@/components/home/heroCarousel";
+import InfoTableSection from "@/components/home/infoTable";
+import NewsletterSection from "@/components/home/newsLetter";
+import SalesAlertSection from "@/components/home/saleAleartSection";
+import TestimonialsSection from "@/components/home/testimonials";
+
+export default function HomePage() {
+    // State
+    const [activeCategory, setActiveCategory] = useState("all");
+    const [products, setProducts] = useState<Product[]>([]);
+
+    useEffect(() => {
+        // Giả lập tải dữ liệu
+        setProducts(featuredProducts);
+    }, []);
+
     return (
-        <div className="min-h-screen bg-gray-100 p-6">
-            <header className="text-center py-6">
-                <h1 className="text-4xl font-bold text-blue-600">OSIRIS</h1>
-                <p className="text-lg text-gray-700 mt-2">
-                    Chào mừng bạn đến với cửa hàng mô hình của chúng tôi!
-                </p>
-            </header>
-            <main className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {/* Example Product Card */}
-                <Card className="shadow-lg">
-                    <CardHeader className="p-0">
-                        <img
-                            src="/path/to/figure-image.jpg"
-                            alt="Figure"
-                            className="w-full h-48 object-cover"
-                        />
-                    </CardHeader>
-                    <CardContent className="p-4">
-                        <CardTitle className="text-xl font-semibold">
-                            Figure 1
-                        </CardTitle>
-                        <p className="text-gray-700 mt-2">
-                            Mô tả ngắn về sản phẩm Figure 1.
-                        </p>
-                        <Button className="mt-4 w-full bg-blue-500 hover:bg-blue-600 text-white">
-                            Mua ngay
-                        </Button>
-                    </CardContent>
-                </Card>
-                {/* Add more product cards as needed */}
-            </main>
+        <div className="min-h-screen bg-gray-50">
+            {/* Header Section */}
+            <HeaderSection />
+
+            {/* Hero Carousel Section */}
+            <HeroCarouselSection />
+
+            {/* Featured Categories Section */}
+            <FeaturedCategoriesSection />
+
+            {/* Sales Alert Section */}
+            <SalesAlertSection />
+
+            {/* Featured Products Section */}
+            <FeaturedProductsSection
+                products={products}
+                activeCategory={activeCategory}
+                setActiveCategory={setActiveCategory}
+            />
+
+            {/* Info Table Section */}
+            <InfoTableSection />
+
+            {/* Newsletter Section */}
+            <NewsletterSection />
+
+            {/* Testimonials Section */}
+            <TestimonialsSection />
+
+            {/* FAQ Section */}
+            <FAQSection />
+
+            {/* Footer Section */}
+            <FooterSection />
         </div>
     );
-};
-
-export default HomePage;
+}
