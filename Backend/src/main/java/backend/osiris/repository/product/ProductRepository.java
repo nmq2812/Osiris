@@ -10,7 +10,6 @@ import cz.jirutka.rsql.parser.ast.ComparisonOperator;
 import io.github.perplexhub.rsql.RSQLCustomPredicate;
 import io.github.perplexhub.rsql.RSQLJPASupport;
 import jakarta.persistence.criteria.*;
-import javax.persistence.criteria.CriteriaBuilder;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
