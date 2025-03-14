@@ -6,7 +6,7 @@ interface LoginCredentials {
     password: string;
 }
 
-export const handleLogin = (credentials: LoginCredentials) => async () => {
+export const handleSignin = (credentials: LoginCredentials) => async () => {
     try {
         const response = await axios.post(
             "http://localhost:8080/api/auth/login",

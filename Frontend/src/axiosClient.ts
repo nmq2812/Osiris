@@ -28,7 +28,7 @@ axiosClient.interceptors.response.use(
             originalRequest._retry = true;
 
             try {
-                await refreshToken(); // Gọi API refresh token
+                // await refreshToken(); // Gọi API refresh token
                 return axiosClient(originalRequest); // Thử lại request cũ sau khi refresh
             } catch (refreshError) {
                 useAuthStore.getState().logout(); // Nếu refresh thất bại, đăng xuất

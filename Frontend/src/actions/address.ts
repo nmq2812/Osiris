@@ -1,6 +1,6 @@
 import axios from "axios";
 
-interface IGetProvince {
+interface IGetAddress {
     page: number;
     size: number;
     sort: string;
@@ -10,21 +10,91 @@ interface IGetProvince {
 }
 export const getProvince = async ({
     page = 0,
-    size = 10,
+    size = 63,
     sort = "id,desc",
     filter = "",
     search = "",
     all,
-}: IGetProvince) => {
+}: IGetAddress) => {
     try {
         const response = await axios.get(
-            "https://api.rajaongkir.com/starter/province",
+            "http://localhost:8080/api/provinces",
             {
-                params: {},
+                params: {
+                    page,
+                    size,
+                    sort,
+                    filter,
+                    search,
+                    all,
+                },
             },
         );
 
-        return response.data;
+        return response.data.content;
+    } catch (error) {
+        if (axios.isAxiosError(error) && error.response) {
+            throw new Error(error.response.data.message);
+        } else {
+            throw new Error("An unknown error occurred");
+        }
+    }
+};
+
+export const getDistrict = async ({
+    page = 0,
+    size = 63,
+    sort = "id,desc",
+    filter = "",
+    search = "",
+    all,
+}: IGetAddress) => {
+    try {
+        const response = await axios.get(
+            "http://localhost:8080/api/districts",
+            {
+                params: {
+                    page,
+                    size,
+                    sort,
+                    filter,
+                    search,
+                    all,
+                },
+            },
+        );
+
+        return response.data.content;
+    } catch (error) {
+        if (axios.isAxiosError(error) && error.response) {
+            throw new Error(error.response.data.message);
+        } else {
+            throw new Error("An unknown error occurred");
+        }
+    }
+};
+
+export const getWard = async ({
+    page = 0,
+    size = 63,
+    sort = "id,desc",
+    filter = "",
+    search = "",
+    all,
+}: IGetAddress) => {
+    try {
+        const response = await axios.get("http://localhost:8080/api/wards", {
+            params: {
+                page,
+                size,
+                sort,
+                filter,
+                search,
+                all,
+            },
+        });
+
+        return response.data.content;
     } catch (error) {
         if (axios.isAxiosError(error) && error.response) {
             throw new Error(error.response.data.message);
