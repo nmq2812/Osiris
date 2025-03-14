@@ -2,12 +2,12 @@ package backend.osiris.repository.authentication;
 
 import backend.osiris.entity.authentication.User;
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.stereotype.Repository;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 
 import java.util.Optional;
 
-@Repository
-public interface UserRepository extends JpaRepository<User, Long> {
+public interface UserRepository extends JpaRepository<User, Long>, JpaSpecificationExecutor<User> {
+
     Optional<User> findByUsername(String username);
 
     Optional<User> findByEmail(String email);
@@ -17,4 +17,5 @@ public interface UserRepository extends JpaRepository<User, Long> {
     boolean existsUserByEmail(String email);
 
     Optional<User> findByEmailAndResetPasswordToken(String email, String resetPasswordToken);
+
 }
