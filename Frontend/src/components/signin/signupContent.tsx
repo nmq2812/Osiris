@@ -24,7 +24,7 @@ import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { handleSignup } from "@/actions/signup";
-import VerifyDrawer from "./verifyDrawer";
+
 import {
     Drawer,
     DrawerContent,
@@ -32,6 +32,7 @@ import {
     DrawerHeader,
     DrawerTitle,
 } from "../ui/drawer";
+import { useRouter } from "next/navigation";
 
 const signupSchema = z.object({
     username: z.string().min(3, "Username phải có ít nhất 3 ký tự"),
@@ -74,8 +75,9 @@ const signupSchema = z.object({
 type SignupFormValues = z.infer<typeof signupSchema>;
 
 const SignUpContent = () => {
+    const route = useRouter();
     const [loading, setLoading] = useState(false);
-    const [open, setOpen] = useState(false);
+    const [id, setId] = useState(false);
     const [provincesList, setProvincesList] = useState<Province[]>([]);
     const [districtsList, setDistrictsList] = useState<District[]>([]);
     const [wardsList, setWardsList] = useState<Ward[]>([]);
@@ -182,10 +184,15 @@ const SignUpContent = () => {
         });
 
         try {
-            await handleSignup({
+            const res = await handleSignup({
                 ...signupData,
                 avatar: signupData.avatar || "none",
             })();
+            console.log("Đăng ký thành công:", res);
+            setId(res.data.userId);
+            if (res.status === 200) {
+                route.push(`/signup/${res.data.userId}`);
+            }
         } catch (error) {
             console.error("Error signing up:", error);
         }
@@ -456,7 +463,6 @@ const SignUpContent = () => {
                         style={{
                             cursor: loading ? "not-allowed" : "pointer",
                         }}
-                        onClick={() => setOpen(true)}
                     >
                         {loading ? (
                             <Loader2 className="animate-spin" size={20} />
@@ -466,7 +472,6 @@ const SignUpContent = () => {
                     </Button>
                 </form>
             </Form>
-            <VerifyDrawer open={open} setOpen={setOpen}></VerifyDrawer>
         </CardContent>
     );
 };

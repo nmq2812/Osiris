@@ -1,4 +1,4 @@
-import { Table, AlertTriangle } from "lucide-react";
+import { AlertTriangle } from "lucide-react";
 import { Alert, AlertTitle, AlertDescription } from "../ui/alert";
 import {
     TableCaption,
@@ -7,6 +7,7 @@ import {
     TableHead,
     TableBody,
     TableCell,
+    Table,
 } from "../ui/table";
 import { Badge } from "@/components/ui/badge";
 

@@ -49,7 +49,7 @@ export const handleSignup = (credentials: SignupCredentials) => async () => {
             },
         );
 
-        return response.data.content;
+        return response;
     } catch (error) {
         if (axios.isAxiosError(error) && error.response) {
             throw new Error(error.response.data.message);
@@ -59,24 +59,26 @@ export const handleSignup = (credentials: SignupCredentials) => async () => {
     }
 };
 
-export const handleVerifyEmail = (token: string) => async () => {
-    try {
-        const response = await axios.post(
-            `http://localhost:8080/api/auth/registration/confirm`,
-            {
-                token,
-            },
-            {
-                withCredentials: true,
-            },
-        );
+export const handleVerifyEmail =
+    (userId: number, token: string) => async () => {
+        try {
+            const response = await axios.post(
+                `http://localhost:8080/api/auth/registration/confirm`,
+                {
+                    userId,
+                    token,
+                },
+                {
+                    withCredentials: true,
+                },
+            );
 
-        return response.data.content;
-    } catch (error) {
-        if (axios.isAxiosError(error) && error.response) {
-            throw new Error(error.response.data.message);
-        } else {
-            throw new Error("An unknown error occurred");
+            return await response.data.content;
+        } catch (error) {
+            if (axios.isAxiosError(error) && error.response) {
+                throw new Error(error.response.data.message);
+            } else {
+                throw new Error("An unknown error occurred");
+            }
         }
-    }
-};
+    };
