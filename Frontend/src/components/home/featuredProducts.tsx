@@ -13,16 +13,10 @@ import Image from "next/image";
 import { useAuthStore } from "@/stores/authStore";
 import { useState } from "react";
 
-interface FeaturedProductsSectionProps {
-    products: Product[];
-    activeCategory: string;
-    setActiveCategory: (category: string) => void;
-}
-
 export default function FeaturedProductsSection() {
     const [activeCategory, setActiveCategory] = useState("all");
     const [products, setProducts] = useState<Product[]>([]);
-    const [token] = useAuthStore((state) => [state.token]);
+
     return (
         <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
             <div className="flex flex-col md:flex-row justify-between items-center mb-8">
