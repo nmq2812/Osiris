@@ -1,7 +1,7 @@
 package backend.osiris.entity.product;
 
 import backend.osiris.entity.BaseEntity;
-import backend.osiris.entity.client.PreOrder;
+import backend.osiris.entity.client.Preorder;
 import backend.osiris.entity.client.Wish;
 import backend.osiris.entity.general.Image;
 import backend.osiris.entity.promotion.Promotion;
@@ -104,7 +104,7 @@ public class Product extends BaseEntity {
     private List<Wish> wishes = new ArrayList<>();
 
     @OneToMany(mappedBy = "product")
-    private List<PreOrder> preorders = new ArrayList<>();
+    private List<Preorder> preorders = new ArrayList<>();
 
     @OneToMany(mappedBy = "product")
     private List<Review> reviews = new ArrayList<>();
