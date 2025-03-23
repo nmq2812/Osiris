@@ -3,10 +3,10 @@
 import FAQSection from "@/components/home/FAQ";
 import FeaturedCategoriesSection from "@/components/home/featuredCategories";
 import FeaturedProductsSection from "@/components/home/featuredProducts";
-import FooterSection from "@/components/home/footer";
-import HeaderSection from "@/components/header";
+import FooterSection from "@/components/layout/footer";
+import HeaderSection from "@/components/layout/header";
 import HeroCarouselSection from "@/components/home/heroCarousel";
-import InfoTableSection from "@/components/home/infoTable";
+import InfoTableSection from "@/components/table/infoTable";
 import NewsletterSection from "@/components/home/newsLetter";
 import SalesAlertSection from "@/components/home/saleAleartSection";
 import TestimonialsSection from "@/components/home/testimonials";
@@ -38,9 +38,6 @@ export default async function HomePage() {
 
             {/* FAQ Section */}
             <FAQSection />
-
-            {/* Footer Section */}
-            <FooterSection />
         </div>
     );
 }
