@@ -4,15 +4,6 @@ import { useState, useEffect } from "react";
 import { getProducts } from "@/actions/product";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Badge } from "@/components/ui/badge";
-import {
-    Card,
-    CardContent,
-    CardFooter,
-    CardHeader,
-    CardTitle,
-    CardDescription,
-} from "@/components/ui/card";
 import {
     Select,
     SelectContent,
@@ -20,7 +11,7 @@ import {
     SelectTrigger,
     SelectValue,
 } from "@/components/ui/select";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
     Pagination,
     PaginationContent,
@@ -29,22 +20,8 @@ import {
     PaginationNext,
     PaginationPrevious,
 } from "@/components/ui/pagination";
-import { Loader2, Search, ShoppingCart, Heart, Star } from "lucide-react";
-import Image from "next/image";
-import Link from "next/link";
-
-// Định nghĩa kiểu dữ liệu sản phẩm
-interface Product {
-    id: number;
-    name: string;
-    price: number;
-    imageUrl: string;
-    description: string;
-    category: string;
-    rating: number;
-    inStock: boolean;
-    discount?: number;
-}
+import { Loader2, Search } from "lucide-react";
+import ProductCard from "@/components/card/productCard";
 
 function ProductsPage() {
     const [products, setProducts] = useState<Product[]>([]);
@@ -141,7 +118,7 @@ function ProductsPage() {
         // Lọc theo danh mục
         if (selectedCategory !== "all") {
             result = result.filter(
-                (product) => product.category === selectedCategory,
+                (product) => product.category.name === selectedCategory,
             );
         }
 
@@ -160,7 +137,7 @@ function ProductsPage() {
             case "popular":
             default:
                 // Sắp xếp theo đánh giá
-                result.sort((a, b) => b.rating - a.rating);
+                result.sort((a, b) => b.id - a.id);
                 break;
         }
 
@@ -304,7 +281,7 @@ function ProductsPage() {
             ) : (
                 <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
                     {currentProducts.map((product) => (
-                        <ProductCard key={product.id} product={product} />
+                        <ProductCard key={product.id} product={product!!} />
                     ))}
                 </div>
             )}
@@ -354,111 +331,6 @@ function ProductsPage() {
                 </Pagination>
             )}
         </div>
-    );
-}
-
-// Component Card Sản phẩm
-function ProductCard({ product }: { product: Product }) {
-    return (
-        <Card className="overflow-hidden h-full flex flex-col hover:shadow-lg transition-shadow">
-            <div className="relative h-60 bg-gray-100">
-                {product.imageUrl ? (
-                    <Link href={`/products/${product.id}`}>
-                        <Image
-                            src={product.imageUrl}
-                            alt={product.name}
-                            fill
-                            className="object-cover"
-                        />
-                    </Link>
-                ) : (
-                    <div className="w-full h-full flex items-center justify-center bg-gray-200">
-                        <p className="text-gray-400">Không có hình ảnh</p>
-                    </div>
-                )}
-
-                {product.discount && (
-                    <Badge className="absolute top-2 left-2 bg-red-500">
-                        -{product.discount}%
-                    </Badge>
-                )}
-
-                <Button
-                    size="icon"
-                    variant="secondary"
-                    className="absolute top-2 right-2 rounded-full"
-                >
-                    <Heart className="h-5 w-5" />
-                </Button>
-            </div>
-
-            <CardHeader className="pb-2">
-                <Link
-                    href={`/products/${product.id}`}
-                    className="hover:underline"
-                >
-                    <CardTitle className="text-lg line-clamp-2">
-                        {product.name}
-                    </CardTitle>
-                </Link>
-                <CardDescription className="line-clamp-2">
-                    {product.description}
-                </CardDescription>
-            </CardHeader>
-
-            <CardContent className="pb-2 flex-grow">
-                <div className="flex items-center mb-2">
-                    {[...Array(5)].map((_, i) => (
-                        <Star
-                            key={i}
-                            size={16}
-                            className={
-                                i < product.rating
-                                    ? "text-yellow-400 fill-yellow-400"
-                                    : "text-gray-300"
-                            }
-                        />
-                    ))}
-                    <span className="ml-2 text-sm text-gray-500">
-                        ({product.rating})
-                    </span>
-                </div>
-
-                <div>
-                    <Badge variant="outline" className="mr-2">
-                        {product.category.name}
-                    </Badge>
-                    {product.inStock ? (
-                        <Badge
-                            variant="outline"
-                            className="bg-green-50 text-green-600 border-green-200"
-                        >
-                            Còn hàng
-                        </Badge>
-                    ) : (
-                        <Badge
-                            variant="outline"
-                            className="bg-red-50 text-red-600 border-red-200"
-                        >
-                            Hết hàng
-                        </Badge>
-                    )}
-                </div>
-            </CardContent>
-
-            <CardFooter className="pt-2 flex items-center justify-between border-t border-gray-100">
-                <div className="text-lg font-bold">
-                    {product.price !== undefined
-                        ? product.price.toLocaleString("vi-VN")
-                        : "Liên hệ"}
-                    ₫
-                </div>
-                <Button size="sm" disabled={!product.inStock}>
-                    <ShoppingCart className="mr-2 h-4 w-4" />
-                    Thêm vào giỏ
-                </Button>
-            </CardFooter>
-        </Card>
     );
 }
 

@@ -11,7 +11,7 @@ export default function FooterSection() {
                     <div>
                         <h3 className="text-xl font-bold mb-4 flex items-center">
                             <Image
-                                src="/images/logo.svg"
+                                src="/logo.png"
                                 alt="Osiris Logo"
                                 width={28}
                                 height={28}
