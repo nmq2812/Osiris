@@ -1,472 +1,1038 @@
 "use client";
-
-import { useState, useEffect } from "react";
-import Image from "next/image";
-import Link from "next/link";
-import { useRouter } from "next/navigation";
-import { TrashIcon, MinusIcon, PlusIcon, ShoppingBagIcon } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Card, CardContent } from "@/components/ui/card";
 import {
+    ActionIcon,
+    Anchor,
+    Badge,
+    Button,
+    Card,
+    Container,
+    Grid,
+    Group,
+    Image,
+    LoadingOverlay,
+    NumberInput,
+    NumberInputHandlers,
+    Radio,
+    RadioGroup,
+    ScrollArea,
+    Skeleton,
+    Stack,
     Table,
-    TableBody,
-    TableCell,
-    TableHead,
-    TableHeader,
-    TableRow,
-} from "@/components/ui/table";
-import { Separator } from "@/components/ui/separator";
-import { toast } from "sonner";
-// Định nghĩa kiểu dữ liệu cho giỏ hàng
-interface CartItem {
-    id: number;
-    name: string;
-    price: number;
-    quantity: number;
-    image: string;
-    available: number; // Số lượng tồn kho
-}
+    Text,
+    ThemeIcon,
+    Title,
+    Tooltip,
+    useMantineTheme,
+} from "@mantine/core";
+import React, { useEffect, useRef, useState } from "react";
+import {
+    AlertTriangle,
+    Check,
+    Home,
+    InfoCircle,
+    Marquee,
+    ShoppingCart,
+    Trash,
+    X,
+} from "tabler-icons-react";
+import { useMutation, useQuery, useQueryClient } from "react-query";
 
-export default function CartPage() {
-    const router = useRouter();
+import Link from "next/link";
 
-    const [cartItems, setCartItems] = useState<CartItem[]>([]);
-    const [loading, setLoading] = useState(true);
-    const [couponCode, setCouponCode] = useState("");
-    const [discount, setDiscount] = useState(0);
-    const [appliedCoupon, setAppliedCoupon] = useState("");
+import useAuthStore from "@/stores/authStore";
+import { useModals } from "@mantine/modals";
+import ApplicationConstants from "@/constants/ApplicationConstants";
+import ResourceURL from "@/constants/ResourceURL";
+import {
+    ClientCartResponse,
+    ClientCartVariantResponse,
+    ClientCartRequest,
+    UpdateQuantityType,
+    ClientSimpleOrderRequest,
+    ClientPaymentMethodResponse,
+    ClientCartVariantKeyRequest,
+    ClientConfirmedOrderResponse,
+} from "@/datas/ClientUI";
+import { CollectionWrapper } from "@/datas/CollectionWrapper";
+import { Empty } from "@/datas/Utility";
+import useSaveCartApi from "@/hooks/use-save-cart-api";
+import useTitle from "@/hooks/use-title";
+import useClientSiteStore from "@/stores/use-client-site-store";
+import FetchUtils, { ErrorMessage } from "@/utils/FetchUtils";
+import MiscUtils from "@/utils/MiscUtils";
+import NotifyUtils from "@/utils/NotifyUtils";
+import PageConfigs from "@/utils/PageConfigs";
+import { NotificationType } from "../models/Notification";
+import { PaymentMethodType } from "../models/PaymentMethod";
 
-    // Giả lập việc lấy dữ liệu giỏ hàng
-    useEffect(() => {
-        // Trong thực tế, dữ liệu này sẽ được lấy từ localStorage, context API hoặc từ backend
-        const fetchCartItems = () => {
-            setLoading(true);
-            // Giả lập việc lấy dữ liệu từ backend
-            const sampleCartItems = [
-                {
-                    id: 1,
-                    name: "Gundam RX-78-2 Ver.Ka",
-                    price: 1200000,
-                    quantity: 1,
-                    image: "",
-                    available: 5,
-                },
-                {
-                    id: 2,
-                    name: "One Piece Figure - Monkey D. Luffy",
-                    price: 850000,
-                    quantity: 2,
-                    image: "",
-                    available: 8,
-                },
-                {
-                    id: 3,
-                    name: "Attack on Titan - Eren Jaeger Action Figure",
-                    price: 750000,
-                    quantity: 1,
-                    image: "",
-                    available: 3,
-                },
-            ];
-            setCartItems(sampleCartItems);
-            setLoading(false);
-        };
+function ClientCart() {
+    useTitle();
 
-        fetchCartItems();
-    }, []);
+    const theme = useMantineTheme();
+    const modals = useModals();
 
-    // Tính tổng tiền
-    const subtotal = cartItems.reduce(
-        (sum, item) => sum + item.price * item.quantity,
-        0,
-    );
+    const { user, currentPaymentMethod, updateCurrentPaymentMethod } =
+        useAuthStore();
 
-    // Tính phí vận chuyển (miễn phí nếu trên 1.500.000đ)
-    const shipping = subtotal > 1500000 ? 0 : 30000;
+    const { cartResponse, isLoadingCartResponse, isErrorCartResponse } =
+        useGetCartApi();
+    const {
+        paymentMethodResponses,
+        isLoadingPaymentMethodResponses,
+        isErrorPaymentMethodResponses,
+    } = useGetAllPaymentMethodsApi();
 
-    // Tổng số tiền cần thanh toán
-    const total = subtotal + shipping - discount;
+    const isLoading = isLoadingCartResponse || isLoadingPaymentMethodResponses;
+    const isError = isErrorCartResponse || isErrorPaymentMethodResponses;
 
-    // Hàm xử lý thay đổi số lượng
-    const updateQuantity = (id: number, newQuantity: number) => {
-        if (newQuantity < 1) return;
+    const handleOrderButton = () => {
+        const PaymentMethodIcon =
+            PageConfigs.paymentMethodIconMap[currentPaymentMethod];
 
-        const item = cartItems.find((item) => item.id === id);
-        if (item && newQuantity > item.available) {
-            toast.error("Số lượng không đủ", {
-                description: `Chỉ còn ${item.available} sản phẩm trong kho.`,
-                action: {
-                    label: "Cancel",
-                    onClick: () => console.log("Clicked"),
-                },
-            });
-            return;
-        }
-
-        setCartItems(
-            cartItems.map((item) =>
-                item.id === id ? { ...item, quantity: newQuantity } : item,
+        modals.openConfirmModal({
+            size: "md",
+            overlayColor:
+                theme.colorScheme === "dark"
+                    ? theme.colors.dark[9]
+                    : theme.colors.gray[2],
+            overlayOpacity: 0.55,
+            overlayBlur: 0.5,
+            closeOnConfirm: false,
+            withCloseButton: false,
+            title: <strong>Thông báo xác nhận đặt mua</strong>,
+            children: (
+                <Stack>
+                    <Text>
+                        Bạn có muốn đặt mua những sản phẩm đã chọn với hình thức
+                        thanh toán sau?
+                    </Text>
+                    <Group spacing="xs">
+                        <PaymentMethodIcon color={theme.colors.gray[5]} />
+                        <Text size="sm">
+                            {
+                                PageConfigs.paymentMethodNameMap[
+                                    currentPaymentMethod
+                                ]
+                            }
+                        </Text>
+                    </Group>
+                </Stack>
             ),
-        );
-    };
-
-    // Hàm xóa sản phẩm khỏi giỏ hàng
-    const removeItem = (id: number) => {
-        setCartItems(cartItems.filter((item) => item.id !== id));
-        toast.success("Đã xóa sản phẩm", {
-            description: "Sản phẩm đã được xóa khỏi giỏ hàng.",
+            labels: {
+                cancel: "Hủy",
+                confirm: "Xác nhận đặt mua",
+            },
+            confirmProps: { color: "blue" },
+            onConfirm: () =>
+                modals.openModal({
+                    size: "md",
+                    overlayColor:
+                        theme.colorScheme === "dark"
+                            ? theme.colors.dark[9]
+                            : theme.colors.gray[2],
+                    overlayOpacity: 0.55,
+                    overlayBlur: 0.5,
+                    closeOnClickOutside: false,
+                    withCloseButton: false,
+                    title: <strong>Thông báo xác nhận đặt mua</strong>,
+                    children: <ConfirmedOrder />,
+                }),
         });
     };
 
-    // Hàm áp dụng mã giảm giá
-    const applyCoupon = () => {
-        if (!couponCode) return;
+    let cartContentFragment;
 
-        // Giả lập kiểm tra mã giảm giá
-        if (couponCode.toUpperCase() === "WELCOME10") {
-            // Giảm 10% tổng hóa đơn
-            const discountAmount = Math.floor(subtotal * 0.1);
-            setDiscount(discountAmount);
-            setAppliedCoupon(couponCode.toUpperCase());
-            toast.success("Áp dụng mã giảm giá thành công", {
-                description: `Bạn được giảm ${discountAmount.toLocaleString(
-                    "vi-VN",
-                )}₫`,
-            });
-        } else if (couponCode.toUpperCase() === "FREESHIP") {
-            // Miễn phí vận chuyển
-            setDiscount(shipping);
-            setAppliedCoupon(couponCode.toUpperCase());
-            toast("Áp dụng mã giảm giá thành công", {
-                description: "Bạn được miễn phí vận chuyển",
-            });
+    if (isLoading) {
+        cartContentFragment = (
+            <Stack>
+                {Array(5)
+                    .fill(0)
+                    .map((_, index) => (
+                        <Skeleton key={index} height={50} radius="md" />
+                    ))}
+            </Stack>
+        );
+    }
+
+    if (isError) {
+        cartContentFragment = (
+            <Stack
+                my={theme.spacing.xl}
+                sx={{ alignItems: "center", color: theme.colors.pink[6] }}
+            >
+                <AlertTriangle size={125} strokeWidth={1} />
+                <Text size="xl" weight={500}>
+                    Đã có lỗi xảy ra
+                </Text>
+            </Stack>
+        );
+    }
+
+    if (cartResponse && paymentMethodResponses) {
+        let cart: ClientCartResponse;
+
+        if (Object.hasOwn(cartResponse, "cartId")) {
+            cart = cartResponse as ClientCartResponse;
         } else {
-            toast.error("Mã giảm giá không hợp lệ", {
-                description: "Vui lòng kiểm tra lại mã giảm giá.",
-            });
+            cart = { cartId: 0, cartItems: [] };
         }
 
-        setCouponCode("");
-    };
+        const totalAmount = cart.cartItems
+            .map(
+                (cartItem) =>
+                    cartItem.cartItemQuantity *
+                    MiscUtils.calculateDiscountedPrice(
+                        cartItem.cartItemVariant.variantPrice,
+                        cartItem.cartItemVariant.variantProduct.productPromotion
+                            ? cartItem.cartItemVariant.variantProduct
+                                  .productPromotion.promotionPercent
+                            : 0,
+                    ),
+            )
+            .reduce((partialSum, a) => partialSum + a, 0);
 
-    // Hàm xử lý thanh toán
-    const handleCheckout = () => {
-        if (cartItems.length === 0) {
-            toast.warning("Giỏ hàng trống", {
-                description:
-                    "Vui lòng thêm sản phẩm vào giỏ hàng trước khi thanh toán.",
-            });
-            return;
-        }
+        const taxCost = Number(
+            (totalAmount * ApplicationConstants.DEFAULT_TAX).toFixed(0),
+        );
 
-        // Chuyển hướng đến trang thanh toán
-        router.push("/checkout");
-    };
+        const shippingCost = ApplicationConstants.DEFAULT_SHIPPING_COST;
 
-    // Hiển thị trạng thái đang tải
-    if (loading) {
-        return (
-            <div className="container mx-auto px-4 py-12">
-                <h1 className="text-3xl font-bold mb-8">Giỏ hàng của bạn</h1>
-                <div className="flex flex-col items-center justify-center py-12">
-                    <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary mb-4"></div>
-                    <p className="text-lg">Đang tải giỏ hàng...</p>
-                </div>
-            </div>
+        const totalPay = totalAmount + taxCost + shippingCost;
+
+        cartContentFragment = (
+            <Grid>
+                <Grid.Col md={9}>
+                    <Card radius="md" shadow="sm" p={0}>
+                        <ScrollArea>
+                            <Table verticalSpacing="md" horizontalSpacing="lg">
+                                <thead>
+                                    <tr>
+                                        <th style={{ minWidth: 325 }}>
+                                            <Text
+                                                weight="initial"
+                                                size="sm"
+                                                color="dimmed"
+                                            >
+                                                Mặt hàng
+                                            </Text>
+                                        </th>
+                                        <th style={{ minWidth: 125 }}>
+                                            <Text
+                                                weight="initial"
+                                                size="sm"
+                                                color="dimmed"
+                                            >
+                                                Đơn giá
+                                            </Text>
+                                        </th>
+                                        <th style={{ minWidth: 150 }}>
+                                            <Text
+                                                weight="initial"
+                                                size="sm"
+                                                color="dimmed"
+                                            >
+                                                Số lượng
+                                            </Text>
+                                        </th>
+                                        <th style={{ minWidth: 125 }}>
+                                            <Text
+                                                weight="initial"
+                                                size="sm"
+                                                color="dimmed"
+                                            >
+                                                Thành tiền
+                                            </Text>
+                                        </th>
+                                        <th
+                                            style={{
+                                                textAlign: "center",
+                                                minWidth: 80,
+                                            }}
+                                        >
+                                            <Text
+                                                weight="initial"
+                                                size="sm"
+                                                color="dimmed"
+                                            >
+                                                Thao tác
+                                            </Text>
+                                        </th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {cart.cartItems.map((cartItem) => (
+                                        <CartItemTableRow
+                                            key={
+                                                cartItem.cartItemVariant
+                                                    .variantId
+                                            }
+                                            cartItem={cartItem}
+                                        />
+                                    ))}
+                                    {cart.cartItems.length === 0 && (
+                                        <tr>
+                                            <td colSpan={5}>
+                                                <Stack
+                                                    my={theme.spacing.xl}
+                                                    sx={{
+                                                        alignItems: "center",
+                                                        color: theme.colors
+                                                            .blue[6],
+                                                    }}
+                                                >
+                                                    <Marquee
+                                                        size={125}
+                                                        strokeWidth={1}
+                                                    />
+                                                    <Text
+                                                        size="xl"
+                                                        weight={500}
+                                                    >
+                                                        Chưa thêm mặt hàng nào
+                                                    </Text>
+                                                </Stack>
+                                            </td>
+                                        </tr>
+                                    )}
+                                </tbody>
+                            </Table>
+                        </ScrollArea>
+                    </Card>
+                </Grid.Col>
+
+                <Grid.Col md={3}>
+                    <Stack>
+                        <Card radius="md" shadow="sm" px="lg" pt="md" pb="lg">
+                            <Stack spacing="xs">
+                                <Group position="apart">
+                                    <Text weight={500} color="dimmed">
+                                        Giao tới
+                                    </Text>
+                                    <Button size="xs" variant="light" compact>
+                                        <Link href="/user/setting/personal">
+                                            Thay đổi
+                                        </Link>
+                                    </Button>
+                                </Group>
+                                <Stack spacing={3.5}>
+                                    <Text weight={500} size="sm">
+                                        {user?.fullname}
+                                        <ThemeIcon
+                                            size="xs"
+                                            ml="xs"
+                                            color="teal"
+                                            title="Địa chỉ của người dùng đặt mua"
+                                        >
+                                            <Home size={12} />
+                                        </ThemeIcon>
+                                    </Text>
+                                    <Text weight={500} size="sm">
+                                        {user?.phone}
+                                    </Text>
+                                    <Text size="sm" color="dimmed">
+                                        {[
+                                            user?.address.line,
+                                            user?.address.ward?.name,
+                                            user?.address.district?.name,
+                                            user?.address.province?.name,
+                                        ]
+                                            .filter(Boolean)
+                                            .join(", ")}
+                                    </Text>
+                                </Stack>
+                            </Stack>
+                        </Card>
+
+                        <Card radius="md" shadow="sm" px="lg" pt="md" pb="lg">
+                            <Stack spacing="xs">
+                                <Text weight={500} color="dimmed">
+                                    Hình thức giao hàng
+                                </Text>
+                                <RadioGroup
+                                    value="ghn"
+                                    orientation="vertical"
+                                    size="sm"
+                                >
+                                    <Radio
+                                        value="ghn"
+                                        label={
+                                            <Image
+                                                src={MiscUtils.ghnLogoPath}
+                                                styles={{
+                                                    image: { maxWidth: 170 },
+                                                }}
+                                            />
+                                        }
+                                    />
+                                </RadioGroup>
+                            </Stack>
+                        </Card>
+
+                        <Card radius="md" shadow="sm" px="lg" pt="md" pb="lg">
+                            <Stack spacing="xs">
+                                <Text weight={500} color="dimmed">
+                                    Hình thức thanh toán
+                                </Text>
+                                <RadioGroup
+                                    value={currentPaymentMethod}
+                                    onChange={updateCurrentPaymentMethod}
+                                    orientation="vertical"
+                                    size="sm"
+                                >
+                                    {paymentMethodResponses.content.map(
+                                        (paymentMethod) => {
+                                            const PaymentMethodIcon =
+                                                PageConfigs
+                                                    .paymentMethodIconMap[
+                                                    paymentMethod
+                                                        .paymentMethodCode
+                                                ];
+
+                                            return (
+                                                <Radio
+                                                    key={
+                                                        paymentMethod.paymentMethodId
+                                                    }
+                                                    value={
+                                                        paymentMethod.paymentMethodCode
+                                                    }
+                                                    label={
+                                                        <Group spacing="xs">
+                                                            <PaymentMethodIcon
+                                                                size={24}
+                                                            />
+                                                            <Text size="sm">
+                                                                {
+                                                                    paymentMethod.paymentMethodName
+                                                                }
+                                                            </Text>
+                                                        </Group>
+                                                    }
+                                                />
+                                            );
+                                        },
+                                    )}
+                                </RadioGroup>
+                            </Stack>
+                        </Card>
+
+                        <Card radius="md" shadow="sm" p="lg">
+                            <Stack spacing="xs">
+                                <Stack spacing="sm">
+                                    <Group position="apart">
+                                        <Text size="sm" color="dimmed">
+                                            Tạm tính
+                                        </Text>
+                                        <Text
+                                            size="sm"
+                                            sx={{ textAlign: "right" }}
+                                        >
+                                            {MiscUtils.formatPrice(
+                                                totalAmount,
+                                            ) + "\u00A0₫"}
+                                        </Text>
+                                    </Group>
+                                    <Group position="apart">
+                                        <Text size="sm" color="dimmed">
+                                            Thuế (10%)
+                                        </Text>
+                                        <Text
+                                            size="sm"
+                                            sx={{ textAlign: "right" }}
+                                        >
+                                            {MiscUtils.formatPrice(taxCost) +
+                                                "\u00A0₫"}
+                                        </Text>
+                                    </Group>
+                                    <Group position="apart">
+                                        <Group spacing="xs">
+                                            <Text size="sm" weight={500}>
+                                                Tổng tiền
+                                            </Text>
+                                            <Tooltip
+                                                label="Chưa tính phí vận chuyển"
+                                                withArrow
+                                                sx={{ height: 20 }}
+                                            >
+                                                <ThemeIcon
+                                                    variant="light"
+                                                    color="blue"
+                                                    size="sm"
+                                                >
+                                                    <InfoCircle size={14} />
+                                                </ThemeIcon>
+                                            </Tooltip>
+                                        </Group>
+                                        <Text
+                                            size="lg"
+                                            weight={700}
+                                            color="blue"
+                                            sx={{ textAlign: "right" }}
+                                        >
+                                            {MiscUtils.formatPrice(totalPay) +
+                                                "\u00A0₫"}
+                                        </Text>
+                                    </Group>
+                                </Stack>
+                            </Stack>
+                        </Card>
+
+                        <Button
+                            size="lg"
+                            leftIcon={<ShoppingCart />}
+                            onClick={handleOrderButton}
+                            disabled={cart.cartItems.length === 0}
+                        >
+                            Đặt mua
+                        </Button>
+                    </Stack>
+                </Grid.Col>
+            </Grid>
         );
     }
 
     return (
-        <div className="container mx-auto px-4 py-12">
-            <h1 className="text-3xl font-bold mb-8">Giỏ hàng của bạn</h1>
+        <main>
+            <Container size="xl">
+                <Stack spacing="lg">
+                    <Group spacing="xs">
+                        <ShoppingCart />
+                        <Title order={2}>Giỏ hàng</Title>
+                    </Group>
 
-            {cartItems.length === 0 ? (
-                <div className="flex flex-col items-center justify-center py-12 bg-gray-50 rounded-lg">
-                    <ShoppingBagIcon className="h-16 w-16 text-gray-400 mb-4" />
-                    <h2 className="text-2xl font-semibold mb-2">
-                        Giỏ hàng trống
-                    </h2>
-                    <p className="text-gray-600 mb-6">
-                        Bạn chưa có sản phẩm nào trong giỏ hàng.
-                    </p>
-                    <Link href="/products">
-                        <Button>Tiếp tục mua sắm</Button>
-                    </Link>
-                </div>
-            ) : (
-                <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                    <div className="lg:col-span-2">
-                        <Card>
-                            <CardContent className="p-0">
-                                <Table>
-                                    <TableHeader>
-                                        <TableRow>
-                                            <TableHead className="w-[100px]">
-                                                Sản phẩm
-                                            </TableHead>
-                                            <TableHead>Tên</TableHead>
-                                            <TableHead className="text-right">
-                                                Đơn giá
-                                            </TableHead>
-                                            <TableHead className="text-center">
-                                                Số lượng
-                                            </TableHead>
-                                            <TableHead className="text-right">
-                                                Thành tiền
-                                            </TableHead>
-                                            <TableHead></TableHead>
-                                        </TableRow>
-                                    </TableHeader>
-                                    <TableBody>
-                                        {cartItems.map((item) => (
-                                            <TableRow key={item.id}>
-                                                <TableCell>
-                                                    <div className="relative h-20 w-20 bg-gray-100 rounded-md">
-                                                        {item.image ? (
-                                                            <Image
-                                                                src={item.image}
-                                                                alt={item.name}
-                                                                fill
-                                                                className="object-cover rounded-md"
-                                                                onError={(
-                                                                    e,
-                                                                ) => {
-                                                                    e.currentTarget.src =
-                                                                        "/placeholder.png";
-                                                                }}
-                                                            />
-                                                        ) : (
-                                                            <div className="w-full h-full flex items-center justify-center bg-gray-200">
-                                                                <p className="text-gray-400">
-                                                                    Không có
-                                                                    hình ảnh
-                                                                </p>
-                                                            </div>
-                                                        )}
-                                                    </div>
-                                                </TableCell>
-                                                <TableCell className="font-medium">
-                                                    <Link
-                                                        href={`/products/${item.id}`}
-                                                        className="hover:text-blue-600 transition-colors"
-                                                    >
-                                                        {item.name}
-                                                    </Link>
-                                                </TableCell>
-                                                <TableCell className="text-right">
-                                                    {item.price.toLocaleString(
-                                                        "vi-VN",
-                                                    )}
-                                                    ₫
-                                                </TableCell>
-                                                <TableCell>
-                                                    <div className="flex items-center justify-center">
-                                                        <Button
-                                                            variant="outline"
-                                                            size="icon"
-                                                            className="h-8 w-8"
-                                                            onClick={() =>
-                                                                updateQuantity(
-                                                                    item.id,
-                                                                    item.quantity -
-                                                                        1,
-                                                                )
-                                                            }
-                                                            disabled={
-                                                                item.quantity <=
-                                                                1
-                                                            }
-                                                        >
-                                                            <MinusIcon className="h-3 w-3" />
-                                                        </Button>
-                                                        <Input
-                                                            type="number"
-                                                            value={
-                                                                item.quantity
-                                                            }
-                                                            onChange={(e) =>
-                                                                updateQuantity(
-                                                                    item.id,
-                                                                    parseInt(
-                                                                        e.target
-                                                                            .value,
-                                                                    ) || 1,
-                                                                )
-                                                            }
-                                                            className="h-8 w-12 mx-2 text-center [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
-                                                            min={1}
-                                                            max={item.available}
-                                                        />
-                                                        <Button
-                                                            variant="outline"
-                                                            size="icon"
-                                                            className="h-8 w-8"
-                                                            onClick={() =>
-                                                                updateQuantity(
-                                                                    item.id,
-                                                                    item.quantity +
-                                                                        1,
-                                                                )
-                                                            }
-                                                            disabled={
-                                                                item.quantity >=
-                                                                item.available
-                                                            }
-                                                        >
-                                                            <PlusIcon className="h-3 w-3" />
-                                                        </Button>
-                                                    </div>
-                                                </TableCell>
-                                                <TableCell className="text-right font-medium">
-                                                    {(
-                                                        item.price *
-                                                        item.quantity
-                                                    ).toLocaleString("vi-VN")}
-                                                    ₫
-                                                </TableCell>
-                                                <TableCell>
-                                                    <Button
-                                                        variant="ghost"
-                                                        size="icon"
-                                                        onClick={() =>
-                                                            removeItem(item.id)
-                                                        }
-                                                    >
-                                                        <TrashIcon className="h-4 w-4 text-red-500" />
-                                                    </Button>
-                                                </TableCell>
-                                            </TableRow>
-                                        ))}
-                                    </TableBody>
-                                </Table>
-                            </CardContent>
-                        </Card>
-
-                        <div className="flex justify-between mt-6">
-                            <Link href="/products">
-                                <Button variant="outline">
-                                    Tiếp tục mua sắm
-                                </Button>
-                            </Link>
-                            <Button
-                                variant="destructive"
-                                onClick={() => setCartItems([])}
-                            >
-                                Xóa giỏ hàng
-                            </Button>
-                        </div>
-                    </div>
-
-                    <div className="lg:col-span-1">
-                        <Card>
-                            <CardContent className="p-6">
-                                <h3 className="text-xl font-bold mb-4">
-                                    Tóm tắt đơn hàng
-                                </h3>
-
-                                <div className="space-y-4">
-                                    <div className="flex justify-between">
-                                        <span className="text-gray-600">
-                                            Tạm tính (
-                                            {cartItems.reduce(
-                                                (sum, item) =>
-                                                    sum + item.quantity,
-                                                0,
-                                            )}{" "}
-                                            sản phẩm)
-                                        </span>
-                                        <span>
-                                            {subtotal.toLocaleString("vi-VN")}₫
-                                        </span>
-                                    </div>
-
-                                    <div className="flex justify-between">
-                                        <span className="text-gray-600">
-                                            Phí vận chuyển
-                                        </span>
-                                        <span>
-                                            {shipping === 0
-                                                ? "Miễn phí"
-                                                : `${shipping.toLocaleString(
-                                                      "vi-VN",
-                                                  )}₫`}
-                                        </span>
-                                    </div>
-
-                                    {discount > 0 && (
-                                        <div className="flex justify-between text-green-600">
-                                            <span>
-                                                Giảm giá{" "}
-                                                {appliedCoupon &&
-                                                    `(${appliedCoupon})`}
-                                            </span>
-                                            <span>
-                                                -
-                                                {discount.toLocaleString(
-                                                    "vi-VN",
-                                                )}
-                                                ₫
-                                            </span>
-                                        </div>
-                                    )}
-
-                                    <Separator />
-
-                                    <div className="flex justify-between font-bold text-lg">
-                                        <span>Tổng cộng</span>
-                                        <span>
-                                            {total.toLocaleString("vi-VN")}₫
-                                        </span>
-                                    </div>
-
-                                    <div className="flex gap-2">
-                                        <Input
-                                            placeholder="Nhập mã giảm giá"
-                                            value={couponCode}
-                                            onChange={(e) =>
-                                                setCouponCode(e.target.value)
-                                            }
-                                        />
-                                        <Button
-                                            variant="outline"
-                                            onClick={applyCoupon}
-                                        >
-                                            Áp dụng
-                                        </Button>
-                                    </div>
-
-                                    {shipping > 0 && (
-                                        <p className="text-sm text-gray-500">
-                                            Miễn phí vận chuyển cho đơn hàng
-                                            trên 1.500.000₫
-                                        </p>
-                                    )}
-
-                                    <Button
-                                        className="w-full"
-                                        size="lg"
-                                        onClick={handleCheckout}
-                                    >
-                                        Tiến hành thanh toán
-                                    </Button>
-
-                                    <div className="text-sm text-gray-500">
-                                        <p>Cam kết:</p>
-                                        <ul className="list-disc pl-5 mt-1 space-y-1">
-                                            <li>Giao hàng toàn quốc</li>
-                                            <li>Đổi trả trong vòng 7 ngày</li>
-                                            <li>
-                                                Bảo hành chính hãng 12 tháng
-                                            </li>
-                                        </ul>
-                                    </div>
-                                </div>
-                            </CardContent>
-                        </Card>
-                    </div>
-                </div>
-            )}
-        </div>
+                    {cartContentFragment}
+                </Stack>
+            </Container>
+        </main>
     );
 }
+
+function CartItemTableRow({
+    cartItem,
+}: {
+    cartItem: ClientCartVariantResponse;
+}) {
+    const theme = useMantineTheme();
+    const modals = useModals();
+    const cartItemQuantityInputHandlers = useRef<NumberInputHandlers>(null);
+    const { currentCartId, user } = useAuthStore();
+    const saveCartApi = useSaveCartApi();
+    const deleteCartItemsApi = useDeleteCartItemsApi();
+
+    const handleCartItemQuantityInput = (cartItemQuantity: number) => {
+        if (
+            user &&
+            cartItemQuantity !== cartItem.cartItemQuantity &&
+            cartItemQuantity <= cartItem.cartItemVariant.variantInventory
+        ) {
+            const cartRequest: ClientCartRequest = {
+                cartId: currentCartId,
+                userId: user.id,
+                cartItems: [
+                    {
+                        variantId: cartItem.cartItemVariant.variantId,
+                        quantity: cartItemQuantity,
+                    },
+                ],
+                status: 1,
+                updateQuantityType: UpdateQuantityType.OVERRIDE,
+            };
+            saveCartApi.mutate(cartRequest);
+        }
+    };
+
+    const handleDeleteCartItemButton = () => {
+        modals.openConfirmModal({
+            size: "xs",
+            overlayColor:
+                theme.colorScheme === "dark"
+                    ? theme.colors.dark[9]
+                    : theme.colors.gray[2],
+            overlayOpacity: 0.55,
+            overlayBlur: 3,
+            closeOnClickOutside: false,
+            title: <strong>Xóa mặt hàng</strong>,
+            children: <Text size="sm">Bạn có muốn xóa mặt hàng này?</Text>,
+            labels: {
+                cancel: "Không xóa",
+                confirm: "Xóa",
+            },
+            confirmProps: { color: "red" },
+            onConfirm: () =>
+                deleteCartItemsApi.mutate([
+                    {
+                        cartId: currentCartId as number,
+                        variantId: cartItem.cartItemVariant.variantId,
+                    },
+                ]),
+        });
+    };
+
+    return (
+        <tr key={cartItem.cartItemVariant.variantId}>
+            <td>
+                <Group spacing="xs">
+                    <Image
+                        radius="md"
+                        width={65}
+                        height={65}
+                        src={
+                            cartItem.cartItemVariant.variantProduct
+                                .productThumbnail || undefined
+                        }
+                        alt={
+                            cartItem.cartItemVariant.variantProduct.productName
+                        }
+                    />
+                    <Stack spacing={3.5}>
+                        <Anchor
+                            component={Link}
+                            to={
+                                "/product/" +
+                                cartItem.cartItemVariant.variantProduct
+                                    .productSlug
+                            }
+                            size="sm"
+                        >
+                            {
+                                cartItem.cartItemVariant.variantProduct
+                                    .productName
+                            }
+                        </Anchor>
+                        {cartItem.cartItemVariant.variantProperties && (
+                            <Stack spacing={1.5}>
+                                {cartItem.cartItemVariant.variantProperties.content.map(
+                                    (variantProperty) => (
+                                        <Text
+                                            key={variantProperty.id}
+                                            size="xs"
+                                            color="dimmed"
+                                        >
+                                            {variantProperty.name}:{" "}
+                                            {variantProperty.value}
+                                        </Text>
+                                    ),
+                                )}
+                            </Stack>
+                        )}
+                    </Stack>
+                </Group>
+            </td>
+            <td>
+                <Stack spacing={2.5}>
+                    <Text weight={500} size="sm">
+                        {MiscUtils.formatPrice(
+                            MiscUtils.calculateDiscountedPrice(
+                                cartItem.cartItemVariant.variantPrice,
+                                cartItem.cartItemVariant.variantProduct
+                                    .productPromotion
+                                    ? cartItem.cartItemVariant.variantProduct
+                                          .productPromotion.promotionPercent
+                                    : 0,
+                            ),
+                        )}{" "}
+                        ₫
+                    </Text>
+                    {cartItem.cartItemVariant.variantProduct
+                        .productPromotion && (
+                        <Group spacing="xs">
+                            <Text
+                                size="xs"
+                                color="dimmed"
+                                sx={{ textDecoration: "line-through" }}
+                            >
+                                {MiscUtils.formatPrice(
+                                    cartItem.cartItemVariant.variantPrice,
+                                )}{" "}
+                                ₫
+                            </Text>
+                            <Badge color="pink" variant="filled" size="sm">
+                                -
+                                {
+                                    cartItem.cartItemVariant.variantProduct
+                                        .productPromotion.promotionPercent
+                                }
+                                %
+                            </Badge>
+                        </Group>
+                    )}
+                </Stack>
+            </td>
+            <td>
+                <Stack spacing={3.5}>
+                    <Group spacing={5}>
+                        <ActionIcon
+                            size={30}
+                            variant="default"
+                            onClick={() =>
+                                cartItemQuantityInputHandlers.current?.decrement()
+                            }
+                        >
+                            –
+                        </ActionIcon>
+
+                        <NumberInput
+                            hideControls
+                            value={cartItem.cartItemQuantity}
+                            onChange={(value) =>
+                                handleCartItemQuantityInput(value || 1)
+                            }
+                            handlersRef={cartItemQuantityInputHandlers}
+                            max={cartItem.cartItemVariant.variantInventory}
+                            min={1}
+                            size="xs"
+                            styles={{
+                                input: { width: 45, textAlign: "center" },
+                            }}
+                        />
+
+                        <ActionIcon
+                            size={30}
+                            variant="default"
+                            onClick={() =>
+                                cartItemQuantityInputHandlers.current?.increment()
+                            }
+                        >
+                            +
+                        </ActionIcon>
+                    </Group>
+                    <Text size="xs" color="dimmed">
+                        Tồn kho: {cartItem.cartItemVariant.variantInventory}
+                    </Text>
+                </Stack>
+            </td>
+            <td>
+                <Text weight={500} size="sm" color="blue">
+                    {MiscUtils.formatPrice(
+                        cartItem.cartItemQuantity *
+                            MiscUtils.calculateDiscountedPrice(
+                                cartItem.cartItemVariant.variantPrice,
+                                cartItem.cartItemVariant.variantProduct
+                                    .productPromotion
+                                    ? cartItem.cartItemVariant.variantProduct
+                                          .productPromotion.promotionPercent
+                                    : 0,
+                            ),
+                    ) + " ₫"}
+                </Text>
+            </td>
+            <td>
+                <ActionIcon
+                    color="red"
+                    variant="outline"
+                    size={24}
+                    title="Xóa"
+                    onClick={handleDeleteCartItemButton}
+                    sx={{ margin: "auto" }}
+                >
+                    <Trash size={16} />
+                </ActionIcon>
+            </td>
+        </tr>
+    );
+}
+
+function ConfirmedOrder() {
+    const theme = useMantineTheme();
+    const modals = useModals();
+
+    const {
+        mutate: createClientOrder,
+        data: clientConfirmedOrderResponse,
+        isLoading,
+        isError,
+    } = useCreateClientOrderApi();
+
+    const [checkoutPaypalStatus, setCheckoutPaypalStatus] = useState<
+        "none" | "success" | "cancel"
+    >("none");
+
+    const { currentPaymentMethod } = useAuthStore();
+
+    let contentFragment;
+
+    useEffect(() => {
+        if (checkoutPaypalStatus === "none") {
+            const request: ClientSimpleOrderRequest = {
+                paymentMethodType: currentPaymentMethod,
+            };
+            createClientOrder(request);
+        }
+    }, [checkoutPaypalStatus, createClientOrder, currentPaymentMethod]);
+
+    const { newNotifications } = useClientSiteStore();
+
+    useEffect(() => {
+        if (newNotifications.length > 0 && clientConfirmedOrderResponse) {
+            const lastNotification =
+                newNotifications[newNotifications.length - 1];
+            if (
+                lastNotification.message.includes(
+                    clientConfirmedOrderResponse.orderCode,
+                )
+            ) {
+                if (
+                    lastNotification.type ===
+                    NotificationType.CHECKOUT_PAYPAL_SUCCESS
+                ) {
+                    setCheckoutPaypalStatus("success");
+                }
+                if (
+                    lastNotification.type ===
+                    NotificationType.CHECKOUT_PAYPAL_CANCEL
+                ) {
+                    setCheckoutPaypalStatus("cancel");
+                }
+            }
+        }
+    }, [
+        clientConfirmedOrderResponse,
+        newNotifications,
+        newNotifications.length,
+    ]);
+
+    const handlePaypalCheckoutButton = (checkoutLink: string) => {
+        window.open(checkoutLink, "mywin", "width=500,height=800");
+    };
+
+    if (isError) {
+        contentFragment = (
+            <Stack justify="space-between" sx={{ height: "100%" }}>
+                <Stack
+                    align="center"
+                    sx={{ alignItems: "center", color: theme.colors.pink[6] }}
+                >
+                    <AlertTriangle size={100} strokeWidth={1} />
+                    <Text weight={500}>Đã có lỗi xảy ra</Text>
+                </Stack>
+                <Button
+                    fullWidth
+                    variant="default"
+                    onClick={modals.closeAll}
+                    mt="md"
+                >
+                    Đóng
+                </Button>
+            </Stack>
+        );
+    }
+
+    if (
+        clientConfirmedOrderResponse &&
+        clientConfirmedOrderResponse.orderPaymentMethodType ===
+            PaymentMethodType.CASH
+    ) {
+        contentFragment = (
+            <Stack justify="space-between" sx={{ height: "100%" }}>
+                <Stack
+                    align="center"
+                    sx={{ alignItems: "center", color: theme.colors.teal[6] }}
+                >
+                    <Check size={100} strokeWidth={1} />
+                    <Text>
+                        <span>Đơn hàng </span>
+                        <Anchor
+                            component={Link}
+                            to={
+                                "/order/detail/" +
+                                clientConfirmedOrderResponse.orderCode
+                            }
+                            onClick={modals.closeAll}
+                            weight={500}
+                        >
+                            {clientConfirmedOrderResponse.orderCode}
+                        </Anchor>
+                        <span> đã được tạo!</span>
+                    </Text>
+                </Stack>
+                <Button
+                    fullWidth
+                    variant="default"
+                    onClick={modals.closeAll}
+                    mt="md"
+                >
+                    Đóng
+                </Button>
+            </Stack>
+        );
+    }
+
+    if (
+        clientConfirmedOrderResponse &&
+        clientConfirmedOrderResponse.orderPaymentMethodType ===
+            PaymentMethodType.PAYPAL
+    ) {
+        contentFragment = (
+            <Stack justify="space-between" sx={{ height: "100%" }}>
+                <Stack
+                    align="center"
+                    sx={{ alignItems: "center", color: theme.colors.teal[6] }}
+                >
+                    <Check size={100} strokeWidth={1} />
+                    <Text sx={{ textAlign: "center" }}>
+                        <span>Đơn hàng </span>
+                        <Text weight={500} component="span">
+                            {clientConfirmedOrderResponse.orderCode}
+                        </Text>
+                        <span> đã được tạo!</span>
+                    </Text>
+                    <Text color="dimmed" size="sm">
+                        Hoàn tất thanh toán PayPal bằng cách bấm nút dưới
+                    </Text>
+                </Stack>
+                {checkoutPaypalStatus === "none" ? (
+                    <Button
+                        fullWidth
+                        mt="md"
+                        onClick={() =>
+                            handlePaypalCheckoutButton(
+                                clientConfirmedOrderResponse.orderPaypalCheckoutLink ||
+                                    "",
+                            )
+                        }
+                    >
+                        Thanh toán PayPal
+                    </Button>
+                ) : checkoutPaypalStatus === "success" ? (
+                    <Button
+                        fullWidth
+                        mt="md"
+                        color="teal"
+                        leftIcon={<Check />}
+                        onClick={modals.closeAll}
+                    >
+                        Đã thanh toán thành công
+                    </Button>
+                ) : (
+                    <Stack spacing="sm">
+                        <Button
+                            fullWidth
+                            mt="md"
+                            variant="outline"
+                            color="pink"
+                            leftIcon={<X size={16} />}
+                            onClick={modals.closeAll}
+                        >
+                            Đã hủy thanh toán. Đóng hộp thoại này.
+                        </Button>
+                        <Button
+                            fullWidth
+                            onClick={() =>
+                                handlePaypalCheckoutButton(
+                                    clientConfirmedOrderResponse.orderPaypalCheckoutLink ||
+                                        "",
+                                )
+                            }
+                        >
+                            Thanh toán PayPal lần nữa
+                        </Button>
+                    </Stack>
+                )}
+            </Stack>
+        );
+    }
+
+    return (
+        <Stack sx={{ minHeight: isLoading ? 200 : "unset" }}>
+            <LoadingOverlay visible={isLoading} />
+            {contentFragment}
+        </Stack>
+    );
+}
+
+function useGetCartApi() {
+    const {
+        data: cartResponse,
+        isLoading: isLoadingCartResponse,
+        isError: isErrorCartResponse,
+    } = useQuery<ClientCartResponse | Empty, ErrorMessage>(
+        ["client-api", "carts", "getCart"],
+        () => FetchUtils.getWithToken(ResourceURL.CLIENT_CART),
+        {
+            onError: () =>
+                NotifyUtils.simpleFailed("Lấy dữ liệu không thành công"),
+            keepPreviousData: true,
+        },
+    );
+
+    return { cartResponse, isLoadingCartResponse, isErrorCartResponse };
+}
+
+function useGetAllPaymentMethodsApi() {
+    const {
+        data: paymentMethodResponses,
+        isLoading: isLoadingPaymentMethodResponses,
+        isError: isErrorPaymentMethodResponses,
+    } = useQuery<CollectionWrapper<ClientPaymentMethodResponse>, ErrorMessage>(
+        ["client-api", "payment-methods", "getAllPaymentMethods"],
+        () => FetchUtils.get(ResourceURL.CLIENT_PAYMENT_METHOD),
+        {
+            onError: () =>
+                NotifyUtils.simpleFailed("Lấy dữ liệu không thành công"),
+            keepPreviousData: true,
+            refetchOnWindowFocus: false,
+        },
+    );
+
+    return {
+        paymentMethodResponses,
+        isLoadingPaymentMethodResponses,
+        isErrorPaymentMethodResponses,
+    };
+}
+
+function useDeleteCartItemsApi() {
+    const queryClient = useQueryClient();
+
+    const { currentTotalCartItems, updateCurrentTotalCartItems } =
+        useAuthStore();
+
+    return useMutation<void, ErrorMessage, ClientCartVariantKeyRequest[]>(
+        (requestBody) =>
+            FetchUtils.deleteWithToken(ResourceURL.CLIENT_CART, requestBody),
+        {
+            onSuccess: (_, requestBody) => {
+                void queryClient.invalidateQueries([
+                    "client-api",
+                    "carts",
+                    "getCart",
+                ]);
+                updateCurrentTotalCartItems(
+                    currentTotalCartItems - requestBody.length,
+                );
+            },
+            onError: () =>
+                NotifyUtils.simpleFailed(
+                    "Không xóa được mặt hàng khỏi giỏ hàng",
+                ),
+        },
+    );
+}
+
+function useCreateClientOrderApi() {
+    const queryClient = useQueryClient();
+
+    const { updateCurrentCartId, updateCurrentTotalCartItems } = useAuthStore();
+
+    return useMutation<
+        ClientConfirmedOrderResponse,
+        ErrorMessage,
+        ClientSimpleOrderRequest
+    >(
+        (requestBody) =>
+            FetchUtils.postWithToken(ResourceURL.CLIENT_ORDER, requestBody),
+        {
+            onSuccess: () => {
+                void queryClient.invalidateQueries([
+                    "client-api",
+                    "carts",
+                    "getCart",
+                ]);
+                updateCurrentCartId(null);
+                updateCurrentTotalCartItems(0);
+            },
+        },
+    );
+}
+
+export default ClientCart;
