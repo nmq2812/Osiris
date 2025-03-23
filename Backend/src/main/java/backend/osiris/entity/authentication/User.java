@@ -5,7 +5,7 @@ import backend.osiris.entity.address.Address;
 import backend.osiris.entity.cart.Cart;
 import backend.osiris.entity.chat.Message;
 import backend.osiris.entity.chat.Room;
-import backend.osiris.entity.client.PreOrder;
+import backend.osiris.entity.client.Preorder;
 import backend.osiris.entity.client.Wish;
 import backend.osiris.entity.general.Notification;
 import backend.osiris.entity.order.Order;
@@ -72,7 +72,7 @@ public class User extends BaseEntity {
     private List<Wish> wishes = new ArrayList<>();
 
     @OneToMany(mappedBy = "user")
-    private List<PreOrder> preorders = new ArrayList<>();
+    private List<Preorder> preorders = new ArrayList<>();
 
     @OneToMany(mappedBy = "user")
     private List<Review> reviews = new ArrayList<>();
