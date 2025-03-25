@@ -2,9 +2,8 @@
 import { create } from "zustand";
 import { devtools, persist } from "zustand/middleware";
 import { createTrackedSelector } from "react-tracked";
-import { PaymentMethodType } from "@/app/models/PaymentMethod";
-import { UserResponse } from "@/app/models/User";
-import { useEffect } from "react";
+import { PaymentMethodType } from "@/models/PaymentMethod";
+import { UserResponse } from "@/models/User";
 
 interface AuthState {
     jwtToken: string | null;
@@ -59,7 +58,7 @@ const createStorage = () => {
     };
 };
 
-const useAuthStore = create<AuthState & AuthAction>()(
+export const useAuthStore = create<AuthState & AuthAction>()(
     devtools(
         persist(
             (set, get) => ({
@@ -123,23 +122,20 @@ const useAuthStore = create<AuthState & AuthAction>()(
 );
 
 // Tạo một custom hook để xử lý storage event
-export function useStorageEvents() {
-    useEffect(() => {
-        const storageEventCallback = (e: StorageEvent) => {
-            if (
-                e.key === useAuthStore.persist.getOptions().name &&
-                e.newValue
-            ) {
-                useAuthStore.persist.rehydrate();
-            }
-        };
+// const withStorageDOMEvents = (store: typeof useAuthStore) => {
+//     const storageEventCallback = (e: StorageEvent) => {
+//         if (e.key === store.persist.getOptions().name && e.newValue) {
+//             store.persist.rehydrate();
+//         }
+//     };
 
-        window.addEventListener("storage", storageEventCallback);
+//     window.addEventListener("storage", storageEventCallback);
 
-        return () => {
-            window.removeEventListener("storage", storageEventCallback);
-        };
-    }, []);
-}
+//     return () => {
+//         window.removeEventListener("storage", storageEventCallback);
+//     };
+// };
+
+// withStorageDOMEvents(useAuthStore);
 
 export default createTrackedSelector(useAuthStore);

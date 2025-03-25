@@ -2,7 +2,7 @@
 import { create } from "zustand";
 import { devtools } from "zustand/middleware";
 import { createTrackedSelector } from "react-tracked";
-import { NotificationResponse } from "@/app/models/Notification";
+import { NotificationResponse } from "@/models/Notification";
 
 interface ClientSiteState {
     newNotifications: NotificationResponse[];

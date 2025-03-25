@@ -1,43 +1,27 @@
-"use server";
+"use client";
 
-import FAQSection from "@/components/home/FAQ";
-import FeaturedCategoriesSection from "@/components/home/featuredCategories";
-import FeaturedProductsSection from "@/components/home/featuredProducts";
-import FooterSection from "@/components/layout/footer";
-import HeaderSection from "@/components/layout/header";
-import HeroCarouselSection from "@/components/home/heroCarousel";
-import InfoTableSection from "@/components/table/infoTable";
-import NewsletterSection from "@/components/home/newsLetter";
-import SalesAlertSection from "@/components/home/saleAleartSection";
-import TestimonialsSection from "@/components/home/testimonials";
+import { Container, Stack, useMantineTheme } from "@mantine/core";
+import ClientHomeBanner from "./ClientHomeBanner";
+import ClientHomeFeaturedCategories from "./ClientHomeFeaturedCategories";
+import ClientHomeLatestProducts from "./ClientHomeLatestProducts";
+import ClientHomeNewsletter from "./ClientHomeNewsletter";
+import useTitle from "@/hooks/use-title";
 
-export default async function HomePage() {
+export default function HomePage() {
     // State
+    useTitle();
+
+    const theme = useMantineTheme();
     return (
-        <div className="min-h-screen bg-gray-50">
-            {/* Hero Carousel Section */}
-            <HeroCarouselSection />
-
-            {/* Featured Categories Section */}
-            <FeaturedCategoriesSection />
-
-            {/* Sales Alert Section */}
-            <SalesAlertSection />
-
-            {/* Featured Products Section */}
-            <FeaturedProductsSection />
-
-            {/* Info Table Section */}
-            <InfoTableSection />
-
-            {/* Newsletter Section */}
-            <NewsletterSection />
-
-            {/* Testimonials Section */}
-            <TestimonialsSection />
-
-            {/* FAQ Section */}
-            <FAQSection />
-        </div>
+        <main>
+            <Container size="xl">
+                <Stack spacing={theme.spacing.xl * 1.5}>
+                    <ClientHomeBanner />
+                    <ClientHomeFeaturedCategories />
+                    <ClientHomeLatestProducts />
+                    <ClientHomeNewsletter />
+                </Stack>
+            </Container>
+        </main>
     );
 }

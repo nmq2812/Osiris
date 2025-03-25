@@ -6,6 +6,9 @@ import { ModalsProvider } from "@mantine/modals";
 import { NotificationsProvider } from "@mantine/notifications";
 import { QueryClient, QueryClientProvider } from "react-query";
 import { ReactQueryDevtools } from "react-query/devtools";
+import React from "react";
+import { ConfigProvider } from "antd";
+import viVN from "antd/lib/locale/vi_VN";
 
 // Tạo QueryClient ở đây
 const queryClient = new QueryClient({
@@ -29,7 +32,19 @@ export default function ClientProviders({ children }: { children: ReactNode }) {
         <QueryClientProvider client={queryClient}>
             <NotificationsProvider>
                 <MantineProvider>
-                    <ModalsProvider>{children}</ModalsProvider>
+                    <ModalsProvider>
+                        <ConfigProvider
+                            locale={viVN}
+                            theme={{
+                                token: {
+                                    colorPrimary: "#1890ff",
+                                    borderRadius: 6,
+                                },
+                            }}
+                        >
+                            {children}
+                        </ConfigProvider>
+                    </ModalsProvider>
                 </MantineProvider>
                 <ReactQueryDevtools initialIsOpen={false} />
             </NotificationsProvider>

@@ -7,7 +7,7 @@ function useTitle(explicitTitle?: string) {
     useDocumentTitle(
         explicitTitle
             ? explicitTitle + " – Electro"
-            : Titles[path] || "Electro",
+            : Titles[path as keyof typeof Titles] || "Electro",
     );
 }
 

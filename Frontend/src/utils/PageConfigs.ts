@@ -14,7 +14,7 @@ import {
     Keyboard,
     Mouse,
 } from "tabler-icons-react";
-import { PaymentMethodType } from "@/app/models/PaymentMethod";
+import { PaymentMethodType } from "@/models/PaymentMethod";
 import {
     EntityPropertyType,
     EntityPropertySchema,
