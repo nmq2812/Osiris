@@ -1,4 +1,4 @@
-import { UploadedImageResponse } from "@/app/models/Image";
+import { UploadedImageResponse } from "@/models/Image";
 import ApplicationConstants from "@/constants/ApplicationConstants";
 import { CollectionWrapper } from "@/datas/CollectionWrapper";
 

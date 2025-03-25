@@ -1,11 +1,11 @@
-import { AddressRequest } from "@/app/models/Address";
-import { ImageResponse } from "@/app/models/Image";
-import { MessageResponse } from "@/app/models/Message";
-import { PaymentMethodType } from "@/app/models/PaymentMethod";
-import { SpecificationItem } from "@/app/models/Product";
-import { RewardType } from "@/app/models/RewardStrategy";
-import { RoomResponse } from "@/app/models/Room";
-import { VariantPropertyItem } from "@/app/models/Variant";
+import { AddressRequest } from "@/models/Address";
+import { ImageResponse } from "@/models/Image";
+import { MessageResponse } from "@/models/Message";
+import { PaymentMethodType } from "@/models/PaymentMethod";
+import { SpecificationItem } from "@/models/Product";
+import { RewardType } from "@/models/RewardStrategy";
+import { RoomResponse } from "@/models/Room";
+import { VariantPropertyItem } from "@/models/Variant";
 import { CollectionWrapper } from "./CollectionWrapper";
 
 // CATEGORY

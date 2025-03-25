@@ -1,257 +1,242 @@
-import { Separator } from "@radix-ui/react-separator";
-import { Link } from "lucide-react";
-import { Button } from "../ui/button";
+"use client";
+import React from "react";
+import {
+    ActionIcon,
+    Anchor,
+    Box,
+    Center,
+    Container,
+    createStyles,
+    Grid,
+    Group,
+    SegmentedControl,
+    Stack,
+    Text,
+    ThemeIcon,
+    useMantineColorScheme,
+    useMantineTheme,
+} from "@mantine/core";
+
+import {
+    BrandFacebook,
+    BrandInstagram,
+    BrandMastercard,
+    BrandTiktok,
+    BrandVisa,
+    BrandYoutube,
+    BuildingBank,
+    CurrencyDong,
+    Headset,
+    Moon,
+    Sun,
+} from "tabler-icons-react";
+import Link from "next/link";
 import Image from "next/image";
 
-export default function FooterSection() {
+const useStyles = createStyles((theme) => ({
+    footer: {
+        marginTop: theme.spacing.xl * 2,
+        paddingTop: theme.spacing.xl * 2,
+        paddingBottom: theme.spacing.xl * 2,
+        backgroundColor:
+            theme.colorScheme === "dark"
+                ? theme.colors.dark[6]
+                : theme.colors.gray[0],
+        borderTop: `1px solid ${
+            theme.colorScheme === "dark"
+                ? theme.colors.dark[5]
+                : theme.colors.gray[2]
+        }`,
+    },
+
+    footerLinks: {
+        [theme.fn.smallerThan("md")]: {
+            marginTop: theme.spacing.xl,
+        },
+    },
+
+    afterFooter: {
+        marginTop: theme.spacing.xl * 2,
+        paddingTop: theme.spacing.xl,
+        borderTop: `1px solid ${
+            theme.colorScheme === "dark"
+                ? theme.colors.dark[4]
+                : theme.colors.gray[2]
+        }`,
+    },
+}));
+
+function ClientFooter() {
+    const theme = useMantineTheme();
+    const { classes } = useStyles();
+
     return (
-        <footer className="bg-gray-900 text-white pt-16 pb-8">
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-12">
-                    <div>
-                        <h3 className="text-xl font-bold mb-4 flex items-center">
-                            <Image
-                                src="/logo.png"
-                                alt="Osiris Logo"
-                                width={28}
-                                height={28}
-                                className="mr-2"
-                            />
-                            OSIRIS Shop
-                        </h3>
-                        <p className="text-gray-400 mb-4">
-                            Nơi cung cấp những mô hình anime, gundam và figures
-                            chất lượng cao với giá cả hợp lý nhất.
-                        </p>
-                        <div className="flex space-x-4">
-                            <Button
-                                variant="ghost"
-                                size="icon"
-                                className="rounded-full h-8 w-8 p-0"
-                            >
-                                <svg
-                                    className="h-4 w-4"
-                                    fill="currentColor"
-                                    viewBox="0 0 24 24"
-                                >
-                                    <path d="M22 12c0-5.523-4.477-10-10-10S2 6.477 2 12c0 4.991 3.657 9.128 8.438 9.878v-6.987h-2.54V12h2.54V9.797c0-2.506 1.492-3.89 3.777-3.89 1.094 0 2.238.195 2.238.195v2.46h-1.26c-1.243 0-1.63.771-1.63 1.562V12h2.773l-.443 2.89h-2.33v6.988C18.343 21.128 22 16.991 22 12z"></path>
-                                </svg>
-                            </Button>
-                            <Button
-                                variant="ghost"
-                                size="icon"
-                                className="rounded-full h-8 w-8 p-0"
-                            >
-                                <svg
-                                    className="h-4 w-4"
-                                    fill="currentColor"
-                                    viewBox="0 0 24 24"
-                                >
-                                    <path d="M12.315 2c2.43 0 2.784.013 3.808.06 1.064.049 1.791.218 2.427.465a4.902 4.902 0 011.772 1.153 4.902 4.902 0 011.153 1.772c.247.636.416 1.363.465 2.427.048 1.067.06 1.407.06 4.123v.08c0 2.643-.012 2.987-.06 4.043-.049 1.064-.218 1.791-.465 2.427a4.902 4.902 0 01-1.153 1.772 4.902 4.902 0 01-1.772 1.153c-.636.247-1.363.416-2.427.465-1.067.048-1.407.06-4.123.06h-.08c-2.643 0-2.987-.012-4.043-.06-1.064-.049-1.791-.218-2.427-.465a4.902 4.902 0 01-1.772-1.153 4.902 4.902 0 01-1.153-1.772c-.247-.636-.416-1.363-.465-2.427-.047-1.024-.06-1.379-.06-3.808v-.63c0-2.43.013-2.784.06-3.808.049-1.064.218-1.791.465-2.427a4.902 4.902 0 011.153-1.772A4.902 4.902 0 015.45 2.525c.636-.247 1.363-.416 2.427-.465C8.901 2.013 9.256 2 11.685 2h.63zm-.081 1.802h-.468c-2.456 0-2.784.011-3.807.058-.975.045-1.504.207-1.857.344-.467.182-.8.398-1.15.748-.35.35-.566.683-.748 1.15-.137.353-.3.882-.344 1.857-.047 1.023-.058 1.351-.058 3.807v.468c0 2.456.011 2.784.058 3.807.045.975.207 1.504.344 1.857.182.466.399.8.748 1.15.35.35.683.566 1.15.748.353.137.882.3 1.857.344 1.054.048 1.37.058 4.041.058h.08c2.597 0 2.917-.01 3.96-.058.976-.045 1.505-.207 1.858-.344.466-.182.8-.398 1.15-.748.35-.35.566-.683.748-1.15.137-.353.3-.882.344-1.857.048-1.055.058-1.37.058-4.041v-.08c0-2.597-.01-2.917-.058-3.96-.045-.976-.207-1.505-.344-1.858a3.097 3.097 0 00-.748-1.15 3.098 3.098 0 00-1.15-.748c-.353-.137-.882-.3-1.857-.344-1.023-.047-1.351-.058-3.807-.058zM12 6.865a5.135 5.135 0 110 10.27 5.135 5.135 0 010-10.27zm0 1.802a3.333 3.333 0 100 6.666 3.333 3.333 0 000-6.666zm5.338-3.205a1.2 1.2 0 110 2.4 1.2 1.2 0 010-2.4z"></path>
-                                </svg>
-                            </Button>
-                            <Button
-                                variant="ghost"
-                                size="icon"
-                                className="rounded-full h-8 w-8 p-0"
-                            >
-                                <svg
-                                    className="h-4 w-4"
-                                    fill="currentColor"
-                                    viewBox="0 0 24 24"
-                                >
-                                    <path d="M8.29 20.251c7.547 0 11.675-6.253 11.675-11.675 0-.178 0-.355-.012-.53A8.348 8.348 0 0022 5.92a8.19 8.19 0 01-2.357.646 4.118 4.118 0 001.804-2.27 8.224 8.224 0 01-2.605.996 4.107 4.107 0 00-6.993 3.743 11.65 11.65 0 01-8.457-4.287 4.106 4.106 0 001.27 5.477A4.072 4.072 0 012.8 9.713v.052a4.105 4.105 0 003.292 4.022 4.095 4.095 0 01-1.853.07 4.108 4.108 0 003.834 2.85A8.233 8.233 0 012 18.407a11.616 11.616 0 006.29 1.84"></path>
-                                </svg>
-                            </Button>
-                            <Button
-                                variant="ghost"
-                                size="icon"
-                                className="rounded-full h-8 w-8 p-0"
-                            >
-                                <svg
-                                    className="h-4 w-4"
-                                    fill="currentColor"
-                                    viewBox="0 0 24 24"
-                                >
-                                    <path d="M19.615 3.184c-3.604-.246-11.631-.245-15.23 0-3.897.266-4.356 2.62-4.385 8.816.029 6.185.484 8.549 4.385 8.816 3.6.245 11.626.246 15.23 0 3.897-.266 4.356-2.62 4.385-8.816-.029-6.185-.484-8.549-4.385-8.816zm-10.615 12.816v-8l8 3.993-8 4.007z"></path>
-                                </svg>
-                            </Button>
-                        </div>
-                    </div>
-
-                    <div>
-                        <h3 className="text-lg font-semibold mb-4">
-                            Thông tin
-                        </h3>
-                        <ul className="space-y-2">
-                            <li>
-                                <Link
-                                    href="#"
-                                    className="text-gray-400 hover:text-white"
-                                >
-                                    Về chúng tôi
+        <footer className={classes.footer}>
+            <Container size="xl">
+                <Grid>
+                    <Grid.Col md={6}>
+                        <Stack spacing={theme.spacing.lg * 1.75}>
+                            <div className="flex items-center">
+                                <Link href="/" className="flex items-center">
+                                    <Image
+                                        src="/logo.png"
+                                        alt="Osiris Logo"
+                                        width={40}
+                                        height={40}
+                                        className="mr-2"
+                                    />
+                                    <span className="text-2xl font-bold text-blue-600">
+                                        OSIRIS
+                                    </span>
                                 </Link>
-                            </li>
-                            <li>
-                                <Link
-                                    href="#"
-                                    className="text-gray-400 hover:text-white"
+                            </div>
+                            <Group>
+                                <Headset
+                                    size={52}
+                                    color={theme.colors[theme.primaryColor][6]}
+                                    strokeWidth={1.25}
+                                />
+                                <Stack spacing={theme.spacing.xs / 4}>
+                                    <Text size="sm" color="dimmed">
+                                        Tổng đài hỗ trợ
+                                    </Text>
+                                    <Text size="xl">
+                                        (024) 3535 7272, (028) 35 111 222
+                                    </Text>
+                                </Stack>
+                            </Group>
+                            <Stack spacing={theme.spacing.xs / 2}>
+                                <Text weight={500}>Địa chỉ liên hệ</Text>
+                                <Text>
+                                    Tòa nhà Bitexco, Quận 1, Thành phố Hồ Chí
+                                    Minh
+                                </Text>
+                            </Stack>
+                            <Group spacing="sm">
+                                <ActionIcon
+                                    color="blue"
+                                    size="xl"
+                                    radius="xl"
+                                    variant="light"
                                 >
-                                    Điều khoản sử dụng
-                                </Link>
-                            </li>
-                            <li>
-                                <Link
-                                    href="#"
-                                    className="text-gray-400 hover:text-white"
+                                    <BrandFacebook strokeWidth={1.5} />
+                                </ActionIcon>
+                                <ActionIcon
+                                    color="blue"
+                                    size="xl"
+                                    radius="xl"
+                                    variant="light"
                                 >
-                                    Chính sách bảo mật
-                                </Link>
-                            </li>
-                            <li>
-                                <Link
-                                    href="#"
-                                    className="text-gray-400 hover:text-white"
+                                    <BrandYoutube strokeWidth={1.5} />
+                                </ActionIcon>
+                                <ActionIcon
+                                    color="blue"
+                                    size="xl"
+                                    radius="xl"
+                                    variant="light"
                                 >
-                                    Chính sách đổi trả
-                                </Link>
-                            </li>
-                            <li>
-                                <Link
-                                    href="#"
-                                    className="text-gray-400 hover:text-white"
+                                    <BrandInstagram strokeWidth={1.5} />
+                                </ActionIcon>
+                                <ActionIcon
+                                    color="blue"
+                                    size="xl"
+                                    radius="xl"
+                                    variant="light"
                                 >
-                                    Liên hệ
-                                </Link>
-                            </li>
-                        </ul>
-                    </div>
-
-                    <div>
-                        <h3 className="text-lg font-semibold mb-4">Danh mục</h3>
-                        <ul className="space-y-2">
-                            <li>
-                                <Link
-                                    href="#"
-                                    className="text-gray-400 hover:text-white"
+                                    <BrandTiktok strokeWidth={1.5} />
+                                </ActionIcon>
+                            </Group>
+                        </Stack>
+                    </Grid.Col>
+                    <Grid.Col md={6}>
+                        <Grid>
+                            <Grid.Col xs={6} className={classes.footerLinks}>
+                                <Stack>
+                                    <Text weight={500}>Hỗ trợ khách hàng</Text>
+                                    <Stack spacing={theme.spacing.xs}>
+                                        <Anchor href="/">
+                                            Câu hỏi thường gặp
+                                        </Anchor>
+                                        <Anchor href="/">
+                                            Hướng dẫn đặt hàng
+                                        </Anchor>
+                                        <Anchor href="/">
+                                            Phương thức vận chuyển
+                                        </Anchor>
+                                        <Anchor href="/">
+                                            Chính sách đổi trả
+                                        </Anchor>
+                                        <Anchor href="/">
+                                            Chính sách thanh toán
+                                        </Anchor>
+                                        <Anchor href="/">
+                                            Giải quyết khiếu nại
+                                        </Anchor>
+                                        <Anchor href="/">
+                                            Chính sách bảo mật
+                                        </Anchor>
+                                    </Stack>
+                                </Stack>
+                            </Grid.Col>
+                            <Grid.Col xs={6} className={classes.footerLinks}>
+                                <Stack
+                                    justify="space-between"
+                                    sx={{ height: "100%" }}
                                 >
-                                    Gundam
-                                </Link>
-                            </li>
-                            <li>
-                                <Link
-                                    href="#"
-                                    className="text-gray-400 hover:text-white"
-                                >
-                                    Anime Figures
-                                </Link>
-                            </li>
-                            <li>
-                                <Link
-                                    href="#"
-                                    className="text-gray-400 hover:text-white"
-                                >
-                                    Nendoroid
-                                </Link>
-                            </li>
-                            <li>
-                                <Link
-                                    href="#"
-                                    className="text-gray-400 hover:text-white"
-                                >
-                                    Figma
-                                </Link>
-                            </li>
-                            <li>
-                                <Link
-                                    href="#"
-                                    className="text-gray-400 hover:text-white"
-                                >
-                                    Mô hình xe
-                                </Link>
-                            </li>
-                        </ul>
-                    </div>
-
-                    <div>
-                        <h3 className="text-lg font-semibold mb-4">Liên hệ</h3>
-                        <ul className="space-y-2">
-                            <li className="flex items-start">
-                                <span className="text-gray-400 mr-2">
-                                    Địa chỉ:
-                                </span>
-                                <span className="text-gray-400">
-                                    123 Nguyễn Văn Linh, Quận 7, TP.HCM
-                                </span>
-                            </li>
-                            <li className="flex items-start">
-                                <span className="text-gray-400 mr-2">
-                                    Email:
-                                </span>
-                                <Link
-                                    href="mailto:contact@osiris.com"
-                                    className="text-gray-400 hover:text-white"
-                                >
-                                    contact@osiris.com
-                                </Link>
-                            </li>
-                            <li className="flex items-start">
-                                <span className="text-gray-400 mr-2">
-                                    Phone:
-                                </span>
-                                <Link
-                                    href="tel:+84123456789"
-                                    className="text-gray-400 hover:text-white"
-                                >
-                                    +84 123 456 789
-                                </Link>
-                            </li>
-                            <li className="flex items-start">
-                                <span className="text-gray-400 mr-2">
-                                    Giờ làm việc:
-                                </span>
-                                <span className="text-gray-400">
-                                    Thứ 2 - Chủ Nhật: 9:00 - 21:00
-                                </span>
-                            </li>
-                        </ul>
-                    </div>
-                </div>
-
-                <Separator className="mb-8 bg-gray-800" />
-
-                <div className="flex flex-col md:flex-row justify-between items-center">
-                    <p className="text-gray-500 text-sm">
-                        © 2025 OSIRIS. Tất cả quyền được bảo lưu.
-                    </p>
-                    <div className="flex items-center space-x-4 mt-4 md:mt-0">
-                        <Image
-                            src="/images/payment-visa.svg"
-                            alt="Visa"
-                            width={40}
-                            height={25}
-                        />
-                        <Image
-                            src="/images/payment-mastercard.svg"
-                            alt="Mastercard"
-                            width={40}
-                            height={25}
-                        />
-                        <Image
-                            src="/images/payment-momo.svg"
-                            alt="Momo"
-                            width={40}
-                            height={25}
-                        />
-                        <Image
-                            src="/images/payment-vnpay.svg"
-                            alt="VNPay"
-                            width={40}
-                            height={25}
-                        />
-                    </div>
-                </div>
-            </div>
+                                    <Stack>
+                                        <Text weight={500}>Giới thiệu</Text>
+                                        <Stack spacing={theme.spacing.xs}>
+                                            <Anchor href="/">Về Công ty</Anchor>
+                                            <Anchor href="/">Tuyển dụng</Anchor>
+                                            <Anchor href="/">Hợp tác</Anchor>
+                                            <Anchor href="/">
+                                                Liên hệ mua hàng
+                                            </Anchor>
+                                        </Stack>
+                                    </Stack>
+                                </Stack>
+                            </Grid.Col>
+                        </Grid>
+                    </Grid.Col>
+                </Grid>
+                <Group className={classes.afterFooter} position="apart">
+                    <Text color="dimmed" size="sm">
+                        © 2025 Osiris Corporation. Bảo lưu mọi quyền.
+                    </Text>
+                    <Group spacing="xs">
+                        <ThemeIcon
+                            variant="outline"
+                            color="gray"
+                            sx={{ width: 50, height: 30 }}
+                        >
+                            <BrandVisa strokeWidth={1.5} />
+                        </ThemeIcon>
+                        <ThemeIcon
+                            variant="outline"
+                            color="gray"
+                            sx={{ width: 50, height: 30 }}
+                        >
+                            <BrandMastercard strokeWidth={1.5} />
+                        </ThemeIcon>
+                        <ThemeIcon
+                            variant="outline"
+                            color="gray"
+                            sx={{ width: 50, height: 30 }}
+                        >
+                            <BuildingBank strokeWidth={1.5} />
+                        </ThemeIcon>
+                        <ThemeIcon
+                            variant="outline"
+                            color="gray"
+                            sx={{ width: 50, height: 30 }}
+                        >
+                            <CurrencyDong strokeWidth={1.5} />
+                        </ThemeIcon>
+                    </Group>
+                </Group>
+            </Container>
         </footer>
     );
 }
+
+export default React.memo(ClientFooter);

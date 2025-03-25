@@ -62,8 +62,8 @@ import FetchUtils, { ErrorMessage } from "@/utils/FetchUtils";
 import MiscUtils from "@/utils/MiscUtils";
 import NotifyUtils from "@/utils/NotifyUtils";
 import PageConfigs from "@/utils/PageConfigs";
-import { NotificationType } from "../models/Notification";
-import { PaymentMethodType } from "../models/PaymentMethod";
+import { NotificationType } from "../../models/Notification";
+import { PaymentMethodType } from "../../models/PaymentMethod";
 
 function ClientCart() {
     useTitle();
@@ -585,19 +585,19 @@ function CartItemTableRow({
                         }
                     />
                     <Stack spacing={3.5}>
-                        <Anchor
-                            component={Link}
-                            to={
-                                "/product/" +
-                                cartItem.cartItemVariant.variantProduct
-                                    .productSlug
-                            }
-                            size="sm"
-                        >
-                            {
-                                cartItem.cartItemVariant.variantProduct
-                                    .productName
-                            }
+                        <Anchor size="sm">
+                            <Link
+                                href={
+                                    "/product/" +
+                                    cartItem.cartItemVariant.variantProduct
+                                        .productSlug
+                                }
+                            >
+                                {
+                                    cartItem.cartItemVariant.variantProduct
+                                        .productName
+                                }
+                            </Link>
                         </Anchor>
                         {cartItem.cartItemVariant.variantProperties && (
                             <Stack spacing={1.5}>
@@ -792,7 +792,9 @@ function ConfirmedOrder() {
     ]);
 
     const handlePaypalCheckoutButton = (checkoutLink: string) => {
-        window.open(checkoutLink, "mywin", "width=500,height=800");
+        if (checkoutLink) {
+            window.open(checkoutLink, "mywin", "width=500,height=800");
+        }
     };
 
     if (isError) {
@@ -831,15 +833,13 @@ function ConfirmedOrder() {
                     <Check size={100} strokeWidth={1} />
                     <Text>
                         <span>Đơn hàng </span>
-                        <Anchor
-                            component={Link}
-                            to={
-                                "/order/detail/" +
-                                clientConfirmedOrderResponse.orderCode
-                            }
-                            onClick={modals.closeAll}
-                            weight={500}
-                        >
+                        <Anchor onClick={modals.closeAll} weight={500}>
+                            <Link
+                                href={
+                                    "/order/detail/" +
+                                    clientConfirmedOrderResponse.orderCode
+                                }
+                            ></Link>
                             {clientConfirmedOrderResponse.orderCode}
                         </Anchor>
                         <span> đã được tạo!</span>

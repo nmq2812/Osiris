@@ -1,5 +1,8 @@
-import { ClientCategoryResponse, ClientListedProductResponse } from "types";
-import { MessageResponse } from "models/Message";
+import {
+    ClientCategoryResponse,
+    ClientListedProductResponse,
+} from "@/datas/ClientUI";
+import { MessageResponse } from "@/models/Message";
 
 class MockUtils {
     static featuredCategories: ClientCategoryResponse[] = [
