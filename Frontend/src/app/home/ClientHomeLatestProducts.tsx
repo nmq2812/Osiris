@@ -1,15 +1,7 @@
 "use client";
 import React from "react";
-import {
-    Button,
-    Grid,
-    Group,
-    Skeleton,
-    Stack,
-    Text,
-    Title,
-    useMantineTheme,
-} from "@mantine/core";
+import { Skeleton } from "@mantine/core";
+import { Button, Space, Typography } from "antd";
 import { AlertTriangle, List, Marquee } from "tabler-icons-react";
 
 import { useQuery } from "react-query";
@@ -20,8 +12,6 @@ import FetchUtils, { ListResponse, ErrorMessage } from "@/utils/FetchUtils";
 import NotifyUtils from "@/utils/NotifyUtils";
 
 function ClientHomeLatestProducts() {
-    const theme = useMantineTheme();
-
     const requestParams = { size: 12, newable: true, saleable: true };
 
     const {
@@ -45,75 +35,81 @@ function ClientHomeLatestProducts() {
 
     if (isLoadingProductResponses) {
         resultFragment = (
-            <Stack>
+            <Space direction="vertical">
                 {Array(5)
                     .fill(0)
                     .map((_, index) => (
                         <Skeleton key={index} height={50} radius="md" />
                     ))}
-            </Stack>
+            </Space>
         );
     }
 
     if (isErrorProductResponses) {
         resultFragment = (
-            <Stack
-                my={theme.spacing.xl}
-                sx={{ alignItems: "center", color: theme.colors.pink[6] }}
+            <Space
+                style={{
+                    alignItems: "center",
+                }}
             >
                 <AlertTriangle size={125} strokeWidth={1} />
-                <Text size="xl" weight={500}>
+                <Typography.Text style={{ fontSize: "14px", fontWeight: 500 }}>
                     Đã có lỗi xảy ra
-                </Text>
-            </Stack>
+                </Typography.Text>
+            </Space>
         );
     }
 
     if (products && products.totalElements === 0) {
         resultFragment = (
-            <Stack
-                my={theme.spacing.xl}
-                sx={{ alignItems: "center", color: theme.colors.blue[6] }}
+            <Space
+                style={{
+                    margin: "24px",
+                    alignItems: "center",
+                    color: "#1890ff",
+                }}
             >
                 <Marquee size={125} strokeWidth={1} />
-                <Text size="xl" weight={500}>
+                <Typography.Text style={{ fontSize: "20px", fontWeight: 500 }}>
                     Không có sản phẩm
-                </Text>
-            </Stack>
+                </Typography.Text>
+            </Space>
         );
     }
 
     if (products && products.totalElements > 0) {
         resultFragment = (
-            <Grid>
+            <div className="grid">
                 {products.content.map((product, index) => (
-                    <Grid.Col key={index} span={6} sm={4} md={3}>
+                    <div key={index} className="grid-col">
                         <ClientProductCard product={product} />
-                    </Grid.Col>
+                    </div>
                 ))}
-            </Grid>
+            </div>
         );
     }
 
     return (
-        <Stack>
-            <Group position="apart">
-                <Title order={2}>
-                    <Text color="orange" inherit>
+        <Space direction="vertical" style={{ width: "100%" }}>
+            <Space
+                style={{
+                    display: "flex",
+                    justifyContent: "space-between",
+                    width: "100%",
+                }}
+            >
+                <Typography.Title level={2}>
+                    <Typography.Text style={{ color: "orange" }}>
                         Sản phẩm mới nhất
-                    </Text>
-                </Title>
-                <Button
-                    variant="light"
-                    leftIcon={<List size={16} />}
-                    radius="md"
-                >
+                    </Typography.Text>
+                </Typography.Title>
+                <Button type="default" icon={<List size={16} />}>
                     Xem tất cả
                 </Button>
-            </Group>
+            </Space>
 
             {resultFragment}
-        </Stack>
+        </Space>
     );
 }
 
