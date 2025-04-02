@@ -1,76 +1,76 @@
 "use client";
 import React from "react";
-import {
-    Button,
-    Card,
-    Grid,
-    Group,
-    Stack,
-    Text,
-    Title,
-    useMantineTheme,
-} from "@mantine/core";
-import { List } from "tabler-icons-react";
+import { Button, Card, Row, Col, Space, Typography, theme } from "antd";
+import { UnorderedListOutlined } from "@ant-design/icons";
 
 import PageConfigs from "@/utils/PageConfigs";
 import MockUtils from "@/utils/MockUtils";
 
 function ClientHomeFeaturedCategories() {
-    const theme = useMantineTheme();
+    const { token } = theme.useToken();
 
     return (
-        <Stack>
-            <Group position="apart">
-                <Title order={2}>
-                    <Text color="orange" inherit>
+        <Space direction="vertical" style={{ width: "100%" }}>
+            <div
+                style={{
+                    display: "flex",
+                    justifyContent: "space-between",
+                    alignItems: "center",
+                }}
+            >
+                <Typography.Title level={2}>
+                    <Typography.Text style={{ color: "orange" }}>
                         Danh mục nổi bật
-                    </Text>
-                </Title>
+                    </Typography.Text>
+                </Typography.Title>
                 <Button
                     href="/all-categories"
-                    variant="light"
-                    leftIcon={<List size={16} />}
-                    radius="md"
+                    type="default"
+                    icon={<UnorderedListOutlined />}
+                    style={{ borderRadius: "8px" }}
                 >
                     Xem tất cả
                 </Button>
-            </Group>
-            <Grid>
+            </div>
+            <Row gutter={[16, 16]}>
                 {MockUtils.featuredCategories.map((category) => {
                     const CategoryIcon =
                         PageConfigs.categorySlugIconMap[category.categorySlug];
 
                     return (
-                        <Grid.Col
+                        <Col
                             key={category.categorySlug}
-                            span={6}
-                            sm={4}
-                            md={3}
+                            xs={12}
+                            sm={8}
+                            md={6}
+                            lg={6}
                         >
-                            <Card
-                                radius="md"
-                                shadow="sm"
-                                p="lg"
-                                to={"/category/" + category.categorySlug}
-                                sx={{
-                                    "&:hover": {
-                                        backgroundColor:
-                                            theme.colorScheme === "dark"
-                                                ? theme.colors.dark[5]
-                                                : theme.colors.gray[0],
-                                    },
-                                }}
-                            >
-                                <Group>
-                                    <CategoryIcon size={50} strokeWidth={1} />
-                                    <Text>{category.categoryName}</Text>
-                                </Group>
-                            </Card>
-                        </Grid.Col>
+                            <a href={"/category/" + category.categorySlug}>
+                                <Card
+                                    style={{
+                                        borderRadius: "8px",
+                                        cursor: "pointer",
+                                        transition: "all 0.3s",
+                                    }}
+                                    hoverable
+                                    onClick={() => {}}
+                                >
+                                    <Space>
+                                        <CategoryIcon
+                                            size={50}
+                                            strokeWidth={1}
+                                        />
+                                        <Typography.Text>
+                                            {category.categoryName}
+                                        </Typography.Text>
+                                    </Space>
+                                </Card>
+                            </a>
+                        </Col>
                     );
                 })}
-            </Grid>
-        </Stack>
+            </Row>
+        </Space>
     );
 }
 
