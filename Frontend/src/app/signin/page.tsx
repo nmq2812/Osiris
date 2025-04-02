@@ -3,22 +3,20 @@
 import React, { useEffect, useState } from "react";
 import {
     Alert,
-    Anchor,
-    Box,
+    Typography,
     Button,
     Card,
-    Container,
-    createStyles,
-    PasswordInput,
-    Text,
-    TextInput,
-    Title,
-    Transition,
-} from "@mantine/core";
+    Form,
+    Input,
+    Row,
+    Col,
+    Space,
+    Spin,
+} from "antd";
 import useTitle from "@/hooks/use-title";
 import { z } from "zod";
 import MessageUtils from "@/utils/MessageUtils";
-import { useForm, zodResolver } from "@mantine/form";
+import { useForm } from "antd/es/form/Form";
 import { JwtResponse, LoginRequest } from "@/models/Authentication";
 import { useMutation } from "react-query";
 import FetchUtils, { ErrorMessage } from "@/utils/FetchUtils";
@@ -32,40 +30,7 @@ import { useRouter } from "next/navigation";
 import { Empty } from "@/datas/Utility";
 import Link from "next/link";
 
-const useStyles = createStyles((theme) => ({
-    wrapper: {
-        minHeight: 600,
-        backgroundSize: "cover",
-        backgroundImage:
-            "url(https://images.unsplash.com/photo-1487875961445-47a00398c267?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1740&q=80)",
-        backgroundPosition: "bottom",
-
-        [theme.fn.smallerThan("sm")]: {
-            backgroundImage: "unset",
-        },
-    },
-
-    form: {
-        borderRight: `1px solid ${
-            theme.colorScheme === "dark"
-                ? theme.colors.dark[7]
-                : theme.colors.gray[3]
-        }`,
-        minHeight: 600,
-        maxWidth: 450,
-        paddingTop: 80,
-
-        [theme.fn.smallerThan("sm")]: {
-            maxWidth: "100%",
-            borderRight: "none",
-        },
-    },
-}));
-
-const initialFormValues = {
-    username: "",
-    password: "",
-};
+const { Title, Text, Link: TextLink } = Typography;
 
 const formSchema = z.object({
     username: z
@@ -77,8 +42,6 @@ const formSchema = z.object({
 });
 
 const LoginPage = () => {
-    const { classes } = useStyles();
-
     useTitle();
 
     const {
@@ -93,12 +56,8 @@ const LoginPage = () => {
     const [counter, setCounter] = useState(3);
     const [openedAlert, setOpenedAlert] = useState(false);
 
-    const route = useRouter();
-
-    const form = useForm({
-        initialValues: initialFormValues,
-        validate: zodResolver(formSchema),
-    });
+    const router = useRouter();
+    const [form] = useForm();
 
     const loginApi = useMutation<JwtResponse, ErrorMessage, LoginRequest>(
         (requestBody) => FetchUtils.post(ResourceURL.LOGIN, requestBody),
@@ -118,15 +77,15 @@ const LoginPage = () => {
         }
 
         if (counter === 0) {
-            route.replace("/");
+            router.replace("/");
         }
-    }, [counter, route, openedAlert, user]);
+    }, [counter, router, openedAlert, user]);
 
-    const handleFormSubmit = form.onSubmit(async (formValues) => {
+    const handleFormSubmit = async (values: any) => {
         if (!user) {
             const loginRequest: LoginRequest = {
-                username: formValues.username,
-                password: formValues.password,
+                username: values.username,
+                password: values.password,
             };
 
             try {
@@ -137,7 +96,6 @@ const LoginPage = () => {
                 updateUser(userResponse);
 
                 const cartResponse = await cartApi.mutateAsync();
-                // Reference: https://stackoverflow.com/a/136411
                 if (Object.hasOwn(cartResponse, "cartId")) {
                     updateCurrentCartId(cartResponse.cartId);
                     updateCurrentTotalCartItems(cartResponse.cartItems.length);
@@ -153,87 +111,144 @@ const LoginPage = () => {
                 NotifyUtils.simpleFailed("Đăng nhập thất bại");
             }
         }
-    });
+    };
 
     return (
         <main>
-            <Container size="xl">
-                <Transition
-                    mounted={openedAlert}
-                    transition="fade"
-                    duration={500}
-                    timingFunction="ease"
-                >
-                    {(styles) => (
-                        <Alert
-                            style={styles}
-                            icon={<AlertCircle size={16} />}
-                            title="Bạn đã đăng nhập thành công!"
-                            color="teal"
-                            radius="md"
-                            mb="xl"
-                        >
-                            Trở về trang chủ trong vòng {counter} giây...
-                        </Alert>
-                    )}
-                </Transition>
-                <Card className={classes.wrapper} radius="md" shadow="sm" p={0}>
-                    <Card className={classes.form} radius={0} p={30}>
-                        <Title order={2} align="center" mt="md" mb={50}>
-                            Đăng nhập
-                        </Title>
+            <div
+                className="container"
+                style={{ maxWidth: 1200, margin: "0 auto", padding: "0 16px" }}
+            >
+                {openedAlert && (
+                    <Alert
+                        message="Bạn đã đăng nhập thành công!"
+                        description={`Trở về trang chủ trong vòng ${counter} giây...`}
+                        type="success"
+                        showIcon
+                        icon={<AlertCircle size={16} />}
+                        style={{ marginBottom: 24 }}
+                    />
+                )}
 
-                        <form onSubmit={handleFormSubmit}>
-                            <TextInput
-                                required
-                                radius="md"
-                                label="Tên tài khoản"
-                                placeholder="Nhập tên tài khoản của bạn"
-                                size="md"
-                                disabled={!!user}
-                                {...form.getInputProps("username")}
-                            />
-                            <PasswordInput
-                                required
-                                label="Mật khẩu"
-                                radius="md"
-                                placeholder="Nhập mật khẩu của bạn"
-                                mt="md"
-                                size="md"
-                                disabled={!!user}
-                                {...form.getInputProps("password")}
-                            />
-                            <Box mt={5}>
-                                <Link href="/forgot">Quên mật khẩu?</Link>
-                            </Box>
-                            {/* TODO: Hoàn chỉnh checkbox */}
-                            {/*<Checkbox*/}
-                            {/*  label="Giữ trạng thái đăng nhập"*/}
-                            {/*  mt="xl"*/}
-                            {/*  size="md"*/}
-                            {/*  disabled={!!user}*/}
-                            {/*/>*/}
-                            <Button
-                                type="submit"
-                                fullWidth
-                                mt="xl"
-                                size="md"
-                                disabled={!!user}
-                                radius="md"
+                <Row>
+                    <Col xs={24} sm={24} md={12} lg={10}>
+                        <Card
+                            style={{
+                                minHeight: 600,
+                                borderRight: "1px solid #f0f0f0",
+                                padding: "30px",
+                            }}
+                        >
+                            <Title
+                                level={2}
+                                style={{
+                                    textAlign: "center",
+                                    marginTop: 50,
+                                    marginBottom: 50,
+                                }}
                             >
                                 Đăng nhập
-                            </Button>
-                        </form>
+                            </Title>
 
-                        <Text align="center" mt="md">
-                            Không có tài khoản?{" "}
-                            <Anchor weight={700}>
-                                <Link href="/signup">Đăng ký ngay</Link>
-                            </Anchor>
-                        </Text>
-                    </Card>
-                </Card>
-            </Container>
+                            <Form
+                                form={form}
+                                layout="vertical"
+                                onFinish={handleFormSubmit}
+                                disabled={!!user}
+                            >
+                                <Form.Item
+                                    label="Tên tài khoản"
+                                    name="username"
+                                    rules={[
+                                        {
+                                            required: true,
+                                            message: "Vui lòng không bỏ trống",
+                                        },
+                                        {
+                                            min: 2,
+                                            message: MessageUtils.min(
+                                                "Tên tài khoản",
+                                                2,
+                                            ),
+                                        },
+                                    ]}
+                                >
+                                    <Input
+                                        placeholder="Nhập tên tài khoản của bạn"
+                                        size="large"
+                                    />
+                                </Form.Item>
+
+                                <Form.Item
+                                    label="Mật khẩu"
+                                    name="password"
+                                    rules={[
+                                        {
+                                            required: true,
+                                            message: "Vui lòng không bỏ trống",
+                                        },
+                                        {
+                                            min: 1,
+                                            message: MessageUtils.min(
+                                                "Mật khẩu",
+                                                1,
+                                            ),
+                                        },
+                                    ]}
+                                >
+                                    <Input.Password
+                                        placeholder="Nhập mật khẩu của bạn"
+                                        size="large"
+                                    />
+                                </Form.Item>
+
+                                <div style={{ marginTop: 5 }}>
+                                    <Link href="/forgot">Quên mật khẩu?</Link>
+                                </div>
+
+                                <Form.Item style={{ marginTop: 24 }}>
+                                    <Button
+                                        type="primary"
+                                        htmlType="submit"
+                                        size="large"
+                                        block
+                                        loading={loginApi.isLoading}
+                                    >
+                                        Đăng nhập
+                                    </Button>
+                                </Form.Item>
+                            </Form>
+
+                            <Text
+                                style={{
+                                    textAlign: "center",
+                                    display: "block",
+                                    marginTop: 16,
+                                }}
+                            >
+                                Không có tài khoản?{" "}
+                                <Link
+                                    href="/signup"
+                                    style={{ fontWeight: 700 }}
+                                >
+                                    Đăng ký ngay
+                                </Link>
+                            </Text>
+                        </Card>
+                    </Col>
+                    <Col xs={0} sm={0} md={12} lg={14}>
+                        <div
+                            style={{
+                                minHeight: 600,
+                                backgroundSize: "cover",
+                                backgroundImage:
+                                    "url(https://images.unsplash.com/photo-1487875961445-47a00398c267?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1740&q=80)",
+                                backgroundPosition: "bottom",
+                            }}
+                        />
+                    </Col>
+                </Row>
+            </div>
         </main>
     );
 };

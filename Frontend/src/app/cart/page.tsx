@@ -1,29 +1,26 @@
 "use client";
 import {
-    ActionIcon,
-    Anchor,
+    Avatar,
     Badge,
     Button,
     Card,
-    Container,
-    Grid,
-    Group,
+    Col,
+    Divider,
+    Empty as AntEmpty,
+    Flex,
     Image,
-    LoadingOverlay,
-    NumberInput,
-    NumberInputHandlers,
+    InputNumber,
+    Modal,
     Radio,
-    RadioGroup,
-    ScrollArea,
+    Row,
     Skeleton,
-    Stack,
+    Space,
+    Spin,
     Table,
-    Text,
-    ThemeIcon,
-    Title,
+    Typography,
     Tooltip,
-    useMantineTheme,
-} from "@mantine/core";
+    theme,
+} from "antd";
 import React, { useEffect, useRef, useState } from "react";
 import {
     AlertTriangle,
@@ -40,7 +37,7 @@ import { useMutation, useQuery, useQueryClient } from "react-query";
 import Link from "next/link";
 
 import useAuthStore from "@/stores/authStore";
-import { useModals } from "@mantine/modals";
+
 import ApplicationConstants from "@/constants/ApplicationConstants";
 import ResourceURL from "@/constants/ResourceURL";
 import {
@@ -65,11 +62,14 @@ import PageConfigs from "@/utils/PageConfigs";
 import { NotificationType } from "../../models/Notification";
 import { PaymentMethodType } from "../../models/PaymentMethod";
 
+const { Title, Text, Link: AntLink } = Typography;
+const { useToken } = theme;
+
 function ClientCart() {
     useTitle();
 
-    const theme = useMantineTheme();
-    const modals = useModals();
+    const { token } = useToken();
+    const [modal, contextHolder] = Modal.useModal();
 
     const { user, currentPaymentMethod, updateCurrentPaymentMethod } =
         useAuthStore();
@@ -89,54 +89,42 @@ function ClientCart() {
         const PaymentMethodIcon =
             PageConfigs.paymentMethodIconMap[currentPaymentMethod];
 
-        modals.openConfirmModal({
-            size: "md",
-            overlayColor:
-                theme.colorScheme === "dark"
-                    ? theme.colors.dark[9]
-                    : theme.colors.gray[2],
-            overlayOpacity: 0.55,
-            overlayBlur: 0.5,
-            closeOnConfirm: false,
-            withCloseButton: false,
-            title: <strong>Thông báo xác nhận đặt mua</strong>,
-            children: (
-                <Stack>
+        modal.confirm({
+            title: "Thông báo xác nhận đặt mua",
+            width: 600,
+            content: (
+                <Flex vertical gap="small">
                     <Text>
                         Bạn có muốn đặt mua những sản phẩm đã chọn với hình thức
                         thanh toán sau?
                     </Text>
-                    <Group spacing="xs">
-                        <PaymentMethodIcon color={theme.colors.gray[5]} />
-                        <Text size="sm">
+                    <Space align="center" size="small">
+                        <PaymentMethodIcon color={token.colorTextSecondary} />
+                        <Text>
                             {
                                 PageConfigs.paymentMethodNameMap[
                                     currentPaymentMethod
                                 ]
                             }
                         </Text>
-                    </Group>
-                </Stack>
+                    </Space>
+                </Flex>
             ),
-            labels: {
-                cancel: "Hủy",
-                confirm: "Xác nhận đặt mua",
+            cancelText: "Hủy",
+            okText: "Xác nhận đặt mua",
+            onOk: () => {
+                modal.info({
+                    title: "Thông báo xác nhận đặt mua",
+                    width: 600,
+                    icon: null,
+                    closable: false,
+                    maskClosable: false,
+                    footer: null,
+                    content: (
+                        <ConfirmedOrder closeModal={() => Modal.destroyAll()} />
+                    ),
+                });
             },
-            confirmProps: { color: "blue" },
-            onConfirm: () =>
-                modals.openModal({
-                    size: "md",
-                    overlayColor:
-                        theme.colorScheme === "dark"
-                            ? theme.colors.dark[9]
-                            : theme.colors.gray[2],
-                    overlayOpacity: 0.55,
-                    overlayBlur: 0.5,
-                    closeOnClickOutside: false,
-                    withCloseButton: false,
-                    title: <strong>Thông báo xác nhận đặt mua</strong>,
-                    children: <ConfirmedOrder />,
-                }),
         });
     };
 
@@ -144,27 +132,32 @@ function ClientCart() {
 
     if (isLoading) {
         cartContentFragment = (
-            <Stack>
+            <Flex vertical gap="middle">
                 {Array(5)
                     .fill(0)
                     .map((_, index) => (
-                        <Skeleton key={index} height={50} radius="md" />
+                        <Skeleton key={index} active paragraph={{ rows: 1 }} />
                     ))}
-            </Stack>
+            </Flex>
         );
     }
 
     if (isError) {
         cartContentFragment = (
-            <Stack
-                my={theme.spacing.xl}
-                sx={{ alignItems: "center", color: theme.colors.pink[6] }}
+            <Flex
+                vertical
+                align="center"
+                justify="center"
+                style={{
+                    margin: `${token.marginXL}px 0`,
+                    color: token.colorError,
+                }}
             >
                 <AlertTriangle size={125} strokeWidth={1} />
-                <Text size="xl" weight={500}>
+                <Text style={{ fontSize: token.fontSizeXL, fontWeight: 500 }}>
                     Đã có lỗi xảy ra
                 </Text>
-            </Stack>
+            </Flex>
         );
     }
 
@@ -200,136 +193,317 @@ function ClientCart() {
         const totalPay = totalAmount + taxCost + shippingCost;
 
         cartContentFragment = (
-            <Grid>
-                <Grid.Col md={9}>
-                    <Card radius="md" shadow="sm" p={0}>
-                        <ScrollArea>
-                            <Table verticalSpacing="md" horizontalSpacing="lg">
-                                <thead>
-                                    <tr>
-                                        <th style={{ minWidth: 325 }}>
-                                            <Text
-                                                weight="initial"
-                                                size="sm"
-                                                color="dimmed"
-                                            >
-                                                Mặt hàng
-                                            </Text>
-                                        </th>
-                                        <th style={{ minWidth: 125 }}>
-                                            <Text
-                                                weight="initial"
-                                                size="sm"
-                                                color="dimmed"
-                                            >
-                                                Đơn giá
-                                            </Text>
-                                        </th>
-                                        <th style={{ minWidth: 150 }}>
-                                            <Text
-                                                weight="initial"
-                                                size="sm"
-                                                color="dimmed"
-                                            >
-                                                Số lượng
-                                            </Text>
-                                        </th>
-                                        <th style={{ minWidth: 125 }}>
-                                            <Text
-                                                weight="initial"
-                                                size="sm"
-                                                color="dimmed"
-                                            >
-                                                Thành tiền
-                                            </Text>
-                                        </th>
-                                        <th
+            <Row gutter={24}>
+                <Col md={18} xs={24}>
+                    <Card
+                        variant="outlined"
+                        style={{ borderRadius: token.borderRadiusLG }}
+                    >
+                        <div style={{ overflowX: "auto" }}>
+                            <Table
+                                dataSource={cart.cartItems}
+                                rowKey={(record) =>
+                                    record.cartItemVariant.variantId
+                                }
+                                pagination={false}
+                                locale={{
+                                    emptyText: (
+                                        <Flex
+                                            vertical
+                                            align="center"
+                                            justify="center"
                                             style={{
-                                                textAlign: "center",
-                                                minWidth: 80,
+                                                margin: `${token.marginXL}px 0`,
+                                                color: token.colorPrimary,
                                             }}
                                         >
+                                            <Marquee
+                                                size={125}
+                                                strokeWidth={1}
+                                            />
                                             <Text
-                                                weight="initial"
-                                                size="sm"
-                                                color="dimmed"
+                                                style={{
+                                                    fontSize: token.fontSizeXL,
+                                                    fontWeight: 500,
+                                                }}
                                             >
+                                                Chưa thêm mặt hàng nào
+                                            </Text>
+                                        </Flex>
+                                    ),
+                                }}
+                                columns={[
+                                    {
+                                        title: (
+                                            <Text type="secondary">
+                                                Mặt hàng
+                                            </Text>
+                                        ),
+                                        key: "item",
+                                        width: 325,
+                                        render: (_, cartItem) => (
+                                            <Space>
+                                                <Image
+                                                    width={65}
+                                                    height={65}
+                                                    src={
+                                                        cartItem.cartItemVariant
+                                                            .variantProduct
+                                                            .productThumbnail ||
+                                                        undefined
+                                                    }
+                                                    alt={
+                                                        cartItem.cartItemVariant
+                                                            .variantProduct
+                                                            .productName
+                                                    }
+                                                    style={{
+                                                        borderRadius:
+                                                            token.borderRadiusLG,
+                                                    }}
+                                                    preview={false}
+                                                />
+                                                <Flex vertical>
+                                                    <AntLink>
+                                                        <Link
+                                                            href={
+                                                                "/product/" +
+                                                                cartItem
+                                                                    .cartItemVariant
+                                                                    .variantProduct
+                                                                    .productSlug
+                                                            }
+                                                        >
+                                                            {
+                                                                cartItem
+                                                                    .cartItemVariant
+                                                                    .variantProduct
+                                                                    .productName
+                                                            }
+                                                        </Link>
+                                                    </AntLink>
+                                                    {cartItem.cartItemVariant
+                                                        .variantProperties && (
+                                                        <Flex vertical>
+                                                            {cartItem.cartItemVariant.variantProperties.content.map(
+                                                                (
+                                                                    variantProperty,
+                                                                ) => (
+                                                                    <Text
+                                                                        key={
+                                                                            variantProperty.id
+                                                                        }
+                                                                        type="secondary"
+                                                                        style={{
+                                                                            fontSize:
+                                                                                token.fontSizeSM,
+                                                                        }}
+                                                                    >
+                                                                        {
+                                                                            variantProperty.name
+                                                                        }
+                                                                        :{" "}
+                                                                        {
+                                                                            variantProperty.value
+                                                                        }
+                                                                    </Text>
+                                                                ),
+                                                            )}
+                                                        </Flex>
+                                                    )}
+                                                </Flex>
+                                            </Space>
+                                        ),
+                                    },
+                                    {
+                                        title: (
+                                            <Text type="secondary">
+                                                Đơn giá
+                                            </Text>
+                                        ),
+                                        key: "price",
+                                        width: 125,
+                                        render: (_, cartItem) => (
+                                            <Flex vertical>
+                                                <Text strong>
+                                                    {MiscUtils.formatPrice(
+                                                        MiscUtils.calculateDiscountedPrice(
+                                                            cartItem
+                                                                .cartItemVariant
+                                                                .variantPrice,
+                                                            cartItem
+                                                                .cartItemVariant
+                                                                .variantProduct
+                                                                .productPromotion
+                                                                ? cartItem
+                                                                      .cartItemVariant
+                                                                      .variantProduct
+                                                                      .productPromotion
+                                                                      .promotionPercent
+                                                                : 0,
+                                                        ),
+                                                    )}{" "}
+                                                    ₫
+                                                </Text>
+                                                {cartItem.cartItemVariant
+                                                    .variantProduct
+                                                    .productPromotion && (
+                                                    <Space size="small">
+                                                        <Text
+                                                            type="secondary"
+                                                            style={{
+                                                                fontSize:
+                                                                    token.fontSizeSM,
+                                                                textDecoration:
+                                                                    "line-through",
+                                                            }}
+                                                        >
+                                                            {MiscUtils.formatPrice(
+                                                                cartItem
+                                                                    .cartItemVariant
+                                                                    .variantPrice,
+                                                            )}{" "}
+                                                            ₫
+                                                        </Text>
+                                                        <Badge
+                                                            count={`-${cartItem.cartItemVariant.variantProduct.productPromotion.promotionPercent}%`}
+                                                            color="pink"
+                                                        />
+                                                    </Space>
+                                                )}
+                                            </Flex>
+                                        ),
+                                    },
+                                    {
+                                        title: (
+                                            <Text type="secondary">
+                                                Số lượng
+                                            </Text>
+                                        ),
+                                        key: "quantity",
+                                        width: 150,
+                                        render: (_, cartItem) => (
+                                            <CartItemQuantity
+                                                cartItem={cartItem}
+                                            />
+                                        ),
+                                    },
+                                    {
+                                        title: (
+                                            <Text type="secondary">
+                                                Thành tiền
+                                            </Text>
+                                        ),
+                                        key: "total",
+                                        width: 125,
+                                        render: (_, cartItem) => (
+                                            <Text
+                                                strong
+                                                style={{
+                                                    color: token.colorPrimary,
+                                                }}
+                                            >
+                                                {MiscUtils.formatPrice(
+                                                    cartItem.cartItemQuantity *
+                                                        MiscUtils.calculateDiscountedPrice(
+                                                            cartItem
+                                                                .cartItemVariant
+                                                                .variantPrice,
+                                                            cartItem
+                                                                .cartItemVariant
+                                                                .variantProduct
+                                                                .productPromotion
+                                                                ? cartItem
+                                                                      .cartItemVariant
+                                                                      .variantProduct
+                                                                      .productPromotion
+                                                                      .promotionPercent
+                                                                : 0,
+                                                        ),
+                                                ) + " ₫"}
+                                            </Text>
+                                        ),
+                                    },
+                                    {
+                                        title: (
+                                            <Text type="secondary">
                                                 Thao tác
                                             </Text>
-                                        </th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {cart.cartItems.map((cartItem) => (
-                                        <CartItemTableRow
-                                            key={
-                                                cartItem.cartItemVariant
-                                                    .variantId
-                                            }
-                                            cartItem={cartItem}
-                                        />
-                                    ))}
-                                    {cart.cartItems.length === 0 && (
-                                        <tr>
-                                            <td colSpan={5}>
-                                                <Stack
-                                                    my={theme.spacing.xl}
-                                                    sx={{
-                                                        alignItems: "center",
-                                                        color: theme.colors
-                                                            .blue[6],
-                                                    }}
-                                                >
-                                                    <Marquee
-                                                        size={125}
-                                                        strokeWidth={1}
-                                                    />
-                                                    <Text
-                                                        size="xl"
-                                                        weight={500}
-                                                    >
-                                                        Chưa thêm mặt hàng nào
-                                                    </Text>
-                                                </Stack>
-                                            </td>
-                                        </tr>
-                                    )}
-                                </tbody>
-                            </Table>
-                        </ScrollArea>
+                                        ),
+                                        key: "actions",
+                                        width: 80,
+                                        render: (_, cartItem) => (
+                                            <Button
+                                                type="primary"
+                                                danger
+                                                shape="circle"
+                                                icon={<Trash size={16} />}
+                                                onClick={() =>
+                                                    handleDeleteCartItem(
+                                                        cartItem,
+                                                    )
+                                                }
+                                                size="small"
+                                                style={{ margin: "auto" }}
+                                            />
+                                        ),
+                                        align: "center",
+                                    },
+                                ]}
+                            />
+                        </div>
                     </Card>
-                </Grid.Col>
+                </Col>
 
-                <Grid.Col md={3}>
-                    <Stack>
-                        <Card radius="md" shadow="sm" px="lg" pt="md" pb="lg">
-                            <Stack spacing="xs">
-                                <Group position="apart">
-                                    <Text weight={500} color="dimmed">
+                <Col md={6} xs={24}>
+                    <Flex vertical gap="middle">
+                        <Card
+                            variant="outlined"
+                            style={{ borderRadius: token.borderRadiusLG }}
+                        >
+                            <Flex vertical gap="small">
+                                <Flex justify="space-between" align="center">
+                                    <Text strong type="secondary">
                                         Giao tới
                                     </Text>
-                                    <Button size="xs" variant="light" compact>
+                                    <Button type="link" size="small">
                                         <Link href="/user/setting/personal">
                                             Thay đổi
                                         </Link>
                                     </Button>
-                                </Group>
-                                <Stack spacing={3.5}>
-                                    <Text weight={500} size="sm">
-                                        {user?.fullname}
-                                        <ThemeIcon
-                                            size="xs"
-                                            ml="xs"
-                                            color="teal"
-                                            title="Địa chỉ của người dùng đặt mua"
+                                </Flex>
+                                <Flex vertical>
+                                    <Flex align="center">
+                                        <Text
+                                            strong
+                                            style={{
+                                                fontSize: token.fontSizeSM,
+                                            }}
                                         >
-                                            <Home size={12} />
-                                        </ThemeIcon>
-                                    </Text>
-                                    <Text weight={500} size="sm">
+                                            {user?.fullname}
+                                        </Text>
+                                        <Tooltip title="Địa chỉ của người dùng đặt mua">
+                                            <Avatar
+                                                size="small"
+                                                style={{
+                                                    backgroundColor:
+                                                        token.colorSuccess,
+                                                    marginLeft: token.marginXS,
+                                                }}
+                                                icon={<Home size={12} />}
+                                            />
+                                        </Tooltip>
+                                    </Flex>
+                                    <Text
+                                        strong
+                                        style={{ fontSize: token.fontSizeSM }}
+                                    >
                                         {user?.phone}
                                     </Text>
-                                    <Text size="sm" color="dimmed">
+                                    <Text
+                                        type="secondary"
+                                        style={{ fontSize: token.fontSizeSM }}
+                                    >
                                         {[
                                             user?.address.line,
                                             user?.address.ward?.name,
@@ -339,190 +513,210 @@ function ClientCart() {
                                             .filter(Boolean)
                                             .join(", ")}
                                     </Text>
-                                </Stack>
-                            </Stack>
+                                </Flex>
+                            </Flex>
                         </Card>
 
-                        <Card radius="md" shadow="sm" px="lg" pt="md" pb="lg">
-                            <Stack spacing="xs">
-                                <Text weight={500} color="dimmed">
+                        <Card
+                            variant="outlined"
+                            style={{ borderRadius: token.borderRadiusLG }}
+                        >
+                            <Flex vertical gap="small">
+                                <Text strong type="secondary">
                                     Hình thức giao hàng
                                 </Text>
-                                <RadioGroup
-                                    value="ghn"
-                                    orientation="vertical"
-                                    size="sm"
-                                >
-                                    <Radio
-                                        value="ghn"
-                                        label={
-                                            <Image
-                                                src={MiscUtils.ghnLogoPath}
-                                                styles={{
-                                                    image: { maxWidth: 170 },
-                                                }}
-                                            />
-                                        }
-                                    />
-                                </RadioGroup>
-                            </Stack>
+                                <Radio.Group value="ghn">
+                                    <Radio value="ghn">
+                                        <Image
+                                            src={MiscUtils.ghnLogoPath}
+                                            preview={false}
+                                            style={{ maxWidth: 170 }}
+                                        />
+                                    </Radio>
+                                </Radio.Group>
+                            </Flex>
                         </Card>
 
-                        <Card radius="md" shadow="sm" px="lg" pt="md" pb="lg">
-                            <Stack spacing="xs">
-                                <Text weight={500} color="dimmed">
+                        <Card
+                            variant="outlined"
+                            style={{ borderRadius: token.borderRadiusLG }}
+                        >
+                            <Flex vertical gap="small">
+                                <Text strong type="secondary">
                                     Hình thức thanh toán
                                 </Text>
-                                <RadioGroup
+                                <Radio.Group
                                     value={currentPaymentMethod}
-                                    onChange={updateCurrentPaymentMethod}
-                                    orientation="vertical"
-                                    size="sm"
+                                    onChange={(e) =>
+                                        updateCurrentPaymentMethod(
+                                            e.target.value,
+                                        )
+                                    }
                                 >
-                                    {paymentMethodResponses.content.map(
-                                        (paymentMethod) => {
-                                            const PaymentMethodIcon =
-                                                PageConfigs
-                                                    .paymentMethodIconMap[
-                                                    paymentMethod
-                                                        .paymentMethodCode
-                                                ];
+                                    <Flex vertical>
+                                        {paymentMethodResponses.content.map(
+                                            (paymentMethod) => {
+                                                const PaymentMethodIcon =
+                                                    PageConfigs
+                                                        .paymentMethodIconMap[
+                                                        paymentMethod
+                                                            .paymentMethodCode
+                                                    ];
 
-                                            return (
-                                                <Radio
-                                                    key={
-                                                        paymentMethod.paymentMethodId
-                                                    }
-                                                    value={
-                                                        paymentMethod.paymentMethodCode
-                                                    }
-                                                    label={
-                                                        <Group spacing="xs">
+                                                return (
+                                                    <Radio
+                                                        key={
+                                                            paymentMethod.paymentMethodId
+                                                        }
+                                                        value={
+                                                            paymentMethod.paymentMethodCode
+                                                        }
+                                                    >
+                                                        <Space size="small">
                                                             <PaymentMethodIcon
                                                                 size={24}
                                                             />
-                                                            <Text size="sm">
+                                                            <Text
+                                                                style={{
+                                                                    fontSize:
+                                                                        token.fontSizeSM,
+                                                                }}
+                                                            >
                                                                 {
                                                                     paymentMethod.paymentMethodName
                                                                 }
                                                             </Text>
-                                                        </Group>
-                                                    }
-                                                />
-                                            );
-                                        },
-                                    )}
-                                </RadioGroup>
-                            </Stack>
+                                                        </Space>
+                                                    </Radio>
+                                                );
+                                            },
+                                        )}
+                                    </Flex>
+                                </Radio.Group>
+                            </Flex>
                         </Card>
 
-                        <Card radius="md" shadow="sm" p="lg">
-                            <Stack spacing="xs">
-                                <Stack spacing="sm">
-                                    <Group position="apart">
-                                        <Text size="sm" color="dimmed">
-                                            Tạm tính
-                                        </Text>
-                                        <Text
-                                            size="sm"
-                                            sx={{ textAlign: "right" }}
-                                        >
-                                            {MiscUtils.formatPrice(
-                                                totalAmount,
-                                            ) + "\u00A0₫"}
-                                        </Text>
-                                    </Group>
-                                    <Group position="apart">
-                                        <Text size="sm" color="dimmed">
-                                            Thuế (10%)
-                                        </Text>
-                                        <Text
-                                            size="sm"
-                                            sx={{ textAlign: "right" }}
-                                        >
-                                            {MiscUtils.formatPrice(taxCost) +
-                                                "\u00A0₫"}
-                                        </Text>
-                                    </Group>
-                                    <Group position="apart">
-                                        <Group spacing="xs">
-                                            <Text size="sm" weight={500}>
-                                                Tổng tiền
-                                            </Text>
-                                            <Tooltip
-                                                label="Chưa tính phí vận chuyển"
-                                                withArrow
-                                                sx={{ height: 20 }}
-                                            >
-                                                <ThemeIcon
-                                                    variant="light"
-                                                    color="blue"
-                                                    size="sm"
-                                                >
-                                                    <InfoCircle size={14} />
-                                                </ThemeIcon>
-                                            </Tooltip>
-                                        </Group>
-                                        <Text
-                                            size="lg"
-                                            weight={700}
-                                            color="blue"
-                                            sx={{ textAlign: "right" }}
-                                        >
-                                            {MiscUtils.formatPrice(totalPay) +
-                                                "\u00A0₫"}
-                                        </Text>
-                                    </Group>
-                                </Stack>
-                            </Stack>
+                        <Card
+                            variant="outlined"
+                            style={{ borderRadius: token.borderRadiusLG }}
+                        >
+                            <Flex vertical gap="small">
+                                <Flex justify="space-between">
+                                    <Text
+                                        type="secondary"
+                                        style={{ fontSize: token.fontSizeSM }}
+                                    >
+                                        Tạm tính
+                                    </Text>
+                                    <Text
+                                        style={{
+                                            fontSize: token.fontSizeSM,
+                                            textAlign: "right",
+                                        }}
+                                    >
+                                        {MiscUtils.formatPrice(totalAmount) +
+                                            "\u00A0₫"}
+                                    </Text>
+                                </Flex>
+                                <Flex justify="space-between">
+                                    <Text
+                                        type="secondary"
+                                        style={{ fontSize: token.fontSizeSM }}
+                                    >
+                                        Thuế (10%)
+                                    </Text>
+                                    <Text
+                                        style={{
+                                            fontSize: token.fontSizeSM,
+                                            textAlign: "right",
+                                        }}
+                                    >
+                                        {MiscUtils.formatPrice(taxCost) +
+                                            "\u00A0₫"}
+                                    </Text>
+                                </Flex>
+                                <Flex justify="space-between" align="center">
+                                    <Space size="small">
+                                        <Text strong>Tổng tiền</Text>
+                                        <Tooltip title="Chưa tính phí vận chuyển">
+                                            <Avatar
+                                                size="small"
+                                                style={{
+                                                    backgroundColor:
+                                                        token.colorPrimary,
+                                                }}
+                                                icon={<InfoCircle size={14} />}
+                                            />
+                                        </Tooltip>
+                                    </Space>
+                                    <Text
+                                        strong
+                                        style={{
+                                            fontSize: token.fontSizeLG,
+                                            color: token.colorPrimary,
+                                            textAlign: "right",
+                                        }}
+                                    >
+                                        {MiscUtils.formatPrice(totalPay) +
+                                            "\u00A0₫"}
+                                    </Text>
+                                </Flex>
+                            </Flex>
                         </Card>
 
                         <Button
-                            size="lg"
-                            leftIcon={<ShoppingCart />}
+                            size="large"
+                            type="primary"
+                            icon={<ShoppingCart />}
                             onClick={handleOrderButton}
                             disabled={cart.cartItems.length === 0}
+                            block
                         >
                             Đặt mua
                         </Button>
-                    </Stack>
-                </Grid.Col>
-            </Grid>
+                    </Flex>
+                </Col>
+            </Row>
         );
     }
 
     return (
         <main>
-            <Container size="xl">
-                <Stack spacing="lg">
-                    <Group spacing="xs">
+            {contextHolder}
+            <div
+                style={{
+                    maxWidth: 1200,
+                    margin: "0 auto",
+                    padding: `0 ${token.paddingLG}px`,
+                }}
+            >
+                <Flex vertical gap="large">
+                    <Space>
                         <ShoppingCart />
-                        <Title order={2}>Giỏ hàng</Title>
-                    </Group>
+                        <Title level={2}>Giỏ hàng</Title>
+                    </Space>
 
                     {cartContentFragment}
-                </Stack>
-            </Container>
+                </Flex>
+            </div>
         </main>
     );
 }
 
-function CartItemTableRow({
+function CartItemQuantity({
     cartItem,
 }: {
     cartItem: ClientCartVariantResponse;
 }) {
-    const theme = useMantineTheme();
-    const modals = useModals();
-    const cartItemQuantityInputHandlers = useRef<NumberInputHandlers>(null);
     const { currentCartId, user } = useAuthStore();
     const saveCartApi = useSaveCartApi();
-    const deleteCartItemsApi = useDeleteCartItemsApi();
+    const { token } = useToken();
 
-    const handleCartItemQuantityInput = (cartItemQuantity: number) => {
+    const handleCartItemQuantityInput = (cartItemQuantity: number | null) => {
         if (
             user &&
             cartItemQuantity !== cartItem.cartItemQuantity &&
+            cartItemQuantity &&
             cartItemQuantity <= cartItem.cartItemVariant.variantInventory
         ) {
             const cartRequest: ClientCartRequest = {
@@ -541,200 +735,73 @@ function CartItemTableRow({
         }
     };
 
-    const handleDeleteCartItemButton = () => {
-        modals.openConfirmModal({
-            size: "xs",
-            overlayColor:
-                theme.colorScheme === "dark"
-                    ? theme.colors.dark[9]
-                    : theme.colors.gray[2],
-            overlayOpacity: 0.55,
-            overlayBlur: 3,
-            closeOnClickOutside: false,
-            title: <strong>Xóa mặt hàng</strong>,
-            children: <Text size="sm">Bạn có muốn xóa mặt hàng này?</Text>,
-            labels: {
-                cancel: "Không xóa",
-                confirm: "Xóa",
-            },
-            confirmProps: { color: "red" },
-            onConfirm: () =>
-                deleteCartItemsApi.mutate([
-                    {
-                        cartId: currentCartId as number,
-                        variantId: cartItem.cartItemVariant.variantId,
-                    },
-                ]),
-        });
-    };
-
     return (
-        <tr key={cartItem.cartItemVariant.variantId}>
-            <td>
-                <Group spacing="xs">
-                    <Image
-                        radius="md"
-                        width={65}
-                        height={65}
-                        src={
-                            cartItem.cartItemVariant.variantProduct
-                                .productThumbnail || undefined
-                        }
-                        alt={
-                            cartItem.cartItemVariant.variantProduct.productName
-                        }
-                    />
-                    <Stack spacing={3.5}>
-                        <Anchor size="sm">
-                            <Link
-                                href={
-                                    "/product/" +
-                                    cartItem.cartItemVariant.variantProduct
-                                        .productSlug
-                                }
-                            >
-                                {
-                                    cartItem.cartItemVariant.variantProduct
-                                        .productName
-                                }
-                            </Link>
-                        </Anchor>
-                        {cartItem.cartItemVariant.variantProperties && (
-                            <Stack spacing={1.5}>
-                                {cartItem.cartItemVariant.variantProperties.content.map(
-                                    (variantProperty) => (
-                                        <Text
-                                            key={variantProperty.id}
-                                            size="xs"
-                                            color="dimmed"
-                                        >
-                                            {variantProperty.name}:{" "}
-                                            {variantProperty.value}
-                                        </Text>
-                                    ),
-                                )}
-                            </Stack>
-                        )}
-                    </Stack>
-                </Group>
-            </td>
-            <td>
-                <Stack spacing={2.5}>
-                    <Text weight={500} size="sm">
-                        {MiscUtils.formatPrice(
-                            MiscUtils.calculateDiscountedPrice(
-                                cartItem.cartItemVariant.variantPrice,
-                                cartItem.cartItemVariant.variantProduct
-                                    .productPromotion
-                                    ? cartItem.cartItemVariant.variantProduct
-                                          .productPromotion.promotionPercent
-                                    : 0,
-                            ),
-                        )}{" "}
-                        ₫
-                    </Text>
-                    {cartItem.cartItemVariant.variantProduct
-                        .productPromotion && (
-                        <Group spacing="xs">
-                            <Text
-                                size="xs"
-                                color="dimmed"
-                                sx={{ textDecoration: "line-through" }}
-                            >
-                                {MiscUtils.formatPrice(
-                                    cartItem.cartItemVariant.variantPrice,
-                                )}{" "}
-                                ₫
-                            </Text>
-                            <Badge color="pink" variant="filled" size="sm">
-                                -
-                                {
-                                    cartItem.cartItemVariant.variantProduct
-                                        .productPromotion.promotionPercent
-                                }
-                                %
-                            </Badge>
-                        </Group>
-                    )}
-                </Stack>
-            </td>
-            <td>
-                <Stack spacing={3.5}>
-                    <Group spacing={5}>
-                        <ActionIcon
-                            size={30}
-                            variant="default"
-                            onClick={() =>
-                                cartItemQuantityInputHandlers.current?.decrement()
-                            }
-                        >
-                            –
-                        </ActionIcon>
-
-                        <NumberInput
-                            hideControls
-                            value={cartItem.cartItemQuantity}
-                            onChange={(value) =>
-                                handleCartItemQuantityInput(value || 1)
-                            }
-                            handlersRef={cartItemQuantityInputHandlers}
-                            max={cartItem.cartItemVariant.variantInventory}
-                            min={1}
-                            size="xs"
-                            styles={{
-                                input: { width: 45, textAlign: "center" },
-                            }}
-                        />
-
-                        <ActionIcon
-                            size={30}
-                            variant="default"
-                            onClick={() =>
-                                cartItemQuantityInputHandlers.current?.increment()
-                            }
-                        >
-                            +
-                        </ActionIcon>
-                    </Group>
-                    <Text size="xs" color="dimmed">
-                        Tồn kho: {cartItem.cartItemVariant.variantInventory}
-                    </Text>
-                </Stack>
-            </td>
-            <td>
-                <Text weight={500} size="sm" color="blue">
-                    {MiscUtils.formatPrice(
-                        cartItem.cartItemQuantity *
-                            MiscUtils.calculateDiscountedPrice(
-                                cartItem.cartItemVariant.variantPrice,
-                                cartItem.cartItemVariant.variantProduct
-                                    .productPromotion
-                                    ? cartItem.cartItemVariant.variantProduct
-                                          .productPromotion.promotionPercent
-                                    : 0,
-                            ),
-                    ) + " ₫"}
-                </Text>
-            </td>
-            <td>
-                <ActionIcon
-                    color="red"
-                    variant="outline"
-                    size={24}
-                    title="Xóa"
-                    onClick={handleDeleteCartItemButton}
-                    sx={{ margin: "auto" }}
+        <Flex vertical>
+            <Space size="small">
+                <Button
+                    size="small"
+                    onClick={() =>
+                        handleCartItemQuantityInput(
+                            cartItem.cartItemQuantity - 1,
+                        )
+                    }
+                    disabled={cartItem.cartItemQuantity <= 1}
                 >
-                    <Trash size={16} />
-                </ActionIcon>
-            </td>
-        </tr>
+                    –
+                </Button>
+                <InputNumber
+                    size="small"
+                    min={1}
+                    max={cartItem.cartItemVariant.variantInventory}
+                    value={cartItem.cartItemQuantity}
+                    onChange={handleCartItemQuantityInput}
+                    style={{ width: 45, textAlign: "center" }}
+                    controls={false}
+                />
+                <Button
+                    size="small"
+                    onClick={() =>
+                        handleCartItemQuantityInput(
+                            cartItem.cartItemQuantity + 1,
+                        )
+                    }
+                    disabled={
+                        cartItem.cartItemQuantity >=
+                        cartItem.cartItemVariant.variantInventory
+                    }
+                >
+                    +
+                </Button>
+            </Space>
+            <Text type="secondary" style={{ fontSize: token.fontSizeSM }}>
+                Tồn kho: {cartItem.cartItemVariant.variantInventory}
+            </Text>
+        </Flex>
     );
 }
 
-function ConfirmedOrder() {
-    const theme = useMantineTheme();
-    const modals = useModals();
+function handleDeleteCartItem(cartItem: ClientCartVariantResponse) {
+    const deleteCartItemsApi = useDeleteCartItemsApi();
+    const { currentCartId } = useAuthStore();
+
+    Modal.confirm({
+        title: "Xóa mặt hàng",
+        content: "Bạn có muốn xóa mặt hàng này?",
+        okText: "Xóa",
+        okButtonProps: { danger: true },
+        cancelText: "Không xóa",
+        onOk: () =>
+            deleteCartItemsApi.mutate([
+                {
+                    cartId: currentCartId as number,
+                    variantId: cartItem.cartItemVariant.variantId,
+                },
+            ]),
+    });
+}
+
+function ConfirmedOrder({ closeModal }: { closeModal: () => void }) {
+    const { token } = useToken();
 
     const {
         mutate: createClientOrder,
@@ -799,23 +866,28 @@ function ConfirmedOrder() {
 
     if (isError) {
         contentFragment = (
-            <Stack justify="space-between" sx={{ height: "100%" }}>
-                <Stack
+            <Flex
+                vertical
+                align="center"
+                justify="space-between"
+                style={{ minHeight: 200 }}
+            >
+                <Flex
+                    vertical
                     align="center"
-                    sx={{ alignItems: "center", color: theme.colors.pink[6] }}
+                    style={{ color: token.colorError }}
                 >
                     <AlertTriangle size={100} strokeWidth={1} />
-                    <Text weight={500}>Đã có lỗi xảy ra</Text>
-                </Stack>
+                    <Text strong>Đã có lỗi xảy ra</Text>
+                </Flex>
                 <Button
-                    fullWidth
-                    variant="default"
-                    onClick={modals.closeAll}
-                    mt="md"
+                    style={{ marginTop: token.marginMD }}
+                    onClick={closeModal}
+                    block
                 >
                     Đóng
                 </Button>
-            </Stack>
+            </Flex>
         );
     }
 
@@ -825,35 +897,38 @@ function ConfirmedOrder() {
             PaymentMethodType.CASH
     ) {
         contentFragment = (
-            <Stack justify="space-between" sx={{ height: "100%" }}>
-                <Stack
+            <Flex
+                vertical
+                align="center"
+                justify="space-between"
+                style={{ minHeight: 200 }}
+            >
+                <Flex
+                    vertical
                     align="center"
-                    sx={{ alignItems: "center", color: theme.colors.teal[6] }}
+                    style={{ color: token.colorSuccess }}
                 >
                     <Check size={100} strokeWidth={1} />
                     <Text>
                         <span>Đơn hàng </span>
-                        <Anchor onClick={modals.closeAll} weight={500}>
-                            <Link
-                                href={
-                                    "/order/detail/" +
-                                    clientConfirmedOrderResponse.orderCode
-                                }
-                            ></Link>
-                            {clientConfirmedOrderResponse.orderCode}
-                        </Anchor>
+                        <Link
+                            href={`/order/detail/${clientConfirmedOrderResponse.orderCode}`}
+                        >
+                            <AntLink strong>
+                                {clientConfirmedOrderResponse.orderCode}
+                            </AntLink>
+                        </Link>
                         <span> đã được tạo!</span>
                     </Text>
-                </Stack>
+                </Flex>
                 <Button
-                    fullWidth
-                    variant="default"
-                    onClick={modals.closeAll}
-                    mt="md"
+                    onClick={closeModal}
+                    style={{ marginTop: token.marginMD }}
+                    block
                 >
                     Đóng
                 </Button>
-            </Stack>
+            </Flex>
         );
     }
 
@@ -863,27 +938,37 @@ function ConfirmedOrder() {
             PaymentMethodType.PAYPAL
     ) {
         contentFragment = (
-            <Stack justify="space-between" sx={{ height: "100%" }}>
-                <Stack
+            <Flex
+                vertical
+                align="center"
+                justify="space-between"
+                style={{ minHeight: 200 }}
+            >
+                <Flex
+                    vertical
                     align="center"
-                    sx={{ alignItems: "center", color: theme.colors.teal[6] }}
+                    style={{ color: token.colorSuccess }}
                 >
                     <Check size={100} strokeWidth={1} />
-                    <Text sx={{ textAlign: "center" }}>
+                    <Text style={{ textAlign: "center" }}>
                         <span>Đơn hàng </span>
-                        <Text weight={500} component="span">
+                        <Text strong>
                             {clientConfirmedOrderResponse.orderCode}
                         </Text>
                         <span> đã được tạo!</span>
                     </Text>
-                    <Text color="dimmed" size="sm">
+                    <Text
+                        type="secondary"
+                        style={{ fontSize: token.fontSizeSM }}
+                    >
                         Hoàn tất thanh toán PayPal bằng cách bấm nút dưới
                     </Text>
-                </Stack>
+                </Flex>
                 {checkoutPaypalStatus === "none" ? (
                     <Button
-                        fullWidth
-                        mt="md"
+                        type="primary"
+                        block
+                        style={{ marginTop: token.marginMD }}
                         onClick={() =>
                             handlePaypalCheckoutButton(
                                 clientConfirmedOrderResponse.orderPaypalCheckoutLink ||
@@ -895,28 +980,28 @@ function ConfirmedOrder() {
                     </Button>
                 ) : checkoutPaypalStatus === "success" ? (
                     <Button
-                        fullWidth
-                        mt="md"
-                        color="teal"
-                        leftIcon={<Check />}
-                        onClick={modals.closeAll}
+                        type="primary"
+                        block
+                        icon={<Check />}
+                        style={{ marginTop: token.marginMD }}
+                        onClick={closeModal}
                     >
                         Đã thanh toán thành công
                     </Button>
                 ) : (
-                    <Stack spacing="sm">
+                    <Flex vertical gap="small" style={{ width: "100%" }}>
                         <Button
-                            fullWidth
-                            mt="md"
-                            variant="outline"
-                            color="pink"
-                            leftIcon={<X size={16} />}
-                            onClick={modals.closeAll}
+                            danger
+                            block
+                            style={{ marginTop: token.marginMD }}
+                            icon={<X size={16} />}
+                            onClick={closeModal}
                         >
                             Đã hủy thanh toán. Đóng hộp thoại này.
                         </Button>
                         <Button
-                            fullWidth
+                            type="primary"
+                            block
                             onClick={() =>
                                 handlePaypalCheckoutButton(
                                     clientConfirmedOrderResponse.orderPaypalCheckoutLink ||
@@ -926,17 +1011,22 @@ function ConfirmedOrder() {
                         >
                             Thanh toán PayPal lần nữa
                         </Button>
-                    </Stack>
+                    </Flex>
                 )}
-            </Stack>
+            </Flex>
         );
     }
 
     return (
-        <Stack sx={{ minHeight: isLoading ? 200 : "unset" }}>
-            <LoadingOverlay visible={isLoading} />
+        <div
+            style={{
+                position: "relative",
+                minHeight: isLoading ? 200 : "auto",
+            }}
+        >
+            {isLoading && <Spin />}
             {contentFragment}
-        </Stack>
+        </div>
     );
 }
 
