@@ -1,6 +1,6 @@
 package backend.osiris.repository.waybill;
 
-import backend.osiris.dto.statitic.StatisticResource;
+import backend.osiris.dto.statistic.StatisticResource;
 import backend.osiris.entity.waybill.Waybill;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.criteria.CriteriaBuilder;
