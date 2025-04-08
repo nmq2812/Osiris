@@ -1,17 +1,15 @@
 "use client";
 import React, { Dispatch, SetStateAction } from "react";
 import {
-    Anchor,
-    Grid,
-    Group,
-    ScrollArea,
-    Skeleton,
-    Stack,
+    Typography,
+    Row,
+    Col,
+    Space,
+    Flex,
     Tabs,
-    Text,
-    ThemeIcon,
-    useMantineTheme,
-} from "@mantine/core";
+    Skeleton,
+    Avatar,
+} from "antd";
 
 import { AlertTriangle } from "tabler-icons-react";
 import ResourceURL from "@/constants/ResourceURL";
@@ -23,13 +21,13 @@ import PageConfigs from "@/utils/PageConfigs";
 import { useQuery } from "react-query";
 import { useRouter } from "next/navigation";
 
+const { Link, Text } = Typography;
+
 function CategoryMenu({
     setOpenedCategoryMenu,
 }: {
     setOpenedCategoryMenu: Dispatch<SetStateAction<boolean>>;
 }) {
-    const theme = useMantineTheme();
-
     const route = useRouter();
 
     const {
@@ -49,27 +47,28 @@ function CategoryMenu({
 
     if (isLoadingCategoryResponses) {
         return (
-            <Stack>
+            <Flex vertical>
                 {Array(5)
                     .fill(0)
                     .map((_, index) => (
-                        <Skeleton key={index} height={50} radius="md" />
+                        <Skeleton key={index} active paragraph={{ rows: 1 }} />
                     ))}
-            </Stack>
+            </Flex>
         );
     }
 
     if (isErrorCategoryResponses) {
         return (
-            <Stack
-                my={theme.spacing.xl}
-                sx={{ alignItems: "center", color: theme.colors.pink[6] }}
+            <Flex
+                vertical
+                align="center"
+                style={{ margin: "24px 0", color: "#eb2f96" }}
             >
                 <AlertTriangle size={125} strokeWidth={1} />
-                <Text size="xl" weight={500}>
+                <Text style={{ fontSize: 20, fontWeight: 500 }}>
                     Đã có lỗi xảy ra
                 </Text>
-            </Stack>
+            </Flex>
         );
     }
 
@@ -80,43 +79,28 @@ function CategoryMenu({
 
     return (
         <Tabs
-            variant="pills"
-            tabPadding="md"
-            styles={{
-                // TODO: Refactor !important
-                tabActive: {
-                    color:
-                        (theme.colorScheme === "dark"
-                            ? theme.colors.blue[2]
-                            : theme.colors.blue[6]) + "!important",
-                    backgroundColor:
-                        (theme.colorScheme === "dark"
-                            ? theme.fn.rgba(theme.colors.blue[8], 0.35)
-                            : theme.colors.blue[0]) + "!important",
-                },
-            }}
-        >
-            {categoryResponses?.content.map((firstCategory, index) => {
+            type="card"
+            items={categoryResponses?.content.map((firstCategory, index) => {
                 const FirstCategoryIcon =
                     PageConfigs.categorySlugIconMap[firstCategory.categorySlug];
 
-                return (
-                    <Tabs.Tab
-                        key={index}
-                        label={firstCategory.categoryName}
-                        icon={<FirstCategoryIcon size={14} />}
-                        placeholder=""
-                        onPointerEnterCapture={() => {}}
-                        onPointerLeaveCapture={() => {}}
-                    >
-                        <Stack>
-                            <Group>
-                                <ThemeIcon variant="light" size={42}>
-                                    <FirstCategoryIcon />
-                                </ThemeIcon>
-                                <Anchor
-                                    sx={{ fontSize: theme.fontSizes.sm * 2 }}
-                                    weight={500}
+                return {
+                    key: String(index),
+                    label: (
+                        <Space>
+                            <FirstCategoryIcon size={14} />
+                            <span>{firstCategory.categoryName}</span>
+                        </Space>
+                    ),
+                    children: (
+                        <Flex vertical>
+                            <Space>
+                                <Avatar
+                                    size={42}
+                                    icon={<FirstCategoryIcon />}
+                                />
+                                <Link
+                                    style={{ fontSize: 16, fontWeight: 500 }}
                                     onClick={() =>
                                         handleAnchor(
                                             "/category/" +
@@ -125,24 +109,26 @@ function CategoryMenu({
                                     }
                                 >
                                     {firstCategory.categoryName}
-                                </Anchor>
-                            </Group>
-                            <ScrollArea style={{ height: 325 }}>
-                                <Grid sx={{ width: "100%" }}>
+                                </Link>
+                            </Space>
+                            <div style={{ height: 325, overflow: "auto" }}>
+                                <Row gutter={[16, 16]}>
                                     {firstCategory.categoryChildren.map(
                                         (secondCategory, index) => (
-                                            <Grid.Col
-                                                span={6}
-                                                xs={4}
-                                                sm={3}
-                                                md={2.4}
-                                                mb="sm"
+                                            <Col
+                                                span={12}
+                                                xs={12}
+                                                sm={8}
+                                                md={6}
+                                                lg={4}
                                                 key={index}
                                             >
-                                                <Stack spacing="xs">
-                                                    <Anchor
-                                                        weight={500}
-                                                        color="pink"
+                                                <Flex vertical gap="small">
+                                                    <Link
+                                                        style={{
+                                                            fontWeight: 500,
+                                                        }}
+                                                        type="danger"
                                                         onClick={() =>
                                                             handleAnchor(
                                                                 "/category/" +
@@ -153,13 +139,13 @@ function CategoryMenu({
                                                         {
                                                             secondCategory.categoryName
                                                         }
-                                                    </Anchor>
+                                                    </Link>
                                                     {secondCategory.categoryChildren.map(
                                                         (
                                                             thirdCategory,
                                                             index,
                                                         ) => (
-                                                            <Anchor
+                                                            <Link
                                                                 key={index}
                                                                 onClick={() =>
                                                                     handleAnchor(
@@ -171,20 +157,20 @@ function CategoryMenu({
                                                                 {
                                                                     thirdCategory.categoryName
                                                                 }
-                                                            </Anchor>
+                                                            </Link>
                                                         ),
                                                     )}
-                                                </Stack>
-                                            </Grid.Col>
+                                                </Flex>
+                                            </Col>
                                         ),
                                     )}
-                                </Grid>
-                            </ScrollArea>
-                        </Stack>
-                    </Tabs.Tab>
-                );
+                                </Row>
+                            </div>
+                        </Flex>
+                    ),
+                };
             })}
-        </Tabs>
+        />
     );
 }
 
