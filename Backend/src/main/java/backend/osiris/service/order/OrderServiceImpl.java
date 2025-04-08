@@ -65,7 +65,7 @@ public class OrderServiceImpl implements OrderService {
     private String ghnToken;
     @Value("${osiris.app.shipping.ghnShopId}")
     private String ghnShopId;
-    @Value("${osirs.app.shipping.ghnApiPath}")
+    @Value("${osiris.app.shipping.ghnApiPath}")
     private String ghnApiPath;
 
     private final OrderRepository orderRepository;
@@ -227,7 +227,7 @@ public class OrderServiceImpl implements OrderService {
                 ));
 
                 paypalRequest.setApplicationContext(new PaypalRequest.PayPalAppContext()
-                        .setBrandName("Electro")
+                        .setBrandName("Osiris")
                         .setLandingPage(PaymentLandingPage.BILLING)
                         .setReturnUrl(AppConstants.BACKEND_HOST + "/client-api/orders/success")
                         .setCancelUrl(AppConstants.BACKEND_HOST + "/client-api/orders/cancel"));

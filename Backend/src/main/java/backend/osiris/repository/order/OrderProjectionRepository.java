@@ -1,6 +1,6 @@
 package backend.osiris.repository.order;
 
-import backend.osiris.dto.statitic.StatisticResource;
+import backend.osiris.dto.statistic.StatisticResource;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.CriteriaQuery;
