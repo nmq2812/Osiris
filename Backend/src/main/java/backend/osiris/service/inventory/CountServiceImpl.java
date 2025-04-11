@@ -22,12 +22,12 @@ public class CountServiceImpl implements CountService {
 
     @Override
     public ListResponse<CountResponse> findAll(int page, int size, String sort, String filter, String search, boolean all) {
-        return defaultFindAll(page, size, sort, filter, search, all, SearchFields.PRODUCT_INVENTORY_LIMIT, countRepository, countMapper);
+        return defaultFindAll(page, size, sort, filter, search, all, SearchFields.COUNT, countRepository, countMapper);
     }
 
     @Override
     public CountResponse findById(Long id) {
-        return defaultFindById(id, countRepository, countMapper, ResourceName.PRODUCT_INVENTORY_LIMIT);
+        return defaultFindById(id, countRepository, countMapper, ResourceName.COUNT);
     }
 
     @Override
@@ -37,7 +37,7 @@ public class CountServiceImpl implements CountService {
 
     @Override
     public CountResponse save(Long id, CountRequest request) {
-        return defaultSave(id, request, countRepository, countMapper, ResourceName.PRODUCT_INVENTORY_LIMIT);
+        return defaultSave(id, request, countRepository, countMapper, ResourceName.COUNT);
     }
 
     @Override

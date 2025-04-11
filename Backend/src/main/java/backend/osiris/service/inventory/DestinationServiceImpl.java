@@ -22,12 +22,12 @@ public class DestinationServiceImpl implements DestinationService {
 
     @Override
     public ListResponse<DestinationResponse> findAll(int page, int size, String sort, String filter, String search, boolean all) {
-        return defaultFindAll(page, size, sort, filter, search, all, SearchFields.PRODUCT_INVENTORY_LIMIT, destinationRepository, destinationMapper);
+        return defaultFindAll(page, size, sort, filter, search, all, SearchFields.DESTINATION, destinationRepository, destinationMapper);
     }
 
     @Override
     public DestinationResponse findById(Long id) {
-        return defaultFindById(id, destinationRepository, destinationMapper, ResourceName.PRODUCT_INVENTORY_LIMIT);
+        return defaultFindById(id, destinationRepository, destinationMapper, ResourceName.DESTINATION);
     }
 
     @Override
@@ -37,7 +37,7 @@ public class DestinationServiceImpl implements DestinationService {
 
     @Override
     public DestinationResponse save(Long id, DestinationRequest request) {
-        return defaultSave(id, request, destinationRepository, destinationMapper, ResourceName.PRODUCT_INVENTORY_LIMIT);
+        return defaultSave(id, request, destinationRepository, destinationMapper, ResourceName.DESTINATION);
     }
 
     @Override

@@ -22,12 +22,12 @@ public class WarehouseServiceImpl implements WarehouseService {
 
     @Override
     public ListResponse<WarehouseResponse> findAll(int page, int size, String sort, String filter, String search, boolean all) {
-        return defaultFindAll(page, size, sort, filter, search, all, SearchFields.PRODUCT_INVENTORY_LIMIT, warehouseRepository, warehouseMapper);
+        return defaultFindAll(page, size, sort, filter, search, all, SearchFields.WAREHOUSE, warehouseRepository, warehouseMapper);
     }
 
     @Override
     public WarehouseResponse findById(Long id) {
-        return defaultFindById(id, warehouseRepository, warehouseMapper, ResourceName.PRODUCT_INVENTORY_LIMIT);
+        return defaultFindById(id, warehouseRepository, warehouseMapper, ResourceName.WAREHOUSE);
     }
 
     @Override
@@ -37,7 +37,7 @@ public class WarehouseServiceImpl implements WarehouseService {
 
     @Override
     public WarehouseResponse save(Long id, WarehouseRequest request) {
-        return defaultSave(id, request, warehouseRepository, warehouseMapper, ResourceName.PRODUCT_INVENTORY_LIMIT);
+        return defaultSave(id, request, warehouseRepository, warehouseMapper, ResourceName.WAREHOUSE);
     }
 
     @Override

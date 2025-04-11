@@ -22,12 +22,12 @@ public class VariantInventoryLimitServiceImpl implements VariantInventoryLimitSe
 
     @Override
     public ListResponse<VariantInventoryLimitResponse> findAll(int page, int size, String sort, String filter, String search, boolean all) {
-        return defaultFindAll(page, size, sort, filter, search, all, SearchFields.PRODUCT_INVENTORY_LIMIT, variantInventoryLimitRepository, variantInventoryLimitMapper);
+        return defaultFindAll(page, size, sort, filter, search, all, SearchFields.VARIANT_INVENTORY_LIMIT, variantInventoryLimitRepository, variantInventoryLimitMapper);
     }
 
     @Override
     public VariantInventoryLimitResponse findById(Long id) {
-        return defaultFindById(id, variantInventoryLimitRepository, variantInventoryLimitMapper, ResourceName.PRODUCT_INVENTORY_LIMIT);
+        return defaultFindById(id, variantInventoryLimitRepository, variantInventoryLimitMapper, ResourceName.VARIANT_INVENTORY_LIMIT);
     }
 
     @Override
@@ -37,7 +37,7 @@ public class VariantInventoryLimitServiceImpl implements VariantInventoryLimitSe
 
     @Override
     public VariantInventoryLimitResponse save(Long id, VariantInventoryLimitRequest request) {
-        return defaultSave(id, request, variantInventoryLimitRepository, variantInventoryLimitMapper, ResourceName.PRODUCT_INVENTORY_LIMIT);
+        return defaultSave(id, request, variantInventoryLimitRepository, variantInventoryLimitMapper, ResourceName.VARIANT_INVENTORY_LIMIT);
     }
 
     @Override

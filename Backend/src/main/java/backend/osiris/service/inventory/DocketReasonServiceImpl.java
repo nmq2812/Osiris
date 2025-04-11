@@ -22,12 +22,12 @@ public class DocketReasonServiceImpl implements DocketReasonService {
 
     @Override
     public ListResponse<DocketReasonResponse> findAll(int page, int size, String sort, String filter, String search, boolean all) {
-        return defaultFindAll(page, size, sort, filter, search, all, SearchFields.PRODUCT_INVENTORY_LIMIT, docketReasonRepository, docketReasonMapper);
+        return defaultFindAll(page, size, sort, filter, search, all, SearchFields.DOCKET_REASON, docketReasonRepository, docketReasonMapper);
     }
 
     @Override
     public DocketReasonResponse findById(Long id) {
-        return defaultFindById(id, docketReasonRepository, docketReasonMapper, ResourceName.PRODUCT_INVENTORY_LIMIT);
+        return defaultFindById(id, docketReasonRepository, docketReasonMapper, ResourceName.DOCKET_REASON);
     }
 
     @Override
@@ -37,7 +37,7 @@ public class DocketReasonServiceImpl implements DocketReasonService {
 
     @Override
     public DocketReasonResponse save(Long id, DocketReasonRequest request) {
-        return defaultSave(id, request, docketReasonRepository, docketReasonMapper, ResourceName.PRODUCT_INVENTORY_LIMIT);
+        return defaultSave(id, request, docketReasonRepository, docketReasonMapper, ResourceName.DOCKET_REASON);
     }
 
     @Override

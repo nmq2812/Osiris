@@ -22,12 +22,12 @@ public class PurchaseOrderServiceImpl implements PurchaseOrderService {
 
     @Override
     public ListResponse<PurchaseOrderResponse> findAll(int page, int size, String sort, String filter, String search, boolean all) {
-        return defaultFindAll(page, size, sort, filter, search, all, SearchFields.PRODUCT_INVENTORY_LIMIT, purchaseOrderRepository, purchaseOrderMapper);
+        return defaultFindAll(page, size, sort, filter, search, all, SearchFields.PURCHASE_ORDER, purchaseOrderRepository, purchaseOrderMapper);
     }
 
     @Override
     public PurchaseOrderResponse findById(Long id) {
-        return defaultFindById(id, purchaseOrderRepository, purchaseOrderMapper, ResourceName.PRODUCT_INVENTORY_LIMIT);
+        return defaultFindById(id, purchaseOrderRepository, purchaseOrderMapper, ResourceName.PURCHASE_ORDER);
     }
 
     @Override
@@ -37,7 +37,7 @@ public class PurchaseOrderServiceImpl implements PurchaseOrderService {
 
     @Override
     public PurchaseOrderResponse save(Long id, PurchaseOrderRequest request) {
-        return defaultSave(id, request, purchaseOrderRepository, purchaseOrderMapper, ResourceName.PRODUCT_INVENTORY_LIMIT);
+        return defaultSave(id, request, purchaseOrderRepository, purchaseOrderMapper, ResourceName.PURCHASE_ORDER);
     }
 
     @Override

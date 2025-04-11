@@ -22,12 +22,12 @@ public class StorageLocationServiceImpl implements StorageLocationService {
 
     @Override
     public ListResponse<StorageLocationResponse> findAll(int page, int size, String sort, String filter, String search, boolean all) {
-        return defaultFindAll(page, size, sort, filter, search, all, SearchFields.PRODUCT_INVENTORY_LIMIT, storageLocationRepository, storageLocationMapper);
+        return defaultFindAll(page, size, sort, filter, search, all, SearchFields.STORAGE_LOCATION, storageLocationRepository, storageLocationMapper);
     }
 
     @Override
     public StorageLocationResponse findById(Long id) {
-        return defaultFindById(id, storageLocationRepository, storageLocationMapper, ResourceName.PRODUCT_INVENTORY_LIMIT);
+        return defaultFindById(id, storageLocationRepository, storageLocationMapper, ResourceName.STORAGE_LOCATION);
     }
 
     @Override
@@ -37,7 +37,7 @@ public class StorageLocationServiceImpl implements StorageLocationService {
 
     @Override
     public StorageLocationResponse save(Long id, StorageLocationRequest request) {
-        return defaultSave(id, request, storageLocationRepository, storageLocationMapper, ResourceName.PRODUCT_INVENTORY_LIMIT);
+        return defaultSave(id, request, storageLocationRepository, storageLocationMapper, ResourceName.STORAGE_LOCATION);
     }
 
     @Override

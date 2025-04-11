@@ -22,12 +22,12 @@ public class TransferServiceImpl implements TransferService {
 
     @Override
     public ListResponse<TransferResponse> findAll(int page, int size, String sort, String filter, String search, boolean all) {
-        return defaultFindAll(page, size, sort, filter, search, all, SearchFields.PRODUCT_INVENTORY_LIMIT, transferRepository, transferMapper);
+        return defaultFindAll(page, size, sort, filter, search, all, SearchFields.TRANSFER, transferRepository, transferMapper);
     }
 
     @Override
     public TransferResponse findById(Long id) {
-        return defaultFindById(id, transferRepository, transferMapper, ResourceName.PRODUCT_INVENTORY_LIMIT);
+        return defaultFindById(id, transferRepository, transferMapper, ResourceName.TRANSFER);
     }
 
     @Override
@@ -37,7 +37,7 @@ public class TransferServiceImpl implements TransferService {
 
     @Override
     public TransferResponse save(Long id, TransferRequest request) {
-        return defaultSave(id, request, transferRepository, transferMapper, ResourceName.PRODUCT_INVENTORY_LIMIT);
+        return defaultSave(id, request, transferRepository, transferMapper, ResourceName.TRANSFER);
     }
 
     @Override
