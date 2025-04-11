@@ -4,8 +4,14 @@ import backend.osiris.config.payment.paypal.PayPalHttpClient;
 import backend.osiris.constant.AppConstants;
 import backend.osiris.constant.FieldName;
 import backend.osiris.constant.ResourceName;
+import backend.osiris.constant.SearchFields;
+import backend.osiris.dto.ListResponse;
 import backend.osiris.dto.client.ClientConfirmedOrderResponse;
 import backend.osiris.dto.client.ClientSimpleOrderRequest;
+import backend.osiris.dto.order.OrderRequest;
+import backend.osiris.dto.order.OrderResourceRequest;
+import backend.osiris.dto.order.OrderResourceResponse;
+import backend.osiris.dto.order.OrderResponse;
 import backend.osiris.dto.payment.OrderIntent;
 import backend.osiris.dto.payment.OrderStatus;
 import backend.osiris.dto.payment.PaymentLandingPage;
@@ -27,6 +33,7 @@ import backend.osiris.entity.waybill.WaybillLog;
 import backend.osiris.exception.ResourceNotFoundException;
 import backend.osiris.mapper.client.ClientOrderMapper;
 import backend.osiris.mapper.general.NotificationMapper;
+import backend.osiris.mapper.order.OrderMapper;
 import backend.osiris.repository.authentication.UserRepository;
 import backend.osiris.repository.cart.CartRepository;
 import backend.osiris.repository.general.NotificationRepository;
@@ -81,6 +88,8 @@ public class OrderServiceImpl implements OrderService {
     private final NotificationRepository notificationRepository;
     private final NotificationService notificationService;
     private final NotificationMapper notificationMapper;
+    private final OrderMapper orderMapper;
+
 
     private static final int USD_VND_RATE = 23_000;
 
@@ -296,6 +305,36 @@ public class OrderServiceImpl implements OrderService {
 
     private Double calculateDiscountedPrice(Double price, Integer discount) {
         return price * (100 - discount) / 100;
+    }
+
+    @Override
+    public ListResponse<OrderResponse> findAll(int page, int size, String sort, String filter, String search, boolean all) {
+        return defaultFindAll(page, size, sort, filter, search, all, SearchFields.ORDER, orderRepository, orderMapper);
+    }
+
+    @Override
+    public OrderResponse findById(Long id) {
+        return defaultFindById(id, orderRepository, orderMapper, ResourceName.ORDER);
+    }
+
+    @Override
+    public OrderResponse save(OrderRequest request) {
+        return defaultSave(request, orderRepository, orderMapper);
+    }
+
+    @Override
+    public OrderResponse save(Long id, OrderRequest request) {
+        return defaultSave(id, request, orderRepository, orderMapper, ResourceName.ORDER);
+    }
+
+    @Override
+    public void delete(Long id) {
+        orderRepository.deleteById(id);
+    }
+
+    @Override
+    public void delete(List<Long> ids) {
+        orderRepository.deleteAllById(ids);
     }
 
 }
