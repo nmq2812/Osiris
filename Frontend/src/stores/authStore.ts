@@ -110,7 +110,7 @@ export const useAuthStore = create<AuthState & AuthAction>()(
                     ),
             }),
             {
-                name: "electro-auth-store",
+                name: "Osiris-auth-store",
                 storage: createStorage(),
             },
         ),

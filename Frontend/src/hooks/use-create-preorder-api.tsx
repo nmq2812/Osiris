@@ -1,16 +1,16 @@
 import { useMutation } from "react-query";
-
-import { Anchor, Text } from "@mantine/core";
-
 import React from "react";
+import Link from "next/link";
+import { Typography } from "antd";
 import ResourceURL from "@/constants/ResourceURL";
 import FetchUtils, { ErrorMessage } from "@/utils/FetchUtils";
 import NotifyUtils from "@/utils/NotifyUtils";
-import { Link } from "tabler-icons-react";
 import {
     ClientPreorderRequest,
     ClientPreorderResponse,
 } from "@/datas/ClientUI";
+
+const { Text } = Typography;
 
 function useCreatePreorderApi() {
     return useMutation<
@@ -23,15 +23,18 @@ function useCreatePreorderApi() {
         {
             onSuccess: (response) =>
                 NotifyUtils.simpleSuccess(
-                    <Text inherit>
+                    <>
                         <span>
                             Đã thêm sản phẩm{" "}
                             {response.preorderProduct.productName} vào{" "}
                         </span>
-                        <Anchor component={Link} href="/user/preorder" inherit>
+                        <Link
+                            href="/user/preorder"
+                            className="text-blue-600 hover:underline"
+                        >
                             danh sách đặt trước
-                        </Anchor>
-                    </Text>,
+                        </Link>
+                    </>,
                 ),
             onError: () =>
                 NotifyUtils.simpleFailed(

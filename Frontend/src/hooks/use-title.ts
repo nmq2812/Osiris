@@ -1,3 +1,4 @@
+"use client";
 import Titles from "@/constants/Titles";
 import { useEffect } from "react";
 import { usePathname } from "next/navigation";
@@ -7,8 +8,8 @@ function useTitle(explicitTitle?: string) {
 
     useEffect(() => {
         const title = explicitTitle
-            ? explicitTitle + " – Electro"
-            : Titles[path as keyof typeof Titles] || "Electro";
+            ? explicitTitle + " – Osiris"
+            : Titles[path as keyof typeof Titles] || "Osiris";
 
         document.title = title;
     }, [path, explicitTitle]);

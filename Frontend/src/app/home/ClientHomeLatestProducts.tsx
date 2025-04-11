@@ -1,8 +1,11 @@
 "use client";
 import React from "react";
-import { Skeleton } from "@mantine/core";
-import { Button, Space, Typography } from "antd";
-import { AlertTriangle, List, Marquee } from "tabler-icons-react";
+import { Button, Space, Typography, Skeleton, Empty } from "antd";
+import {
+    UnorderedListOutlined,
+    WarningOutlined,
+    InboxOutlined,
+} from "@ant-design/icons";
 
 import { useQuery } from "react-query";
 import ClientProductCard from "@/components/ClientProductCard";
@@ -35,11 +38,11 @@ function ClientHomeLatestProducts() {
 
     if (isLoadingProductResponses) {
         resultFragment = (
-            <Space direction="vertical">
+            <Space direction="vertical" style={{ width: "100%" }}>
                 {Array(5)
                     .fill(0)
                     .map((_, index) => (
-                        <Skeleton key={index} height={50} radius="md" />
+                        <Skeleton key={index} active />
                     ))}
             </Space>
         );
@@ -47,33 +50,30 @@ function ClientHomeLatestProducts() {
 
     if (isErrorProductResponses) {
         resultFragment = (
-            <Space
-                style={{
-                    alignItems: "center",
-                }}
-            >
-                <AlertTriangle size={125} strokeWidth={1} />
-                <Typography.Text style={{ fontSize: "14px", fontWeight: 500 }}>
+            <div style={{ textAlign: "center", margin: "24px 0" }}>
+                <WarningOutlined style={{ fontSize: 64, color: "#ff4d4f" }} />
+                <Typography.Text
+                    style={{
+                        display: "block",
+                        fontSize: "14px",
+                        fontWeight: 500,
+                    }}
+                >
                     Đã có lỗi xảy ra
                 </Typography.Text>
-            </Space>
+            </div>
         );
     }
 
     if (products && products.totalElements === 0) {
         resultFragment = (
-            <Space
-                style={{
-                    margin: "24px",
-                    alignItems: "center",
-                    color: "#1890ff",
-                }}
-            >
-                <Marquee size={125} strokeWidth={1} />
-                <Typography.Text style={{ fontSize: "20px", fontWeight: 500 }}>
-                    Không có sản phẩm
-                </Typography.Text>
-            </Space>
+            <Empty
+                image={
+                    <InboxOutlined style={{ fontSize: 64, color: "#1890ff" }} />
+                }
+                description="Không có sản phẩm"
+                style={{ margin: "24px 0" }}
+            />
         );
     }
 
@@ -91,10 +91,11 @@ function ClientHomeLatestProducts() {
 
     return (
         <Space direction="vertical" style={{ width: "100%" }}>
-            <Space
+            <div
                 style={{
                     display: "flex",
                     justifyContent: "space-between",
+                    alignItems: "center",
                     width: "100%",
                 }}
             >
@@ -103,10 +104,14 @@ function ClientHomeLatestProducts() {
                         Sản phẩm mới nhất
                     </Typography.Text>
                 </Typography.Title>
-                <Button type="default" icon={<List size={16} />}>
+                <Button
+                    type="default"
+                    icon={<UnorderedListOutlined />}
+                    style={{ borderRadius: "8px" }}
+                >
                     Xem tất cả
                 </Button>
-            </Space>
+            </div>
 
             {resultFragment}
         </Space>

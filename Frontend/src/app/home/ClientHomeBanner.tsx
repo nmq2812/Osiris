@@ -1,113 +1,67 @@
 "use client";
 import React from "react";
-import { Row, Col, Space, Typography, Card } from "antd";
-import { CarOutlined, HeartOutlined, StarOutlined } from "@ant-design/icons";
+import Image from "next/image";
 import ClientCarousel from "@/components/ClientCarousel";
+import Link from "next/link";
 
-const { Title, Text } = Typography;
-
-// Định nghĩa styles
-const styles = {
-    carouselBox: {
-        height: "100%",
-        minHeight: 315,
-    },
-    gradient1: {
-        background: "linear-gradient(105deg, #36CFC9 0%, #A0D911 100%)",
-        height: "100%",
-        minHeight: 315,
-        borderRadius: "8px",
-    },
-    gradient2: {
-        background: "linear-gradient(0deg, #FFA940 0%, #F5222D 100%)",
-        height: "100%",
-        minHeight: 315,
-        borderRadius: "8px",
-    },
-    gradient3: {
-        background: "linear-gradient(0deg, #2F54EB 0%, #13C2C2 100%)",
-        height: "100%",
-        minHeight: 315,
-        borderRadius: "8px",
-    },
-    rightBannerCard: {
-        backgroundColor: "#f5f5f5",
-        borderRadius: "8px",
-    },
-    icon: {
-        fontSize: 65,
-    },
-};
-
-function ClientHomeBanner() {
-    return (
-        <Row gutter={16}>
-            <Col xs={24} md={14} lg={16}>
-                <ClientCarousel>
-                    <div style={styles.gradient1}></div>
-                    <div style={styles.gradient2}></div>
-                    <div style={styles.gradient3}></div>
-                </ClientCarousel>
-            </Col>
-            <Col xs={24} md={10} lg={8}>
-                <Space direction="vertical" style={{ width: "100%" }} size={16}>
-                    <Card
-                        styles={{ body: { padding: 0 } }}
-                        style={styles.rightBannerCard}
-                    >
-                        <Space align="start" style={{ padding: "12px 16px" }}>
-                            <CarOutlined style={styles.icon} />
-                            <Space direction="vertical" size={4}>
-                                <Title level={5} style={{ marginBottom: 0 }}>
-                                    Miễn phí vận chuyển
-                                </Title>
-                                <Text>
-                                    100% đơn hàng đều được miễn phí vận chuyển
-                                    khi thanh toán trước.
-                                </Text>
-                            </Space>
-                        </Space>
-                    </Card>
-
-                    <Card
-                        styles={{ body: { padding: 0 } }}
-                        style={styles.rightBannerCard}
-                    >
-                        <Space align="start" style={{ padding: "12px 16px" }}>
-                            <StarOutlined style={styles.icon} />
-                            <Space direction="vertical" size={4}>
-                                <Title level={5} style={{ marginBottom: 0 }}>
-                                    Bảo hành tận tâm
-                                </Title>
-                                <Text>
-                                    Bất kể giấy tờ thế nào, công ty luôn cam kết
-                                    sẽ hỗ trợ khách hàng tới cùng.
-                                </Text>
-                            </Space>
-                        </Space>
-                    </Card>
-
-                    <Card
-                        styles={{ body: { padding: 0 } }}
-                        style={styles.rightBannerCard}
-                    >
-                        <Space align="start" style={{ padding: "12px 16px" }}>
-                            <HeartOutlined style={styles.icon} />
-                            <Space direction="vertical" size={4}>
-                                <Title level={5} style={{ marginBottom: 0 }}>
-                                    Đổi trả 1-1 hoặc hoàn tiền
-                                </Title>
-                                <Text>
-                                    Nếu phát sinh lỗi hoặc bạn cảm thấy sản phẩm
-                                    chưa đáp ứng được nhu cầu.
-                                </Text>
-                            </Space>
-                        </Space>
-                    </Card>
-                </Space>
-            </Col>
-        </Row>
-    );
+// Cấu trúc dữ liệu cho banner
+interface BannerItem {
+    id: number;
+    imageUrl: string;
+    alt: string;
+    title: string;
+    description: string;
 }
+
+const bannerData: BannerItem[] = [
+    {
+        id: 1,
+        imageUrl:
+            "https://file.hstatic.net/1000190106/collection/new_site_banner_mg_c9fbad1bc0a443ad8852f5959ad428ad.jpg", // Thay đổi đường dẫn phù hợp
+        alt: "Khuyến mãi mùa hè",
+        title: "Khuyến mãi mùa hè",
+        description: "Giảm giá đến 50% cho tất cả sản phẩm mùa hè",
+    },
+    {
+        id: 2,
+        imageUrl:
+            "https://file.hstatic.net/200000838897/article/gk-figure-banner_5cfd73eb18ae47899865e6a695ac6d1d.jpg", // Thay đổi đường dẫn phù hợp
+        alt: "Bộ sưu tập mới",
+        title: "Bộ sưu tập mới 2025",
+        description: "Khám phá những sản phẩm mới nhất của chúng tôi",
+    },
+];
+
+const ClientHomeBanner = () => {
+    return (
+        <div className="w-full max-w-7xl mx-auto my-6">
+            <ClientCarousel>
+                {bannerData.map((banner) => (
+                    <div key={banner.id} className="relative w-full h-[400px]">
+                        {/* Sử dụng div thay vì Image nếu bạn chưa có hình ảnh thực */}
+                        <div
+                            className="w-full h-full bg-gray-200 flex items-center justify-center"
+                            style={{
+                                backgroundImage: `url(${banner.imageUrl})`,
+                                backgroundSize: "cover",
+                                backgroundPosition: "center",
+                            }}
+                        >
+                            {/* Lớp overlay cho text */}
+                            <div className="absolute inset-0 bg-black/30 flex flex-col items-center justify-center text-white p-8">
+                                <h2 className="text-4xl font-bold mb-4">
+                                    {banner.title}
+                                </h2>
+                                <p className="text-lg mb-6 max-w-lg text-center">
+                                    {banner.description}
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                ))}
+            </ClientCarousel>
+        </div>
+    );
+};
 
 export default ClientHomeBanner;

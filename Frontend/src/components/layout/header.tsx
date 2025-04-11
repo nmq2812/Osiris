@@ -1,13 +1,12 @@
 "use client";
 
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
 import {
     Layout,
     Input,
-    Space,
     Button,
     Dropdown,
     Badge,
@@ -17,6 +16,10 @@ import {
     Col,
     Popover,
     MenuProps,
+    AutoComplete,
+    Avatar,
+    Spin,
+    Empty,
 } from "antd";
 import {
     BellOutlined,
@@ -33,7 +36,9 @@ import {
     FileOutlined,
     MenuOutlined,
     IdcardOutlined,
+    SearchOutlined,
 } from "@ant-design/icons";
+import { debounce } from "lodash";
 import ResourceURL from "@/constants/ResourceURL";
 import {
     EventInitiationResponse,
@@ -48,8 +53,178 @@ import { useQuery } from "react-query";
 import CategoryMenu from "./CategoryMenu";
 
 const { Header } = Layout;
-const { Search } = Input;
 const { Text } = Typography;
+
+function SearchComponent() {
+    const router = useRouter();
+    const [searchValue, setSearchValue] = useState("");
+    const [isLoading, setIsLoading] = useState(false);
+    const [searchResults, setSearchResults] = useState<any[]>([]);
+    const [showResults, setShowResults] = useState(false);
+    const searchRef = useRef<HTMLDivElement>(null);
+
+    const debouncedSearch = useMemo(
+        () =>
+            debounce(async (value: string) => {
+                if (!value || value.length < 2) {
+                    setSearchResults([]);
+                    setIsLoading(false);
+                    return;
+                }
+
+                setIsLoading(true);
+                try {
+                    const response = (await FetchUtils.get(
+                        ResourceURL.CLIENT_PRODUCT,
+                        {
+                            q: value,
+                            limit: 6,
+                            page: 1,
+                        },
+                    )) as { content: any[] };
+
+                    if (response && response.content) {
+                        setSearchResults(response.content);
+                    } else {
+                        setSearchResults([]);
+                    }
+                } catch (error) {
+                    console.error("Search error:", error);
+                    setSearchResults([]);
+                } finally {
+                    setIsLoading(false);
+                }
+            }, 500),
+        [],
+    );
+
+    useEffect(() => {
+        debouncedSearch(searchValue);
+
+        return () => {
+            debouncedSearch.cancel();
+        };
+    }, [searchValue, debouncedSearch]);
+
+    useEffect(() => {
+        const handleClickOutside = (event: MouseEvent) => {
+            if (
+                searchRef.current &&
+                !searchRef.current.contains(event.target as Node)
+            ) {
+                setShowResults(false);
+            }
+        };
+
+        document.addEventListener("mousedown", handleClickOutside);
+        return () => {
+            document.removeEventListener("mousedown", handleClickOutside);
+        };
+    }, []);
+
+    const handleSelect = (value: string, option: any) => {
+        if (option.productSlug) {
+            router.push(`/product/${option.productSlug}`);
+        }
+        setShowResults(false);
+    };
+
+    const handleSearch = (value: string) => {
+        if (value.trim()) {
+            router.push(`/search?q=${encodeURIComponent(value.trim())}`);
+        }
+        setShowResults(false);
+    };
+
+    // Tối ưu hóa hiệu suất bằng cách tạo options thông qua useMemo
+    const options = useMemo(
+        () =>
+            searchResults.map((product) => ({
+                value: product.productName,
+                label: (
+                    <div className="flex items-center gap-3 py-2">
+                        <Avatar
+                            size={40}
+                            shape="square"
+                            src={
+                                product.productThumbnail || product.productImage
+                            }
+                            alt={product.productName}
+                        />
+                        <div className="flex-1 min-w-0">
+                            <div className="font-medium text-sm line-clamp-1">
+                                {product.productName}
+                            </div>
+                            {/* <div className="text-blue-600 font-medium">
+                                {MiscUtils.formatCurrency(product.productPrice)}
+                            </div> */}
+                        </div>
+                    </div>
+                ),
+                productSlug: product.productSlug,
+            })),
+        [searchResults],
+    );
+
+    return (
+        <div className="relative w-full" ref={searchRef}>
+            <AutoComplete
+                className="w-full"
+                value={searchValue}
+                onChange={setSearchValue}
+                onSelect={handleSelect}
+                options={options}
+                onFocus={() => setShowResults(true)}
+                open={showResults && searchValue.length >= 2}
+                notFoundContent={
+                    isLoading ? (
+                        <div className="py-6 text-center">
+                            <Spin size="small" />
+                            <div className="mt-2 text-sm text-gray-500">
+                                Đang tìm kiếm...
+                            </div>
+                        </div>
+                    ) : searchValue.length >= 2 ? (
+                        <Empty
+                            description="Không tìm thấy sản phẩm phù hợp"
+                            image={Empty.PRESENTED_IMAGE_SIMPLE}
+                            className="py-4"
+                        />
+                    ) : null
+                }
+                popupClassName="search-results-dropdown"
+                getPopupContainer={(trigger) =>
+                    trigger.parentNode as HTMLElement
+                }
+            >
+                <Input.Search
+                    placeholder="Bạn tìm gì..."
+                    enterButton
+                    allowClear
+                    size="large"
+                    onSearch={handleSearch}
+                />
+            </AutoComplete>
+
+            {/* Link xem tất cả kết quả */}
+            {showResults &&
+                searchValue.length >= 2 &&
+                searchResults.length > 0 && (
+                    <div className="absolute bottom-0 right-0 transform translate-y-full bg-white border-t w-full p-2 text-right z-10 shadow-sm">
+                        <Link
+                            href={`/search?q=${encodeURIComponent(
+                                searchValue.trim(),
+                            )}`}
+                            className="text-blue-600 hover:underline text-sm px-3"
+                            onClick={() => setShowResults(false)}
+                        >
+                            Xem tất cả {searchResults.length}+ kết quả
+                        </Link>
+                    </div>
+                )}
+        </div>
+    );
+}
 
 function HeaderSection() {
     const router = useRouter();
@@ -66,9 +241,6 @@ function HeaderSection() {
 
     const { user, resetAuthState, currentTotalCartItems } = useAuthStore();
 
-    // Search state & function
-    const [search, setSearch] = useState("");
-
     useNotificationEvents();
 
     const { newNotifications } = useClientSiteStore();
@@ -81,12 +253,6 @@ function HeaderSection() {
             setDisabledNotificationIndicator(false);
         }
     }, [newNotifications.length]);
-
-    const handleSearch = (value: string) => {
-        if (value.trim() !== "") {
-            router.replace("/search?q=" + value.trim());
-        }
-    };
 
     const handleSignoutMenu = () => {
         if (user) {
@@ -167,15 +333,26 @@ function HeaderSection() {
         <Header
             style={{
                 background: "#fff",
-                padding: "0 10rem",
+                padding: "0",
                 boxShadow: "0 2px 8px rgba(0, 0, 0, 0.06)",
                 marginBottom: 24,
-                height: "fit-content",
+                height: "auto",
+                position: "sticky",
+                top: 0,
+                zIndex: 100,
             }}
         >
-            <div className="container" ref={headerRef}>
-                <Row align="middle" style={{ height: 64 }}>
-                    <Col span={4}>
+            <div
+                className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8"
+                ref={headerRef}
+            >
+                <Row
+                    align="middle"
+                    className="py-4"
+                    justify="space-between"
+                    gutter={[16, 0]}
+                >
+                    <Col xs={24} sm={6} md={5} lg={4}>
                         <Link href="/" className="flex items-center">
                             <Image
                                 src="/logo.png"
@@ -183,26 +360,30 @@ function HeaderSection() {
                                 width={40}
                                 height={40}
                                 className="mr-2"
+                                priority
                             />
-                            <span className="text-2xl font-bold text-blue-600">
+                            <span className="text-xl font-bold text-blue-600 md:text-2xl">
                                 OSIRIS
                             </span>
                         </Link>
                     </Col>
-                    <Col span={10}>
-                        <Search
-                            placeholder="Bạn tìm gì..."
-                            allowClear
-                            enterButton
-                            size="large"
-                            value={search}
-                            onChange={(e) => setSearch(e.target.value)}
-                            onSearch={handleSearch}
-                            style={{ width: "100%" }}
-                        />
+                    <Col
+                        xs={24}
+                        sm={12}
+                        md={12}
+                        lg={10}
+                        className="order-3 mt-4 sm:order-2 sm:mt-0"
+                    >
+                        <SearchComponent />
                     </Col>
-                    <Col span={10}>
-                        <Row justify="end" gutter={16}>
+                    <Col
+                        xs={24}
+                        sm={6}
+                        md={7}
+                        lg={10}
+                        className="order-2 sm:order-3"
+                    >
+                        <Row justify="end" gutter={[12, 8]} align="middle">
                             {user && (
                                 <>
                                     <Col>
@@ -213,6 +394,7 @@ function HeaderSection() {
                                                         currentTotalCartItems
                                                     }
                                                     overflowCount={99}
+                                                    className="flex items-center"
                                                 >
                                                     <Button
                                                         type="text"
@@ -225,6 +407,7 @@ function HeaderSection() {
                                                             />
                                                         }
                                                         size="large"
+                                                        className="flex items-center justify-center"
                                                     />
                                                 </Badge>
                                             </Link>
@@ -244,6 +427,7 @@ function HeaderSection() {
                                                         />
                                                     }
                                                     size="large"
+                                                    className="flex items-center justify-center"
                                                 />
                                             </Link>
                                         </Tooltip>
@@ -265,6 +449,7 @@ function HeaderSection() {
                                             }
                                             onClick={handleNotificationButton}
                                             size="large"
+                                            className="flex items-center justify-center"
                                         />
                                     </Badge>
                                 </Tooltip>
@@ -288,15 +473,16 @@ function HeaderSection() {
                                             />
                                         }
                                         size="large"
+                                        className="flex items-center justify-center"
                                     />
                                 </Dropdown>
                             </Col>
                         </Row>
                     </Col>
                 </Row>
-                <Row style={{ marginTop: 12, marginBottom: 12 }}>
-                    <Col>
-                        <Space size="small">
+                <Row className="mb-3 flex flex-wrap items-center justify-between">
+                    <Col xs={24} sm={14} md={16}>
+                        <div className="mb-2 flex flex-wrap items-center gap-2 sm:mb-0">
                             <Popover
                                 open={openedCategoryMenu}
                                 onOpenChange={setOpenedCategoryMenu}
@@ -311,30 +497,48 @@ function HeaderSection() {
                                 trigger="click"
                                 overlayStyle={{ width: headerWidth }}
                             >
-                                <Button icon={<MenuOutlined />}>
+                                <Button
+                                    icon={<MenuOutlined />}
+                                    className="flex items-center"
+                                >
                                     Danh mục sản phẩm
                                 </Button>
                             </Popover>
-                            <Button type="link">Sản phẩm mới</Button>
-                            <Button type="link" style={{ color: "green" }}>
+                            <Button type="link" className="px-2">
+                                Sản phẩm mới
+                            </Button>
+                            <Button
+                                type="link"
+                                style={{ color: "green" }}
+                                className="px-2"
+                            >
                                 Sản phẩm xu hướng
                             </Button>
-                            <Button type="link" style={{ color: "#eb2f96" }}>
+                            <Button
+                                type="link"
+                                style={{ color: "#eb2f96" }}
+                                className="px-2"
+                            >
                                 Khuyến mại
                             </Button>
-                        </Space>
+                        </div>
                     </Col>
-                    <Col flex="auto" style={{ textAlign: "right" }}>
-                        <Space>
+                    <Col
+                        xs={24}
+                        sm={10}
+                        md={8}
+                        className="text-left sm:text-right"
+                    >
+                        <div className="flex items-center justify-start sm:justify-end">
                             <Badge
                                 count="Hot"
                                 style={{ backgroundColor: "#eb2f96" }}
                             />
-                            <Text type="secondary">
+                            <Text type="secondary" className="ml-2">
                                 Miễn phí giao hàng cho đơn hàng trên 1 triệu
                                 đồng
                             </Text>
-                        </Space>
+                        </div>
                     </Col>
                 </Row>
             </div>
@@ -410,3 +614,35 @@ function useNotificationEvents() {
 }
 
 export default HeaderSection;
+
+const styles = `
+.search-results-dropdown {
+  max-height: 400px;
+  overflow-y: auto;
+  padding: 8px;
+  width: 100%;
+  box-shadow: 0 3px 6px rgba(0,0,0,0.1);
+  border-radius: 0 0 4px 4px;
+}
+
+.line-clamp-1 {
+  display: -webkit-box;
+  -webkit-line-clamp: 1;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.ant-select-item {
+  padding: 4px 8px !important;
+}
+
+.ant-select-item-option-content {
+  width: 100%;
+}
+`;
+
+if (typeof document !== "undefined") {
+    const styleEl = document.createElement("style");
+    styleEl.innerHTML = styles;
+    document.head.appendChild(styleEl);
+}
