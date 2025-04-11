@@ -1,26 +1,12 @@
+"use client";
 import React from "react";
-
+import Link from "next/link";
+import { Card, Typography, Image, Badge, Space, Button, Tooltip } from "antd";
 import {
-    ActionIcon,
-    Anchor,
-    Badge,
-    Box,
-    Card,
-    Group,
-    Highlight,
-    Image,
-    Stack,
-    Text,
-    useMantineTheme,
-} from "@mantine/core";
-
-import {
-    BellPlus,
-    HeartPlus,
-    Link,
-    ShoppingCartPlus,
-} from "tabler-icons-react";
-import { useDisclosure } from "@mantine/hooks";
+    BellOutlined,
+    HeartOutlined,
+    ShoppingCartOutlined,
+} from "@ant-design/icons";
 import {
     ClientListedProductResponse,
     ClientWishRequest,
@@ -35,15 +21,15 @@ import { useAuthStore } from "@/stores/authStore";
 import MiscUtils from "@/utils/MiscUtils";
 import NotifyUtils from "@/utils/NotifyUtils";
 
+const { Text, Title } = Typography;
+
 interface ClientProductCardProps {
     product: ClientListedProductResponse;
     search?: string;
 }
 
 function ClientProductCard({ product, search }: ClientProductCardProps) {
-    const theme = useMantineTheme();
-
-    const [opened, handlers] = useDisclosure(false);
+    const [hovered, setHovered] = React.useState(false);
 
     const createWishApi = useCreateWishApi();
     const createPreorderApi = useCreatePreorderApi();
@@ -53,6 +39,7 @@ function ClientProductCard({ product, search }: ClientProductCardProps) {
 
     const handleCreateWishButton = (event: React.MouseEvent<HTMLElement>) => {
         event.preventDefault();
+        event.stopPropagation();
         if (!user) {
             NotifyUtils.simple("Vui lòng đăng nhập để sử dụng chức năng");
         } else {
@@ -68,6 +55,7 @@ function ClientProductCard({ product, search }: ClientProductCardProps) {
         event: React.MouseEvent<HTMLElement>,
     ) => {
         event.preventDefault();
+        event.stopPropagation();
         if (!user) {
             NotifyUtils.simple("Vui lòng đăng nhập để sử dụng chức năng");
         } else {
@@ -82,6 +70,7 @@ function ClientProductCard({ product, search }: ClientProductCardProps) {
 
     const handleAddToCartButton = (event: React.MouseEvent<HTMLElement>) => {
         event.preventDefault();
+        event.stopPropagation();
         if (!user) {
             NotifyUtils.simple("Vui lòng đăng nhập để sử dụng chức năng");
         } else {
@@ -100,110 +89,105 @@ function ClientProductCard({ product, search }: ClientProductCardProps) {
             saveCartApi.mutate(cartRequest, {
                 onSuccess: () =>
                     NotifyUtils.simpleSuccess(
-                        <Text inherit>
+                        <>
                             <span>
                                 Đã thêm 1 sản phẩm {product.productName} (phiên
                                 bản mặc định) vào{" "}
                             </span>
-                            <Anchor component={Link} inherit>
-                                <Link href="/cart">giỏ hàng</Link>
-                            </Anchor>
-                        </Text>,
+                            <Link href="/cart">giỏ hàng</Link>
+                        </>,
                     ),
             });
         }
     };
 
+    // Helper function to highlight search terms
+    const highlightText = (text: string) => {
+        if (!search) return text;
+
+        const parts = text.split(new RegExp(`(${search})`, "gi"));
+        return (
+            <>
+                {parts.map((part, i) =>
+                    part.toLowerCase() === search?.toLowerCase() ? (
+                        <mark key={i} className="bg-yellow-200">
+                            {part}
+                        </mark>
+                    ) : (
+                        part
+                    ),
+                )}
+            </>
+        );
+    };
+
     return (
-        <Card
-            radius="md"
-            shadow="sm"
-            p="lg"
-            component={Link}
-            to={"/product/" + product.productSlug}
-            sx={{
-                height: "100%",
-                transition: "box-shadow .2s ease-in",
-                "&:hover": {
-                    backgroundColor:
-                        theme.colorScheme === "dark"
-                            ? theme.colors.dark[5]
-                            : "unset",
-                    boxShadow: theme.shadows.lg,
-                },
-            }}
-            onMouseEnter={handlers.open}
-            onMouseLeave={handlers.close}
-        >
-            <Stack spacing="xs">
-                <Box sx={{ position: "relative" }}>
-                    <Image
-                        radius="md"
-                        src={product.productThumbnail || undefined}
-                        alt={product.productName}
-                        styles={{ image: { aspectRatio: "1 / 1" } }}
-                    />
-                    <Group
-                        spacing="xs"
-                        sx={{
-                            position: "absolute",
-                            left: "50%",
-                            bottom: 0,
-                            transform: "translateX(-50%)",
-                            marginBottom: theme.spacing.sm,
-                            opacity: opened ? 1 : 0,
-                            transition: "opacity .2s ease-in",
-                        }}
-                    >
-                        <ActionIcon
-                            color="pink"
-                            size="lg"
-                            radius="xl"
-                            variant="filled"
-                            title="Thêm vào danh sách yêu thích"
-                            onClick={handleCreateWishButton}
+        <Link href={`/product/${product.productSlug}`} passHref>
+            <Card
+                hoverable
+                className="h-full transition-shadow duration-200 hover:shadow-lg"
+                cover={
+                    <div className="relative">
+                        <Image
+                            src={product.productThumbnail || "/placeholder.png"}
+                            alt={product.productName}
+                            className="aspect-square object-cover"
+                            preview={false}
+                        />
+                        <div
+                            className={`absolute bottom-0 left-1/2 flex -translate-x-1/2 space-x-2 transition-opacity duration-200 mb-2 ${
+                                hovered ? "opacity-100" : "opacity-0"
+                            }`}
+                            onMouseEnter={() => setHovered(true)}
+                            onMouseLeave={() => setHovered(false)}
                         >
-                            <HeartPlus size={18} />
-                        </ActionIcon>
-                        {product.productSaleable ? (
-                            <ActionIcon
-                                color="blue"
-                                size="lg"
-                                radius="xl"
-                                variant="filled"
-                                title="Thêm vào giỏ hàng"
-                                onClick={handleAddToCartButton}
-                            >
-                                <ShoppingCartPlus size={18} />
-                            </ActionIcon>
-                        ) : (
-                            <ActionIcon
-                                color="teal"
-                                size="lg"
-                                radius="xl"
-                                variant="filled"
-                                title="Thông báo khi có hàng"
-                                onClick={handleCreatePreorderButton}
-                            >
-                                <BellPlus size={18} />
-                            </ActionIcon>
-                        )}
-                    </Group>
-                </Box>
-                <Stack spacing={theme.spacing.xs / 2}>
-                    <Group spacing="xs">
-                        <Text weight={500}>
-                            <Highlight highlight={search || ""}>
-                                {product.productName}
-                            </Highlight>
+                            <Tooltip title="Thêm vào danh sách yêu thích">
+                                <Button
+                                    type="primary"
+                                    shape="circle"
+                                    icon={<HeartOutlined />}
+                                    onClick={handleCreateWishButton}
+                                    style={{ backgroundColor: "#eb2f96" }}
+                                />
+                            </Tooltip>
+
+                            {product.productSaleable ? (
+                                <Tooltip title="Thêm vào giỏ hàng">
+                                    <Button
+                                        type="primary"
+                                        shape="circle"
+                                        icon={<ShoppingCartOutlined />}
+                                        onClick={handleAddToCartButton}
+                                    />
+                                </Tooltip>
+                            ) : (
+                                <Tooltip title="Thông báo khi có hàng">
+                                    <Button
+                                        type="primary"
+                                        shape="circle"
+                                        icon={<BellOutlined />}
+                                        onClick={handleCreatePreorderButton}
+                                        style={{ backgroundColor: "#13c2c2" }}
+                                    />
+                                </Tooltip>
+                            )}
+                        </div>
+                    </div>
+                }
+                onMouseEnter={() => setHovered(true)}
+                onMouseLeave={() => setHovered(false)}
+            >
+                <Space direction="vertical" size="small" className="w-full">
+                    <Space>
+                        <Text strong className="line-clamp-2">
+                            {highlightText(product.productName)}
                         </Text>
                         {!product.productSaleable && (
-                            <Badge size="xs" color="red" variant="filled">
-                                Hết hàng
-                            </Badge>
+                            <Badge color="red" count="Hết hàng" />
                         )}
-                    </Group>
-                    <Text weight={500} color="pink">
+                    </Space>
+
+                    <Text strong style={{ color: "#eb2f96" }}>
                         {product.productPriceRange
                             .map((price) =>
                                 product.productPromotion
@@ -217,27 +201,27 @@ function ClientProductCard({ product, search }: ClientProductCardProps) {
                             .map(MiscUtils.formatPrice)
                             .join("–") + "\u00A0₫"}
                     </Text>
+
                     {product.productPromotion && (
-                        <Group spacing="xs">
-                            <Text
-                                size="sm"
-                                sx={{ textDecoration: "line-through" }}
-                            >
+                        <Space>
+                            <Text type="secondary" delete>
                                 {product.productPriceRange
                                     .map(MiscUtils.formatPrice)
                                     .join("–") + "\u00A0₫"}
                             </Text>
-                            <Badge color="pink" variant="filled">
-                                -{product.productPromotion.promotionPercent}%
-                            </Badge>
-                        </Group>
+                            <Badge
+                                count={`-${product.productPromotion.promotionPercent}%`}
+                                style={{ backgroundColor: "#eb2f96" }}
+                            />
+                        </Space>
                     )}
-                    <Text size="sm" color="dimmed">
+
+                    <Text type="secondary" className="text-sm">
                         {product.productVariants.length} phiên bản
                     </Text>
-                </Stack>
-            </Stack>
-        </Card>
+                </Space>
+            </Card>
+        </Link>
     );
 }
 

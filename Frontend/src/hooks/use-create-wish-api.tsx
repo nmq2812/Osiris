@@ -1,12 +1,13 @@
 import { useMutation } from "react-query";
-
 import React from "react";
+import Link from "next/link";
+import { Typography } from "antd";
 import ResourceURL from "@/constants/ResourceURL";
 import { ClientWishResponse, ClientWishRequest } from "@/datas/ClientUI";
 import FetchUtils, { ErrorMessage } from "@/utils/FetchUtils";
 import NotifyUtils from "@/utils/NotifyUtils";
-import { Anchor, Text } from "@mantine/core";
-import { Link } from "tabler-icons-react";
+
+const { Text } = Typography;
 
 function useCreateWishApi() {
     return useMutation<ClientWishResponse, ErrorMessage, ClientWishRequest>(
@@ -15,15 +16,18 @@ function useCreateWishApi() {
         {
             onSuccess: (response) =>
                 NotifyUtils.simpleSuccess(
-                    <Text inherit>
+                    <>
                         <span>
                             Đã thêm sản phẩm {response.wishProduct.productName}{" "}
                             vào{" "}
                         </span>
-                        <Anchor component={Link} href="/user/wishlist" inherit>
+                        <Link
+                            href="/user/wishlist"
+                            className="text-blue-600 hover:underline"
+                        >
                             danh sách yêu thích
-                        </Anchor>
-                    </Text>,
+                        </Link>
+                    </>,
                 ),
             onError: () =>
                 NotifyUtils.simpleFailed(

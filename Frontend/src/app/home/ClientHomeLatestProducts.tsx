@@ -1,16 +1,11 @@
 "use client";
 import React from "react";
+import { Button, Space, Typography, Skeleton, Empty } from "antd";
 import {
-    Button,
-    Grid,
-    Group,
-    Skeleton,
-    Stack,
-    Text,
-    Title,
-    useMantineTheme,
-} from "@mantine/core";
-import { AlertTriangle, List, Marquee } from "tabler-icons-react";
+    UnorderedListOutlined,
+    WarningOutlined,
+    InboxOutlined,
+} from "@ant-design/icons";
 
 import { useQuery } from "react-query";
 import ClientProductCard from "@/components/ClientProductCard";
@@ -20,8 +15,6 @@ import FetchUtils, { ListResponse, ErrorMessage } from "@/utils/FetchUtils";
 import NotifyUtils from "@/utils/NotifyUtils";
 
 function ClientHomeLatestProducts() {
-    const theme = useMantineTheme();
-
     const requestParams = { size: 12, newable: true, saleable: true };
 
     const {
@@ -45,75 +38,83 @@ function ClientHomeLatestProducts() {
 
     if (isLoadingProductResponses) {
         resultFragment = (
-            <Stack>
+            <Space direction="vertical" style={{ width: "100%" }}>
                 {Array(5)
                     .fill(0)
                     .map((_, index) => (
-                        <Skeleton key={index} height={50} radius="md" />
+                        <Skeleton key={index} active />
                     ))}
-            </Stack>
+            </Space>
         );
     }
 
     if (isErrorProductResponses) {
         resultFragment = (
-            <Stack
-                my={theme.spacing.xl}
-                sx={{ alignItems: "center", color: theme.colors.pink[6] }}
-            >
-                <AlertTriangle size={125} strokeWidth={1} />
-                <Text size="xl" weight={500}>
+            <div style={{ textAlign: "center", margin: "24px 0" }}>
+                <WarningOutlined style={{ fontSize: 64, color: "#ff4d4f" }} />
+                <Typography.Text
+                    style={{
+                        display: "block",
+                        fontSize: "14px",
+                        fontWeight: 500,
+                    }}
+                >
                     Đã có lỗi xảy ra
-                </Text>
-            </Stack>
+                </Typography.Text>
+            </div>
         );
     }
 
     if (products && products.totalElements === 0) {
         resultFragment = (
-            <Stack
-                my={theme.spacing.xl}
-                sx={{ alignItems: "center", color: theme.colors.blue[6] }}
-            >
-                <Marquee size={125} strokeWidth={1} />
-                <Text size="xl" weight={500}>
-                    Không có sản phẩm
-                </Text>
-            </Stack>
+            <Empty
+                image={
+                    <InboxOutlined style={{ fontSize: 64, color: "#1890ff" }} />
+                }
+                description="Không có sản phẩm"
+                style={{ margin: "24px 0" }}
+            />
         );
     }
 
     if (products && products.totalElements > 0) {
         resultFragment = (
-            <Grid>
+            <div className="grid">
                 {products.content.map((product, index) => (
-                    <Grid.Col key={index} span={6} sm={4} md={3}>
+                    <div key={index} className="grid-col">
                         <ClientProductCard product={product} />
-                    </Grid.Col>
+                    </div>
                 ))}
-            </Grid>
+            </div>
         );
     }
 
     return (
-        <Stack>
-            <Group position="apart">
-                <Title order={2}>
-                    <Text color="orange" inherit>
+        <Space direction="vertical" style={{ width: "100%" }}>
+            <div
+                style={{
+                    display: "flex",
+                    justifyContent: "space-between",
+                    alignItems: "center",
+                    width: "100%",
+                }}
+            >
+                <Typography.Title level={2}>
+                    <Typography.Text style={{ color: "orange" }}>
                         Sản phẩm mới nhất
-                    </Text>
-                </Title>
+                    </Typography.Text>
+                </Typography.Title>
                 <Button
-                    variant="light"
-                    leftIcon={<List size={16} />}
-                    radius="md"
+                    type="default"
+                    icon={<UnorderedListOutlined />}
+                    style={{ borderRadius: "8px" }}
                 >
                     Xem tất cả
                 </Button>
-            </Group>
+            </div>
 
             {resultFragment}
-        </Stack>
+        </Space>
     );
 }
 

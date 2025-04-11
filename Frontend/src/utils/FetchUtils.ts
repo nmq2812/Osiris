@@ -118,7 +118,7 @@ class FetchUtils {
     ): Promise<O> {
         const token = JSON.parse(
             localStorage.getItem(
-                isAdmin ? "electro-admin-auth-store" : "electro-auth-store",
+                isAdmin ? "Osiris-admin-auth-store" : "Osiris-auth-store",
             ) || "{}",
         ).state?.jwtToken;
 
@@ -153,7 +153,7 @@ class FetchUtils {
     ): Promise<O> {
         const token = JSON.parse(
             localStorage.getItem(
-                isAdmin ? "electro-admin-auth-store" : "electro-auth-store",
+                isAdmin ? "Osiris-admin-auth-store" : "Osiris-auth-store",
             ) || "{}",
         ).state?.jwtToken;
 
@@ -186,7 +186,7 @@ class FetchUtils {
     ): Promise<O> {
         const token = JSON.parse(
             localStorage.getItem(
-                isAdmin ? "electro-admin-auth-store" : "electro-auth-store",
+                isAdmin ? "Osiris-admin-auth-store" : "Osiris-auth-store",
             ) || "{}",
         ).state?.jwtToken;
 
@@ -219,7 +219,7 @@ class FetchUtils {
     ) {
         const token = JSON.parse(
             localStorage.getItem(
-                isAdmin ? "electro-admin-auth-store" : "electro-auth-store",
+                isAdmin ? "Osiris-admin-auth-store" : "Osiris-auth-store",
             ) || "{}",
         ).state?.jwtToken;
 

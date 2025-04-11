@@ -1,57 +1,50 @@
 "use client";
 import React from "react";
-import { Card, Group, Text, TextInput, useMantineTheme } from "@mantine/core";
-import { At, Mailbox } from "tabler-icons-react";
+import { Card, Row, Col, Typography, Input, Space } from "antd";
+import { MailOutlined, InboxOutlined } from "@ant-design/icons";
+
+const { Text } = Typography;
 
 function ClientHomeNewsletter() {
-    const theme = useMantineTheme();
-
     return (
         <Card
-            radius="md"
-            shadow="sm"
-            p="lg"
-            sx={{
-                backgroundColor:
-                    theme.colorScheme === "dark"
-                        ? theme.colors.blue[9]
-                        : theme.colors.blue[6],
-                color: theme.white,
+            style={{
+                backgroundColor: "#1890ff",
+                color: "#fff",
+                borderRadius: "8px",
             }}
         >
-            <Group position="apart">
-                <Group>
-                    <Mailbox size={40} strokeWidth={1} />
-                    <Text weight={500} sx={{ fontSize: theme.fontSizes.xl }}>
-                        Đăng ký nhận tin
-                    </Text>
-                    <Text sx={{ fontSize: theme.fontSizes.md }}>
-                        và cập nhật khuyến mãi liên tục...
-                    </Text>
-                </Group>
-                <TextInput
-                    styles={{
-                        root: { width: 450 },
-                        icon: { color: theme.white },
-                        input: {
-                            color: theme.white,
+            <Row justify="space-between" align="middle">
+                <Col>
+                    <Space>
+                        <InboxOutlined style={{ fontSize: 40 }} />
+                        <Space direction="vertical" size={0}>
+                            <Text
+                                strong
+                                style={{ fontSize: 18, color: "#fff" }}
+                            >
+                                Đăng ký nhận tin
+                            </Text>
+                            <Text style={{ color: "#fff" }}>
+                                và cập nhật khuyến mãi liên tục...
+                            </Text>
+                        </Space>
+                    </Space>
+                </Col>
+                <Col>
+                    <Input
+                        style={{
+                            width: 450,
+                            backgroundColor: "rgba(255,255,255,0.25)",
                             border: "none",
-                            backgroundColor: theme.fn.rgba(
-                                theme.colors.blue[1],
-                                0.25,
-                            ),
-
-                            "&::placeholder": {
-                                color: theme.fn.rgba(theme.colors.gray[0], 0.5),
-                            },
-                        },
-                    }}
-                    placeholder="Địa chỉ email"
-                    radius="md"
-                    size="md"
-                    icon={<At size={16} />}
-                />
-            </Group>
+                            color: "#fff",
+                        }}
+                        placeholder="Địa chỉ email"
+                        size="large"
+                        prefix={<MailOutlined style={{ color: "#fff" }} />}
+                    />
+                </Col>
+            </Row>
         </Card>
     );
 }

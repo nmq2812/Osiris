@@ -1,16 +1,13 @@
 "use client";
 
 import { ReactNode, useState } from "react";
-import { MantineProvider } from "@mantine/core";
-import { ModalsProvider } from "@mantine/modals";
-import { NotificationsProvider } from "@mantine/notifications";
 import { QueryClient, QueryClientProvider } from "react-query";
 import { ReactQueryDevtools } from "react-query/devtools";
 import React from "react";
-import { ConfigProvider } from "antd";
+import { ConfigProvider, App, theme } from "antd";
 import viVN from "antd/lib/locale/vi_VN";
 
-// Tạo QueryClient ở đây
+// Create QueryClient here
 const queryClient = new QueryClient({
     defaultOptions: {
         queries: {
@@ -21,33 +18,30 @@ const queryClient = new QueryClient({
 });
 
 export default function ClientProviders({ children }: { children: ReactNode }) {
-    // Sử dụng hook để quản lý colorScheme
-    const [colorScheme, setColorScheme] = useState<"light" | "dark">("light");
+    // Use hook to manage theme
+    const [isDarkMode, setIsDarkMode] = useState<boolean>(false);
 
-    const toggleColorScheme = (value?: "light" | "dark") => {
-        setColorScheme(value || (colorScheme === "dark" ? "light" : "dark"));
+    const toggleTheme = () => {
+        setIsDarkMode(!isDarkMode);
     };
 
     return (
         <QueryClientProvider client={queryClient}>
-            <NotificationsProvider>
-                <MantineProvider>
-                    <ModalsProvider>
-                        <ConfigProvider
-                            locale={viVN}
-                            theme={{
-                                token: {
-                                    colorPrimary: "#1890ff",
-                                    borderRadius: 6,
-                                },
-                            }}
-                        >
-                            {children}
-                        </ConfigProvider>
-                    </ModalsProvider>
-                </MantineProvider>
-                <ReactQueryDevtools initialIsOpen={false} />
-            </NotificationsProvider>
+            <ConfigProvider
+                locale={viVN}
+                theme={{
+                    token: {
+                        colorPrimary: "#1890ff",
+                        borderRadius: 6,
+                    },
+                    algorithm: isDarkMode
+                        ? theme.darkAlgorithm
+                        : theme.defaultAlgorithm,
+                }}
+            >
+                <App>{children}</App>
+            </ConfigProvider>
+            <ReactQueryDevtools initialIsOpen={false} />
         </QueryClientProvider>
     );
 }
