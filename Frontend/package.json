@@ -53,6 +53,7 @@
         "react-hook-form": "^7.54.2",
         "react-query": "^3.39.3",
         "react-responsive-carousel": "^3.2.23",
+        "react-stomp-hooks": "^3.0.1",
         "react-tracked": "^2.0.1",
         "sonner": "^2.0.1",
         "tabler-icons-react": "^1.56.0",
