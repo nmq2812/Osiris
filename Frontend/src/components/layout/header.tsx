@@ -2,7 +2,6 @@
 
 import React, { useEffect, useRef, useState, useMemo } from "react";
 import { useRouter } from "next/navigation";
-import Image from "next/image";
 import Link from "next/link";
 import {
     Layout,
@@ -36,7 +35,6 @@ import {
     FileOutlined,
     MenuOutlined,
     IdcardOutlined,
-    SearchOutlined,
 } from "@ant-design/icons";
 import { debounce } from "lodash";
 import ResourceURL from "@/constants/ResourceURL";
@@ -51,6 +49,7 @@ import MiscUtils from "@/utils/MiscUtils";
 import NotifyUtils from "@/utils/NotifyUtils";
 import { useQuery } from "react-query";
 import CategoryMenu from "./CategoryMenu";
+import OsirisLogo from "../OsirisLogo";
 
 const { Header } = Layout;
 const { Text } = Typography;
@@ -353,19 +352,7 @@ function HeaderSection() {
                     gutter={[16, 0]}
                 >
                     <Col xs={24} sm={6} md={5} lg={4}>
-                        <Link href="/" className="flex items-center">
-                            <Image
-                                src="/logo.png"
-                                alt="Osiris Logo"
-                                width={40}
-                                height={40}
-                                className="mr-2"
-                                priority
-                            />
-                            <span className="text-xl font-bold text-blue-600 md:text-2xl">
-                                OSIRIS
-                            </span>
-                        </Link>
+                        <OsirisLogo></OsirisLogo>
                     </Col>
                     <Col
                         xs={24}
