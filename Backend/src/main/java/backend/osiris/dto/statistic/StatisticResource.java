@@ -1,4 +1,4 @@
-package backend.osiris.dto.statitic;
+package backend.osiris.dto.statistic;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
