@@ -1,3 +1,4 @@
+
 import ReviewStarGroup from "@/components/ReviewStarGroup";
 import ApplicationConstants from "@/constants/ApplicationConstants";
 import ResourceURL from "@/constants/ResourceURL";
@@ -220,6 +221,7 @@ function useGetAllReviewsByProduct(productSlug: string, activePage: number) {
         isLoadingReviewResponses,
         isErrorReviewResponses,
     };
+
 }
 
 export default ClientProductReviews;

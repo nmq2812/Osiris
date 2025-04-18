@@ -1,7 +1,9 @@
 "use client";
 
 import React, { useEffect, useRef, useState, useMemo } from "react";
+
 import { usePathname, useRouter } from "next/navigation";
+
 import Link from "next/link";
 import {
     Layout,
@@ -50,8 +52,10 @@ import NotifyUtils from "@/utils/NotifyUtils";
 import { useQuery } from "react-query";
 import CategoryMenu from "./CategoryMenu";
 import OsirisLogo from "../OsirisLogo";
+
 import useAdminAuthStore from "@/stores/use-admin-auth-store";
 import DefaultHeader from "./DefaultHeader";
+
 
 const { Header } = Layout;
 const { Text } = Typography;
@@ -357,6 +361,7 @@ function HeaderSection() {
                     justify="space-between"
                     gutter={[16, 0]}
                 >
+
                     <Col
                         xs={24}
                         sm={6}
@@ -364,6 +369,7 @@ function HeaderSection() {
                         lg={4}
                         onClick={() => router.replace("/")}
                     >
+
                         <OsirisLogo></OsirisLogo>
                     </Col>
                     <Col

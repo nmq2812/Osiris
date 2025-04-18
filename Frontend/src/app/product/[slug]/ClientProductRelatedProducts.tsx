@@ -1,3 +1,4 @@
+
 import { Grid, Group, Stack, Title } from "@mantine/core";
 import { CircleSquare } from "tabler-icons-react";
 
@@ -27,6 +28,7 @@ function ClientProductRelatedProducts({
             </Grid>
         </Stack>
     );
+
 }
 
 export default ClientProductRelatedProducts;
