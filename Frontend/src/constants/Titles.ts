@@ -30,7 +30,7 @@ const handler = {
     get: function (target: typeof titles, name: string) {
         return Object.prototype.hasOwnProperty.call(target, name)
             ? target[name] + " – Osiris"
-            : "Electro";
+            : "osiris – Thương mại điện tử";
     },
 };
 

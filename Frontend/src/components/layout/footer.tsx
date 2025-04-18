@@ -9,11 +9,17 @@ import {
     InstagramOutlined,
     CustomerServiceOutlined,
 } from "@ant-design/icons";
+import useAdminAuthStore from "@/stores/use-admin-auth-store";
 
 const { Footer } = Layout;
 const { Text, Title } = Typography;
 
 function ClientFooter() {
+    const { user } = useAdminAuthStore();
+
+    if (user) {
+        return null; // Không hiển thị footer nếu đã đăng nhập
+    }
     return (
         <Footer className="bg-gray-100 pt-16 pb-8 mt-16 border-t border-gray-200">
             <div className="container mx-auto max-w-7xl px-4">
