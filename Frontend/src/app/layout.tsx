@@ -6,6 +6,7 @@ import FooterSection from "@/components/layout/footer";
 import { QueryClient, QueryClientProvider } from "react-query";
 import "antd/dist/reset.css";
 import "@ant-design/v5-patch-for-react-19";
+import useAdminAuthStore from "@/stores/use-admin-auth-store";
 const queryClient = new QueryClient();
 
 const geistSans = Geist({
@@ -23,6 +24,7 @@ export default function RootLayout({
 }: Readonly<{
     children: React.ReactNode;
 }>) {
+    const { user } = useAdminAuthStore();
     return (
         <html lang="en">
             <body
@@ -30,7 +32,6 @@ export default function RootLayout({
             >
                 <QueryClientProvider client={queryClient}>
                     <HeaderSection />
-                    <div className=""></div>
                     {children}
                     <FooterSection />
                 </QueryClientProvider>

@@ -2,10 +2,8 @@
 import React, { useEffect } from "react";
 import { Layout, theme } from "antd";
 import useTitle from "@/hooks/use-title";
-import { DefaultHeader } from "@/components/DefaultHeader";
-import AdminSignin from "../admin-signin/page";
 import useAdminAuthStore from "@/stores/use-admin-auth-store";
-import DefaultNavbar from "@/components/DefaultNavbar";
+import DefaultNavbar from "@/components/layout/DefaultNavbar";
 import useAppStore from "@/stores/use-app-store";
 import { useRouter } from "next/navigation";
 
@@ -32,7 +30,6 @@ function Admin({ children }: { children: React.ReactNode }) {
 
     return (
         <Layout style={{ minHeight: "100vh" }}>
-            <DefaultHeader />
             <Layout>
                 <DefaultNavbar />
                 <Layout

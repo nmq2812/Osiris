@@ -75,11 +75,12 @@ function AdminSignin() {
 
             const jwtResponse = await loginApi.mutateAsync(loginRequest);
             updateJwtToken(jwtResponse.token);
+            console.log("jwtResponse", jwtResponse.token);
 
             const userResponse = await userInfoApi.mutateAsync();
             updateUser(userResponse);
 
-            router.push("/admin");
+            router.replace("/admin");
             NotifyUtils.simpleSuccess("Đăng nhập thành công");
         } catch (error) {
             if (error instanceof z.ZodError) {

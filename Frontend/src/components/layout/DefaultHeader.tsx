@@ -26,7 +26,7 @@ import Link from "next/link";
 import useAppStore from "@/stores/use-app-store";
 import NotifyUtils from "@/utils/NotifyUtils";
 import useAdminAuthStore from "@/stores/use-admin-auth-store";
-import OsirisLogo from "./OsirisLogo";
+import OsirisLogo from "../OsirisLogo";
 
 const { Header } = Layout;
 const { Text } = Typography;
@@ -134,7 +134,7 @@ export function DefaultHeader() {
             <div className="header-right">
                 <Space size="middle" align="center">
                     {/* Hiển thị các links trên desktop */}
-                    <Space size="small" className="hidden md:flex">
+                    <Space size="small" className=" md:flex">
                         {headerLinks.map((link) => (
                             <Link
                                 key={link.label}
