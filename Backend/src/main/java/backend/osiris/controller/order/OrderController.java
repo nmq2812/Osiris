@@ -20,7 +20,6 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/orders")
 @AllArgsConstructor
-@CrossOrigin(AppConstants.FRONTEND_HOST)
 public class OrderController {
 
     private OrderService orderService;

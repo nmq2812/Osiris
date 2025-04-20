@@ -14,7 +14,6 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/api/stats")
 @AllArgsConstructor
-@CrossOrigin(AppConstants.FRONTEND_HOST)
 public class StatisticController {
 
     private StatisticService statisticService;

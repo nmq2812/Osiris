@@ -18,7 +18,6 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/promotions")
 @AllArgsConstructor
-@CrossOrigin(AppConstants.FRONTEND_HOST)
 public class PromotionController {
 
     private PromotionService promotionService;

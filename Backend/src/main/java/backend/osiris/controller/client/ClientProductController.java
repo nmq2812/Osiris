@@ -34,7 +34,6 @@ import java.util.Optional;
 @RestController
 @RequestMapping("/client-api/products")
 @AllArgsConstructor
-@CrossOrigin(AppConstants.FRONTEND_HOST)
 public class ClientProductController {
 
     private ProductRepository productRepository;

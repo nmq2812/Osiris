@@ -38,7 +38,6 @@ import java.util.UUID;
 @RestController
 @RequestMapping("/client-api/notifications")
 @AllArgsConstructor
-@CrossOrigin(AppConstants.FRONTEND_HOST)
 @Slf4j
 public class ClientNotificationController {
 
