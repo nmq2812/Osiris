@@ -9,7 +9,7 @@ import { TitleLink } from "@/datas/TitleLink";
 import MessageUtils from "@/utils/MessageUtils";
 import PageConfigs from "@/utils/PageConfigs";
 import { z } from "zod";
-import AddressConfigs from "../address/AddressConfigs";
+import AddressConfigs from "../AddressConfigs";
 
 class ProvinceConfigs extends Configs {
     static managerPath = ManagerPath.PROVINCE;

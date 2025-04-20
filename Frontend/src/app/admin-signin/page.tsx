@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { use, useEffect, useState } from "react";
 import {
     Form,
     Input,
@@ -56,13 +56,18 @@ function AdminSignin() {
         FetchUtils.getWithToken(ResourceURL.ADMIN_USER_INFO, undefined, true),
     );
 
+    // Kiểm tra xem người dùng đã đăng nhập hay chưa
+    useEffect(() => {
+        if (user) {
+            NotifyUtils.simpleSuccess("Bạn đã đăng nhập rồi!");
+            router.replace("/admin");
+        }
+    }, []);
     // Xử lý đăng nhập
     const handleFormSubmit = async (values: {
         username: string;
         password: string;
     }) => {
-        if (user) return;
-
         try {
             setLoading(true);
             // Xác thực dữ liệu với zod
@@ -79,7 +84,8 @@ function AdminSignin() {
             const userResponse = await userInfoApi.mutateAsync();
             updateUser(userResponse);
 
-            router.push("/admin");
+            router.replace("/admin");
+
             NotifyUtils.simpleSuccess("Đăng nhập thành công");
         } catch (error) {
             if (error instanceof z.ZodError) {

@@ -8,8 +8,8 @@ import { AddressResponse, AddressRequest } from "@/models/Address";
 import { DistrictResponse } from "@/models/District";
 import { ProvinceResponse } from "@/models/Province";
 import MiscUtils from "@/utils/MiscUtils";
-import DistrictConfigs from "../district/DistrictConfigs";
-import ProvinceConfigs from "../province/ProvinceConfigs";
+import DistrictConfigs from "./district/DistrictConfigs";
+import ProvinceConfigs from "./province/ProvinceConfigs";
 import AddressConfigs from "./AddressConfigs";
 
 function useAddressUpdateViewModel(id: number) {

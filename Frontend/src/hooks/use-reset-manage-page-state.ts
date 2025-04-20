@@ -1,3 +1,4 @@
+"use client";
 import useAppStore from "@/stores/use-app-store";
 import { useEffect } from "react";
 
