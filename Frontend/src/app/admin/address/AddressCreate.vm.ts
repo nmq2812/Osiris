@@ -6,8 +6,8 @@ import { DistrictResponse } from "@/models/District";
 import { ProvinceResponse } from "@/models/Province";
 import { useForm, zodResolver } from "@mantine/form";
 import { useState } from "react";
-import DistrictConfigs from "../district/DistrictConfigs";
-import ProvinceConfigs from "../province/ProvinceConfigs";
+import DistrictConfigs from "./district/DistrictConfigs";
+import ProvinceConfigs from "./province/ProvinceConfigs";
 import AddressConfigs from "./AddressConfigs";
 
 function useAddressCreateViewModel() {

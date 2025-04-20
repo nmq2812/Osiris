@@ -1,58 +1,40 @@
 "use client";
-import React, { useEffect } from "react";
-import { Layout, theme } from "antd";
+import React from "react";
+import { Layout } from "antd";
+import DefaultHeader from "@/components/layout/DefaultHeader";
+import DefaultNavbar from "@/components/layout/DefaultNavbar";
 import useTitle from "@/hooks/use-title";
-import { DefaultHeader } from "@/components/DefaultHeader";
-import AdminSignin from "../admin-signin/page";
 import useAdminAuthStore from "@/stores/use-admin-auth-store";
-import DefaultNavbar from "@/components/DefaultNavbar";
-import useAppStore from "@/stores/use-app-store";
-import { useRouter } from "next/navigation";
+import AdminSignin from "../admin-signin/page";
 
 const { Content } = Layout;
-const { useToken } = theme;
 
-function Admin({ children }: { children: React.ReactNode }) {
-    useTitle("Admin");
-    const { token } = useToken();
+function Admin() {
+    useTitle();
+
     const { user } = useAdminAuthStore();
-    const { opened } = useAppStore();
-    const router = useRouter();
-
-    // Sử dụng useEffect để chuyển hướng sau khi render
-    useEffect(() => {
-        if (!user) {
-            router.replace("/admin-signin");
-        }
-    }, [user, router]);
 
     if (!user) {
-        return null;
+        return <AdminSignin />;
     }
+
+    console.log("Admin user: ", user);
 
     return (
         <Layout style={{ minHeight: "100vh" }}>
-            <DefaultHeader />
             <Layout>
                 <DefaultNavbar />
-                <Layout
-                    style={{
-                        marginLeft: opened ? 250 : 80,
-                        transition: "margin-left 0.2s",
-                        padding: "0 24px 24px",
-                    }}
-                >
+                <Layout style={{ padding: "24px", background: "#f5f5f5" }}>
                     <Content
                         style={{
-                            background: token.colorBgContainer,
-                            marginTop: 24,
-                            minHeight: 280,
-                            borderRadius: token.borderRadiusLG,
+                            background: "#fff",
                             padding: 24,
-                            overflow: "auto",
+                            margin: 0,
+                            minHeight: 280,
+                            borderRadius: 8,
                         }}
                     >
-                        {children}
+                        {/* Page content goes here - use proper routing in Next.js for content */}
                     </Content>
                 </Layout>
             </Layout>

@@ -40,9 +40,9 @@ import MessageUtils from "@/utils/MessageUtils";
 import NotifyUtils from "@/utils/NotifyUtils";
 import { useSearchParams } from "next/navigation";
 import { useMutation } from "react-query";
-import ProvinceConfigs from "../admin/province/ProvinceConfigs";
-import DistrictConfigs from "../admin/district/DistrictConfigs";
-import WardConfigs from "../admin/ward/WardConfigs";
+import ProvinceConfigs from "../admin/address/province/ProvinceConfigs";
+import DistrictConfigs from "../admin/address/district/DistrictConfigs";
+import WardConfigs from "../admin/address/ward/WardConfigs";
 import { useRouter } from "next/navigation";
 
 const { Text, Title } = Typography;

@@ -12,9 +12,9 @@ import {
     Form,
     theme,
 } from "antd";
-import DistrictConfigs from "@/app/admin/district/DistrictConfigs";
-import ProvinceConfigs from "@/app/admin/province/ProvinceConfigs";
-import WardConfigs from "@/app/admin/ward/WardConfigs";
+import DistrictConfigs from "@/app/admin/address/district/DistrictConfigs";
+import ProvinceConfigs from "@/app/admin/address/province/ProvinceConfigs";
+import WardConfigs from "@/app/admin/address/ward/WardConfigs";
 import ClientUserNavbar from "@/components/ClientUserNavbar";
 import ResourceURL from "@/constants/ResourceURL";
 import { ClientPersonalSettingUserRequest } from "@/datas/ClientUI";
