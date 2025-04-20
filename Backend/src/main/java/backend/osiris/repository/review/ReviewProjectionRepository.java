@@ -5,6 +5,7 @@ import backend.osiris.entity.review.Review;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.CriteriaQuery;
+import jakarta.persistence.criteria.Expression;
 import jakarta.persistence.criteria.Root;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Repository;
@@ -23,9 +24,15 @@ public class ReviewProjectionRepository {
         CriteriaQuery<StatisticResource> query = cb.createQuery(StatisticResource.class);
 
         Root<Review> review = query.from(Review.class);
-        query.select(cb.construct(StatisticResource.class, review.get("createdAt").as(Instant.class), cb.count(review.get("id"))));
-        query.groupBy(review.get("createdAt").as(Instant.class));
-        query.orderBy(cb.asc(review.get("createdAt")));
+        Expression<Instant> createdAtExpr = review.get("createdAt").as(Instant.class);
+
+        query.select(cb.construct(
+                StatisticResource.class,
+                createdAtExpr,
+                cb.count(review.get("id"))
+        ));
+        query.groupBy(createdAtExpr);
+        query.orderBy(cb.asc(createdAtExpr));
 
         return em.createQuery(query).getResultList();
     }
