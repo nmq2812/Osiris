@@ -18,7 +18,6 @@ import java.util.List;
 @RestController
 @RequestMapping("/client-api/payment-methods")
 @AllArgsConstructor
-@CrossOrigin(AppConstants.FRONTEND_HOST)
 public class ClientPaymentMethodController {
 
     private PaymentMethodRepository paymentMethodRepository;

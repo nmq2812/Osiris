@@ -20,7 +20,6 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/reviews")
 @AllArgsConstructor
-@CrossOrigin(AppConstants.FRONTEND_HOST)
 public class ReviewController {
 
     private ReviewService reviewService;

@@ -34,7 +34,6 @@ import java.util.Optional;
 @RestController
 @RequestMapping("/client-api/preorders")
 @AllArgsConstructor
-@CrossOrigin(AppConstants.FRONTEND_HOST)
 public class ClientPreorderController {
 
     private PreorderRepository preorderRepository;

@@ -21,7 +21,6 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/waybills")
 @AllArgsConstructor
-@CrossOrigin(AppConstants.FRONTEND_HOST)
 public class WaybillController {
 
     private WaybillService waybillService;
