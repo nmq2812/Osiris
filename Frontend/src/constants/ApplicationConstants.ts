@@ -1,5 +1,5 @@
 class ApplicationConstants {
-    static HOME_PATH = "http://localhost:8080";
+    static HOME_PATH = "https://osiris-1744699838592.azurewebsites.net";
     static API_PATH = ApplicationConstants.HOME_PATH + "/api";
     static CLIENT_API_PATH = ApplicationConstants.HOME_PATH + "/client-api";
     static WEBSOCKET_PATH = ApplicationConstants.HOME_PATH + "/ws";

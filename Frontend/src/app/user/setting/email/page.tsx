@@ -12,7 +12,7 @@ import {
     theme,
 } from "antd";
 import { MailOutlined } from "@ant-design/icons";
-import { useMutation } from "react-query";
+import { useMutation } from "@tanstack/react-query";
 import { z } from "zod";
 import ClientUserNavbar from "@/components/ClientUserNavbar";
 import useTitle from "@/hooks/use-title";

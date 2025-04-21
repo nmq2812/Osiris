@@ -6,9 +6,12 @@ import useAdminAuthStore from "@/stores/use-admin-auth-store";
 import DefaultNavbar from "@/components/layout/DefaultNavbar";
 import useAppStore from "@/stores/use-app-store";
 import { useRouter } from "next/navigation";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 
 const { Content } = Layout;
 const { useToken } = theme;
+
+const queryClient = new QueryClient();
 
 function Admin({ children }: { children: React.ReactNode }) {
     useTitle("Admin");
@@ -22,38 +25,36 @@ function Admin({ children }: { children: React.ReactNode }) {
         if (!user) {
             router.replace("/admin-signin");
         }
-    }, [user, router]);
-
-    if (!user) {
-        return null;
-    }
+    }, [user]);
 
     return (
-        <Layout style={{ minHeight: "100vh" }}>
-            <Layout>
-                <DefaultNavbar />
-                <Layout
-                    style={{
-                        marginLeft: opened ? 250 : 80,
-                        transition: "margin-left 0.2s",
-                        padding: "0 24px 24px",
-                    }}
-                >
-                    <Content
+        <QueryClientProvider client={queryClient}>
+            <Layout style={{ minHeight: "100vh" }}>
+                <Layout>
+                    <DefaultNavbar />
+                    <Layout
                         style={{
-                            background: token.colorBgContainer,
-                            marginTop: 24,
-                            minHeight: 280,
-                            borderRadius: token.borderRadiusLG,
-                            padding: 24,
-                            overflow: "auto",
+                            marginLeft: opened ? 250 : 80,
+                            transition: "margin-left 0.2s",
+                            padding: "0 24px 24px",
                         }}
                     >
-                        {children}
-                    </Content>
+                        <Content
+                            style={{
+                                background: token.colorBgContainer,
+                                marginTop: 24,
+                                minHeight: 280,
+                                borderRadius: token.borderRadiusLG,
+                                padding: 24,
+                                overflow: "auto",
+                            }}
+                        >
+                            {children}
+                        </Content>
+                    </Layout>
                 </Layout>
             </Layout>
-        </Layout>
+        </QueryClientProvider>
     );
 }
 

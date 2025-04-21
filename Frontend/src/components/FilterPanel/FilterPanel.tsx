@@ -1,3 +1,4 @@
+"use client";
 import React, { useRef } from "react";
 import { Divider, Paper, Stack } from "@mantine/core";
 import useAppStore from "@/stores/use-app-store";

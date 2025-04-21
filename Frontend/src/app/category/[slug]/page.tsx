@@ -33,7 +33,7 @@ import useTitle from "@/hooks/use-title";
 import FetchUtils, { ErrorMessage } from "@/utils/FetchUtils";
 import MiscUtils from "@/utils/MiscUtils";
 import NotifyUtils from "@/utils/NotifyUtils";
-import { useQuery } from "react-query";
+import { useQuery } from "@tanstack/react-query";
 import useClientCategoryStore from "@/stores/use-client-category-store";
 import ClientCategoryProducts from "./ClientCategoryProducts";
 import ClientCategorySkeleton from "./ClientCategorySkeleton";

@@ -25,7 +25,7 @@ import { CollectionWrapper } from "@/datas/CollectionWrapper";
 import useTitle from "@/hooks/use-title";
 import FetchUtils, { ErrorMessage } from "@/utils/FetchUtils";
 import PageConfigs from "@/utils/PageConfigs";
-import { useQuery } from "react-query";
+import { useQuery } from "@tanstack/react-query";
 
 const { Content } = Layout;
 const { Title, Text, Link } = Typography;

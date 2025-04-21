@@ -1,4 +1,4 @@
-import { useMutation } from "react-query";
+import { useMutation } from "@tanstack/react-query";
 import React from "react";
 import Link from "next/link";
 import { Typography } from "antd";

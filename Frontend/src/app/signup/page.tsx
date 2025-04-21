@@ -39,7 +39,7 @@ import FetchUtils, { ErrorMessage } from "@/utils/FetchUtils";
 import MessageUtils from "@/utils/MessageUtils";
 import NotifyUtils from "@/utils/NotifyUtils";
 import { useSearchParams } from "next/navigation";
-import { useMutation } from "react-query";
+import { useMutation } from "@tanstack/react-query";
 import ProvinceConfigs from "../admin/address/province/ProvinceConfigs";
 import DistrictConfigs from "../admin/address/district/DistrictConfigs";
 import WardConfigs from "../admin/address/ward/WardConfigs";

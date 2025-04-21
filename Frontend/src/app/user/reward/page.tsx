@@ -23,7 +23,7 @@ import useTitle from "@/hooks/use-title";
 
 import { RewardType } from "@/models/RewardStrategy";
 import DateUtils from "@/utils/DateUtils";
-import { useQuery } from "react-query";
+import { useQuery } from "@tanstack/react-query";
 import FetchUtils, { ErrorMessage } from "@/utils/FetchUtils";
 import ResourceURL from "@/constants/ResourceURL";
 import NotifyUtils from "@/utils/NotifyUtils";

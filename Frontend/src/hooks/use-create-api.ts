@@ -1,6 +1,6 @@
 import FetchUtils, { ErrorMessage } from "@/utils/FetchUtils";
 import NotifyUtils from "@/utils/NotifyUtils";
-import { useMutation } from "react-query";
+import { useMutation } from "@tanstack/react-query";
 
 function useCreateApi<I, O>(resourceUrl: string) {
     return useMutation<O, ErrorMessage, I>(

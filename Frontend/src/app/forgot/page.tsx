@@ -3,7 +3,7 @@ import React from "react";
 import { Button, Card, Input, Space, Typography } from "antd";
 import { z } from "zod";
 import { useForm, zodResolver } from "@mantine/form";
-import { useMutation } from "react-query";
+import { useMutation } from "@tanstack/react-query";
 import ResourceURL from "@/constants/ResourceURL";
 import { Empty } from "@/datas/Utility";
 import useTitle from "@/hooks/use-title";

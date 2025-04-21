@@ -1,4 +1,3 @@
-
 import ReviewStarGroup from "@/components/ReviewStarGroup";
 import ApplicationConstants from "@/constants/ApplicationConstants";
 import ResourceURL from "@/constants/ResourceURL";
@@ -21,7 +20,7 @@ import {
     useMantineTheme,
 } from "@mantine/core";
 import { useState } from "react";
-import { useQuery } from "react-query";
+import { useQuery } from "@tanstack/react-query";
 import { AlertCircle, AlertTriangle, Edit, Messages } from "tabler-icons-react";
 
 interface ClientProductReviewsProps {
@@ -221,7 +220,6 @@ function useGetAllReviewsByProduct(productSlug: string, activePage: number) {
         isLoadingReviewResponses,
         isErrorReviewResponses,
     };
-
 }
 
 export default ClientProductReviews;

@@ -1,3 +1,4 @@
+"use client";
 import { SelectOption } from "@/datas/SelectOption";
 import useAppStore from "@/stores/use-app-store";
 import { Filter } from "@/utils/FilterUtils";

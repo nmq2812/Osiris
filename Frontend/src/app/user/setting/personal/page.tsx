@@ -30,7 +30,7 @@ import FetchUtils, { ErrorMessage } from "@/utils/FetchUtils";
 import MessageUtils from "@/utils/MessageUtils";
 import MiscUtils from "@/utils/MiscUtils";
 import NotifyUtils from "@/utils/NotifyUtils";
-import { useMutation } from "react-query";
+import { useMutation } from "@tanstack/react-query";
 import { z } from "zod";
 
 const { Title } = Typography;

@@ -5,7 +5,6 @@ import {
     Button,
     Card,
     Col,
-    Divider,
     Input,
     Layout,
     Row,
@@ -24,7 +23,7 @@ import { useAuthStore } from "@/stores/authStore";
 import DateUtils from "@/utils/DateUtils";
 import FetchUtils, { ErrorMessage } from "@/utils/FetchUtils";
 import NotifyUtils from "@/utils/NotifyUtils";
-import { useQuery, useQueryClient, useMutation } from "react-query";
+import { useQuery, useQueryClient, useMutation } from "@tanstack/react-query";
 import { useStompClient, useSubscription } from "react-stomp-hooks";
 
 const { Text, Title } = Typography;
@@ -385,46 +384,46 @@ export function MessageInput({
 }
 
 function useGetRoomApi() {
-    const {
-        data: roomExistenceResponse,
-        isLoading: isLoadingRoomExistenceResponse,
-        isError: isErrorRoomExistenceResponse,
-    } = useQuery<ClientRoomExistenceResponse, ErrorMessage>(
-        ["client-api", "chat", "getRoom"],
-        () => FetchUtils.getWithToken(ResourceURL.CLIENT_CHAT_GET_ROOM),
-        {
-            onError: () =>
-                NotifyUtils.simpleFailed("Lấy dữ liệu không thành công"),
-            refetchOnWindowFocus: false,
-            keepPreviousData: true,
-        },
-    );
+    const { data, isLoading, isError } = useQuery<
+        ClientRoomExistenceResponse,
+        ErrorMessage
+    >({
+        queryKey: ["client-api", "chat", "getRoom"],
+        queryFn: () =>
+            FetchUtils.getWithToken(ResourceURL.CLIENT_CHAT_GET_ROOM),
+        refetchOnWindowFocus: false,
+        placeholderData: (previousData) => previousData,
+    });
+
+    useEffect(() => {
+        if (isError) {
+            NotifyUtils.simpleFailed("Lấy dữ liệu không thành công");
+        }
+    }, [isError]);
 
     return {
-        roomExistenceResponse,
-        isLoadingRoomExistenceResponse,
-        isErrorRoomExistenceResponse,
+        roomExistenceResponse: data as ClientRoomExistenceResponse | undefined,
+        isLoadingRoomExistenceResponse: isLoading,
+        isErrorRoomExistenceResponse: isError,
     };
 }
 
 function useCreateRoomApi() {
     const queryClient = useQueryClient();
 
-    return useMutation<RoomResponse, ErrorMessage, void>(
-        () => FetchUtils.postWithToken(ResourceURL.CLIENT_CHAT_CREATE_ROOM, {}),
-        {
-            onSuccess: () =>
-                queryClient.invalidateQueries([
-                    "client-api",
-                    "chat",
-                    "getRoom",
-                ]),
-            onError: () =>
-                NotifyUtils.simpleFailed(
-                    "Khởi tạo yêu cầu tư vấn không thành công",
-                ),
-        },
-    );
+    return useMutation<RoomResponse, ErrorMessage, void>({
+        mutationFn: () =>
+            FetchUtils.postWithToken(ResourceURL.CLIENT_CHAT_CREATE_ROOM, {}),
+
+        onSuccess: () =>
+            queryClient.invalidateQueries({
+                queryKey: ["client-api", "chat", "getRoom"],
+            }),
+        onError: () =>
+            NotifyUtils.simpleFailed(
+                "Khởi tạo yêu cầu tư vấn không thành công",
+            ),
+    });
 }
 
 export default ClientChat;

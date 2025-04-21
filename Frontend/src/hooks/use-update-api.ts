@@ -1,6 +1,6 @@
 import FetchUtils, { ErrorMessage } from "@/utils/FetchUtils";
 import NotifyUtils from "@/utils/NotifyUtils";
-import { useMutation, useQueryClient } from "react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 
 function useUpdateApi<I, O>(
     resourceUrl: string,

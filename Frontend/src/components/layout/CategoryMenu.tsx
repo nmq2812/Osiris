@@ -22,7 +22,7 @@ import { CollectionWrapper } from "@/datas/CollectionWrapper";
 import FetchUtils, { ErrorMessage } from "@/utils/FetchUtils";
 import NotifyUtils from "@/utils/NotifyUtils";
 import PageConfigs from "@/utils/PageConfigs";
-import { useQuery } from "react-query";
+import { useQuery } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 
 const { Link, Text } = Typography;

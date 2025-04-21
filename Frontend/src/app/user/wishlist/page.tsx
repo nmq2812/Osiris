@@ -22,7 +22,7 @@ import {
     WarningOutlined,
 } from "@ant-design/icons";
 import Link from "next/link";
-import { useMutation, useQuery, useQueryClient } from "react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import ClientUserNavbar from "@/components/ClientUserNavbar";
 import useTitle from "@/hooks/use-title";
 import FetchUtils, { ErrorMessage, ListResponse } from "@/utils/FetchUtils";

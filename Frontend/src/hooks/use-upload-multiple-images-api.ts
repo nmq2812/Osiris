@@ -2,7 +2,7 @@ import { CollectionWrapper } from "@/datas/CollectionWrapper";
 import { UploadedImageResponse } from "@/models/Image";
 import FetchUtils, { ErrorMessage } from "@/utils/FetchUtils";
 import NotifyUtils from "@/utils/NotifyUtils";
-import { useMutation } from "react-query";
+import { useMutation } from "@tanstack/react-query";
 
 function useUploadMultipleImagesApi() {
     return useMutation<

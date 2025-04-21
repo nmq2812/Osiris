@@ -1,4 +1,5 @@
-import React from "react";
+"use client";
+import React, { useCallback, useMemo } from "react";
 import { Table, Checkbox, Space, Button, Typography } from "antd";
 import { EditOutlined, EyeOutlined, DeleteOutlined } from "@ant-design/icons";
 import Link from "next/link";
@@ -42,74 +43,94 @@ function ManageTable<T extends BaseResponse>({
         entityDetailTableRowsFragment,
     });
 
-    const columns = [
-        {
-            title: (
-                <Checkbox
-                    onChange={handleToggleAllRowsCheckbox}
-                    checked={selection.length === listResponse.content.length}
-                    indeterminate={
-                        selection.length > 0 &&
-                        selection.length !== listResponse.content.length
-                    }
-                />
-            ),
-            width: 40,
-            render: (_: any, entity: BaseResponse) => (
-                <Checkbox
-                    checked={selection.includes(entity.id)}
-                    onChange={() => handleToggleRowCheckbox(entity.id)}
-                />
-            ),
-        },
-        ...tableHeads.map((head, index) => ({
-            title: head,
-            dataIndex: `column_${index}`,
-            key: `column_${index}`,
-            render: (_: any, entity: T) => {
-                const propertyValues = showedPropertiesFragment(entity);
-                // This is a simplified approach - need to ensure showedPropertiesFragment
-                // returns an array of elements that can be accessed by index
-                return React.Children.toArray(propertyValues)[index];
-            },
-        })),
-        {
-            title: "Thao tác",
-            key: "action",
-            width: 120,
-            render: (_: any, entity: BaseResponse) => (
-                <Space size="small">
-                    <Button
-                        type="primary"
-                        icon={<EyeOutlined />}
-                        size="small"
-                        shape="circle"
-                        onClick={() => handleViewEntityButton(entity.id)}
-                        title="Xem"
+    // Memoize the row className function
+    const getRowClassName = useCallback(
+        (record: BaseResponse) =>
+            selection.includes(record.id) ? "ant-table-row-selected" : "",
+        [selection],
+    );
+
+    // Memoize column definitions to prevent unnecessary re-renders
+    const columns = useMemo(
+        () => [
+            {
+                title: (
+                    <Checkbox
+                        onChange={handleToggleAllRowsCheckbox}
+                        checked={
+                            selection.length === listResponse.content.length
+                        }
+                        indeterminate={
+                            selection.length > 0 &&
+                            selection.length !== listResponse.content.length
+                        }
                     />
-                    <Link href={`update/${entity.id}`} passHref>
+                ),
+                width: 40,
+                render: (_: any, entity: BaseResponse) => (
+                    <Checkbox
+                        checked={selection.includes(entity.id)}
+                        onChange={() => handleToggleRowCheckbox(entity.id)}
+                    />
+                ),
+            },
+            ...tableHeads.map((head, index) => ({
+                title: head,
+                dataIndex: `column_${index}`,
+                key: `column_${index}`,
+                render: (_: any, entity: T) => {
+                    const propertyValues = showedPropertiesFragment(entity);
+                    return React.Children.toArray(propertyValues)[index];
+                },
+            })),
+            {
+                title: "Thao tác",
+                key: "action",
+                width: 120,
+                render: (_: any, entity: BaseResponse) => (
+                    <Space size="small">
                         <Button
                             type="primary"
-                            icon={<EditOutlined />}
+                            icon={<EyeOutlined />}
                             size="small"
                             shape="circle"
-                            style={{ backgroundColor: "#13c2c2" }}
-                            title="Cập nhật"
+                            onClick={() => handleViewEntityButton(entity.id)}
+                            title="Xem"
                         />
-                    </Link>
-                    <Button
-                        type="primary"
-                        danger
-                        icon={<DeleteOutlined />}
-                        size="small"
-                        shape="circle"
-                        onClick={() => handleDeleteEntityButton(entity.id)}
-                        title="Xóa"
-                    />
-                </Space>
-            ),
-        },
-    ];
+                        <Link href={`update/${entity.id}`} passHref>
+                            <Button
+                                type="primary"
+                                icon={<EditOutlined />}
+                                size="small"
+                                shape="circle"
+                                style={{ backgroundColor: "#13c2c2" }}
+                                title="Cập nhật"
+                            />
+                        </Link>
+                        <Button
+                            type="primary"
+                            danger
+                            icon={<DeleteOutlined />}
+                            size="small"
+                            shape="circle"
+                            onClick={() => handleDeleteEntityButton(entity.id)}
+                            title="Xóa"
+                        />
+                    </Space>
+                ),
+            },
+        ],
+        [
+            handleToggleAllRowsCheckbox,
+            handleToggleRowCheckbox,
+            handleViewEntityButton,
+            handleDeleteEntityButton,
+            selection,
+            listResponse.content.length,
+            tableHeads,
+            showedPropertiesFragment,
+        ],
+    );
 
     return (
         <Table
@@ -120,9 +141,7 @@ function ManageTable<T extends BaseResponse>({
             size="middle"
             bordered
             style={{ borderRadius: 8, overflow: "hidden" }}
-            rowClassName={(record) =>
-                selection.includes(record.id) ? "ant-table-row-selected" : ""
-            }
+            rowClassName={getRowClassName}
         />
     );
 }

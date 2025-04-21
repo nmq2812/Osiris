@@ -20,7 +20,7 @@ import {
     OrderedListOutlined,
 } from "@ant-design/icons";
 import Link from "next/link";
-import { useQuery } from "react-query";
+import { useQuery } from "@tanstack/react-query";
 import ClientUserNavbar from "@/components/ClientUserNavbar";
 import ApplicationConstants from "@/constants/ApplicationConstants";
 import FetchUtils, { ErrorMessage, ListResponse } from "@/utils/FetchUtils";

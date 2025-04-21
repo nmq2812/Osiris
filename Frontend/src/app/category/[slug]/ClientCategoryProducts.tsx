@@ -8,7 +8,7 @@ import { ClientListedProductResponse } from "@/datas/ClientUI";
 import useClientCategoryStore from "@/stores/use-client-category-store";
 import FetchUtils, { ListResponse, ErrorMessage } from "@/utils/FetchUtils";
 import NotifyUtils from "@/utils/NotifyUtils";
-import { useQuery } from "react-query";
+import { useQuery } from "@tanstack/react-query";
 
 const { Text } = Typography;
 const { useToken } = theme;

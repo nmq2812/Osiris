@@ -1,7 +1,7 @@
 "use client";
 import React from "react";
 import { Space, Skeleton, theme, Typography } from "antd";
-import { useQuery } from "react-query";
+import { useQuery } from "@tanstack/react-query";
 import { useParams } from "next/navigation";
 import FetchUtils, { ErrorMessage } from "@/utils/FetchUtils";
 import ResourceURL from "@/constants/ResourceURL";

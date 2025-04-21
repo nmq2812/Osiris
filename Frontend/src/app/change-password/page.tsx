@@ -2,7 +2,7 @@
 import React, { useEffect } from "react";
 
 import { Space, Card, Typography, Input, Button } from "antd";
-import { useMutation } from "react-query";
+import { useMutation } from "@tanstack/react-query";
 
 import { useForm, zodResolver } from "@mantine/form";
 import { z } from "zod";

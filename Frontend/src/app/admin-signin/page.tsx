@@ -12,7 +12,7 @@ import {
     theme,
 } from "antd";
 import { useRouter } from "next/navigation";
-import { useMutation } from "react-query";
+import { useMutation } from "@tanstack/react-query";
 import { LockOutlined, UserOutlined } from "@ant-design/icons";
 import { z } from "zod";
 import ResourceURL from "@/constants/ResourceURL";
@@ -48,13 +48,19 @@ function AdminSignin() {
     const { user, updateJwtToken, updateUser, resetAdminAuthState } =
         useAdminAuthStore();
 
-    const loginApi = useMutation<JwtResponse, ErrorMessage, LoginRequest>(
-        (requestBody) => FetchUtils.post(ResourceURL.LOGIN, requestBody),
-    );
+    const loginApi = useMutation<JwtResponse, ErrorMessage, LoginRequest>({
+        mutationFn: (requestBody: LoginRequest) =>
+            FetchUtils.post(ResourceURL.LOGIN, requestBody),
+    });
 
-    const userInfoApi = useMutation<UserResponse, ErrorMessage>((_) =>
-        FetchUtils.getWithToken(ResourceURL.ADMIN_USER_INFO, undefined, true),
-    );
+    const userInfoApi = useMutation<UserResponse, ErrorMessage, void>({
+        mutationFn: () =>
+            FetchUtils.getWithToken(
+                ResourceURL.ADMIN_USER_INFO,
+                undefined,
+                true,
+            ),
+    });
 
     // Kiểm tra xem người dùng đã đăng nhập hay chưa
     useEffect(() => {

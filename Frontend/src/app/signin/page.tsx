@@ -18,7 +18,7 @@ import { z } from "zod";
 import MessageUtils from "@/utils/MessageUtils";
 import { useForm } from "antd/es/form/Form";
 import { JwtResponse, LoginRequest } from "@/models/Authentication";
-import { useMutation } from "react-query";
+import { useMutation } from "@tanstack/react-query";
 import FetchUtils, { ErrorMessage } from "@/utils/FetchUtils";
 import ResourceURL from "@/constants/ResourceURL";
 import NotifyUtils from "@/utils/NotifyUtils";

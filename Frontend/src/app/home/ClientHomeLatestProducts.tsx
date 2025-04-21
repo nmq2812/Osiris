@@ -7,7 +7,7 @@ import {
     InboxOutlined,
 } from "@ant-design/icons";
 
-import { useQuery } from "react-query";
+import { useQuery } from "@tanstack/react-query";
 import ClientProductCard from "@/components/ClientProductCard";
 import ResourceURL from "@/constants/ResourceURL";
 import { ClientListedProductResponse } from "@/datas/ClientUI";
