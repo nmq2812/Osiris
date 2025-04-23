@@ -44,11 +44,16 @@ function CategoryMenu({
     } = useQuery<CollectionWrapper<ClientCategoryResponse>, ErrorMessage>({
         queryKey: ["client-api", "categories", "getAllCategories"],
         queryFn: () => FetchUtils.get(ResourceURL.CLIENT_CATEGORY),
-
-        onError: () => NotifyUtils.simpleFailed("Lấy dữ liệu không thành công"),
         refetchOnWindowFocus: false,
-        keepPreviousData: true,
+        staleTime: Infinity,
     });
+
+    // Handle error separately with useEffect
+    React.useEffect(() => {
+        if (isErrorCategoryResponses) {
+            NotifyUtils.simpleFailed("Lấy dữ liệu không thành công");
+        }
+    }, [isErrorCategoryResponses]);
 
     const handleAnchor = (path: string) => {
         setOpenedCategoryMenu(false);
