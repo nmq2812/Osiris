@@ -41,16 +41,14 @@ function CategoryMenu({
         data: categoryResponses,
         isLoading: isLoadingCategoryResponses,
         isError: isErrorCategoryResponses,
-    } = useQuery<CollectionWrapper<ClientCategoryResponse>, ErrorMessage>(
-        ["client-api", "categories", "getAllCategories"],
-        () => FetchUtils.get(ResourceURL.CLIENT_CATEGORY),
-        {
-            onError: () =>
-                NotifyUtils.simpleFailed("Lấy dữ liệu không thành công"),
-            refetchOnWindowFocus: false,
-            keepPreviousData: true,
-        },
-    );
+    } = useQuery<CollectionWrapper<ClientCategoryResponse>, ErrorMessage>({
+        queryKey: ["client-api", "categories", "getAllCategories"],
+        queryFn: () => FetchUtils.get(ResourceURL.CLIENT_CATEGORY),
+
+        onError: () => NotifyUtils.simpleFailed("Lấy dữ liệu không thành công"),
+        refetchOnWindowFocus: false,
+        keepPreviousData: true,
+    });
 
     const handleAnchor = (path: string) => {
         setOpenedCategoryMenu(false);
