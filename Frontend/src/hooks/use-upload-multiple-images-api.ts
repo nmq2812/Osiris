@@ -9,7 +9,8 @@ function useUploadMultipleImagesApi() {
         CollectionWrapper<UploadedImageResponse>,
         ErrorMessage,
         File[]
-    >((images) => FetchUtils.uploadMultipleImages(images), {
+    >({
+        mutationFn: (images) => FetchUtils.uploadMultipleImages(images),
         onSuccess: () => NotifyUtils.simpleSuccess("Tải hình lên thành công"),
         onError: () =>
             NotifyUtils.simpleFailed("Tải hình lên không thành công"),

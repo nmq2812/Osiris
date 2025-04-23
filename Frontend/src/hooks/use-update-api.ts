@@ -9,23 +9,21 @@ function useUpdateApi<I, O>(
 ) {
     const queryClient = useQueryClient();
 
-    return useMutation<O, ErrorMessage, I>(
-        (requestBody) =>
+    return useMutation<O, ErrorMessage, I>({
+        mutationFn: (requestBody) =>
             FetchUtils.update<I, O>(resourceUrl, entityId, requestBody),
-        {
-            onSuccess: () => {
-                NotifyUtils.simpleSuccess("Cập nhật thành công");
-                void queryClient.invalidateQueries([
-                    resourceKey,
-                    "getById",
-                    entityId,
-                ]);
-                void queryClient.invalidateQueries([resourceKey, "getAll"]);
-            },
-            onError: () =>
-                NotifyUtils.simpleFailed("Cập nhật không thành công"),
+
+        onSuccess: () => {
+            NotifyUtils.simpleSuccess("Cập nhật thành công");
+            void queryClient.invalidateQueries({
+                queryKey: [resourceKey, "getById", entityId],
+            });
+            void queryClient.invalidateQueries({
+                queryKey: [resourceKey, "getAll"],
+            });
         },
-    );
+        onError: () => NotifyUtils.simpleFailed("Cập nhật không thành công"),
+    });
 }
 
 export default useUpdateApi;

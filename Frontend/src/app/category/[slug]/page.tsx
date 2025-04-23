@@ -464,16 +464,20 @@ function useGetCategoryApi(categorySlug: string) {
         data: categoryResponse,
         isLoading: isLoadingCategoryResponse,
         isError: isErrorCategoryResponse,
-    } = useQuery<ClientCategoryResponse, ErrorMessage>(
-        ["client-api", "categories", "getCategory", categorySlug],
-        () => FetchUtils.get(ResourceURL.CLIENT_CATEGORY + "/" + categorySlug),
-        {
-            onError: () =>
-                NotifyUtils.simpleFailed("Lấy dữ liệu không thành công"),
-            refetchOnWindowFocus: false,
-            keepPreviousData: true,
-        },
-    );
+    } = useQuery<ClientCategoryResponse, ErrorMessage>({
+        queryKey: ["client-api", "categories", "getCategory", categorySlug],
+        queryFn: () =>
+            FetchUtils.get(ResourceURL.CLIENT_CATEGORY + "/" + categorySlug),
+
+        refetchOnWindowFocus: false,
+        staleTime: Infinity,
+    });
+
+    useEffect(() => {
+        if (isErrorCategoryResponse) {
+            NotifyUtils.simpleFailed("Lấy dữ liệu không thành công");
+        }
+    }, [isErrorCategoryResponse]);
 
     return {
         categoryResponse,
@@ -487,19 +491,27 @@ function useGetFilterApi(categorySlug: string) {
         data: filterResponse,
         isLoading: isLoadingFilterResponse,
         isError: isErrorFilterResponse,
-    } = useQuery<ClientFilterResponse, ErrorMessage>(
-        ["client-api", "filters", "getFilterByCategorySlug", categorySlug],
-        () =>
+    } = useQuery<ClientFilterResponse, ErrorMessage>({
+        queryKey: [
+            "client-api",
+            "filters",
+            "getFilterByCategorySlug",
+            categorySlug,
+        ],
+        queryFn: () =>
             FetchUtils.get(ResourceURL.CLIENT_FILTER_CATEGORY, {
                 slug: categorySlug,
             }),
-        {
-            onError: () =>
-                NotifyUtils.simpleFailed("Lấy dữ liệu không thành công"),
-            refetchOnWindowFocus: false,
-            keepPreviousData: true,
-        },
-    );
+
+        refetchOnWindowFocus: false,
+        staleTime: Infinity,
+    });
+
+    useEffect(() => {
+        if (isErrorFilterResponse) {
+            NotifyUtils.simpleFailed("Lấy dữ liệu không thành công");
+        }
+    }, [isErrorFilterResponse]);
 
     return { filterResponse, isLoadingFilterResponse, isErrorFilterResponse };
 }

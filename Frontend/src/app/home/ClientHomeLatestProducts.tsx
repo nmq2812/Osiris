@@ -21,16 +21,19 @@ function ClientHomeLatestProducts() {
         data: productResponses,
         isLoading: isLoadingProductResponses,
         isError: isErrorProductResponses,
-    } = useQuery<ListResponse<ClientListedProductResponse>, ErrorMessage>(
-        ["client-api", "products", "getAllProducts", requestParams],
-        () => FetchUtils.get(ResourceURL.CLIENT_PRODUCT, requestParams),
-        {
-            onError: () =>
-                NotifyUtils.simpleFailed("Lấy dữ liệu không thành công"),
-            refetchOnWindowFocus: false,
-            keepPreviousData: true,
-        },
-    );
+    } = useQuery<ListResponse<ClientListedProductResponse>, ErrorMessage>({
+        queryKey: ["client-api", "products", "getAllProducts", requestParams],
+        queryFn: () =>
+            FetchUtils.get(ResourceURL.CLIENT_PRODUCT, requestParams),
+        refetchOnWindowFocus: false,
+        staleTime: Infinity,
+    });
+
+    React.useEffect(() => {
+        if (isErrorProductResponses) {
+            NotifyUtils.simpleFailed("Lấy dữ liệu không thành công");
+        }
+    }, [isErrorProductResponses]);
     const products =
         productResponses as ListResponse<ClientListedProductResponse>;
 
