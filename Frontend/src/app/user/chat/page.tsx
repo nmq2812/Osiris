@@ -248,9 +248,7 @@ function ClientChat() {
         </Layout.Content>
     );
 }
-export const FromMessage: React.FC<{ message: MessageResponse }> = ({
-    message,
-}) => {
+const FromMessage: React.FC<{ message: MessageResponse }> = ({ message }) => {
     return (
         <Space
             style={{
@@ -290,9 +288,7 @@ export const FromMessage: React.FC<{ message: MessageResponse }> = ({
     );
 };
 
-export const ToMessage: React.FC<{ message: MessageResponse }> = ({
-    message,
-}) => {
+const ToMessage: React.FC<{ message: MessageResponse }> = ({ message }) => {
     return (
         <div
             style={{
@@ -323,13 +319,7 @@ export const ToMessage: React.FC<{ message: MessageResponse }> = ({
     );
 };
 
-export function MessageInput({
-    roomId,
-    userId,
-}: {
-    roomId: number;
-    userId: number;
-}) {
+function MessageInput({ roomId, userId }: { roomId: number; userId: number }) {
     const [message, setMessage] = useState("");
     const stompClient = useStompClient();
 
