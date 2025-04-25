@@ -357,43 +357,34 @@ function useUpdatePreorderApi() {
         ClientPreorderResponse,
         ErrorMessage,
         ClientPreorderRequest
-    >(
-        (requestBody) =>
+    >({
+        mutationFn: (requestBody) =>
             FetchUtils.putWithToken(ResourceURL.CLIENT_PREORDER, requestBody),
-        {
-            onSuccess: () => {
-                NotifyUtils.simpleSuccess("Cập nhật thành công");
-                void queryClient.invalidateQueries([
-                    "client-api",
-                    "preorders",
-                    "getAllPreorders",
-                ]);
-            },
-            onError: () =>
-                NotifyUtils.simpleFailed("Cập nhật không thành công"),
+
+        onSuccess: () => {
+            NotifyUtils.simpleSuccess("Cập nhật thành công");
+            void queryClient.invalidateQueries({
+                queryKey: ["client-api", "preorders", "getAllPreorders"],
+            });
         },
-    );
+        onError: () => NotifyUtils.simpleFailed("Cập nhật không thành công"),
+    });
 }
 
 function useDeletePreordersApi() {
     const queryClient = useQueryClient();
 
-    return useMutation<void, ErrorMessage, number[]>(
-        (entityIds) =>
+    return useMutation<void, ErrorMessage, number[]>({
+        mutationFn: (entityIds) =>
             FetchUtils.deleteWithToken(ResourceURL.CLIENT_PREORDER, entityIds),
-        {
-            onSuccess: () => {
-                NotifyUtils.simpleSuccess("Xóa đặt trước sản phẩm thành công");
-                void queryClient.invalidateQueries([
-                    "client-api",
-                    "preorders",
-                    "getAllPreorders",
-                ]);
-            },
-            onError: () =>
-                NotifyUtils.simpleFailed("Xóa đặt trước sản phẩm thất bại"),
+
+        onSuccess: () => {
+            NotifyUtils.simpleSuccess("Xóa đặt trước sản phẩm thành công");
+            void queryClient.invalidateQueries({
+                queryKey: ["client-api", "preorders", "getAllPreorders"],
+            });
         },
-    );
+    });
 }
 
 export default ClientPreorder;

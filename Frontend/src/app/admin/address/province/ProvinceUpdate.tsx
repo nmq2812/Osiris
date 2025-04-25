@@ -11,6 +11,8 @@ import {
 import { useParams } from "next/navigation";
 import ProvinceConfigs from "./ProvinceConfigs";
 import useProvinceUpdateViewModel from "./ProvinceUpdate.vm";
+import CreateUpdateTitle from "@/components/CreateUpdateTitle";
+import DefaultPropertyPanel from "@/components/DefaultPropertyPanel";
 
 function ProvinceUpdate() {
     const { id } = useParams();
