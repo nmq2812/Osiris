@@ -12,6 +12,8 @@ import {
 import { useParams } from "next/navigation";
 import DistrictConfigs from "./DistrictConfigs";
 import useDistrictUpdateViewModel from "./DistrictUpdate.vm";
+import CreateUpdateTitle from "@/components/CreateUpdateTitle";
+import DefaultPropertyPanel from "@/components/DefaultPropertyPanel";
 
 function DistrictUpdate() {
     const { id } = useParams();

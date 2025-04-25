@@ -1,5 +1,5 @@
 "use client";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
     Button,
     Card,
@@ -328,17 +328,20 @@ function useGetAllPreordersApi(activePage: number) {
         data: preorderResponses,
         isLoading: isLoadingPreorderResponses,
         isError: isErrorPreorderResponses,
-    } = useQuery<ListResponse<ClientPreorderResponse>, ErrorMessage>(
-        ["client-api", "preorders", "getAllPreorders", requestParams],
-        () =>
+    } = useQuery<ListResponse<ClientPreorderResponse>, ErrorMessage>({
+        queryKey: ["client-api", "preorders", "getAllPreorders", requestParams],
+        queryFn: () =>
             FetchUtils.getWithToken(ResourceURL.CLIENT_PREORDER, requestParams),
-        {
-            onError: () =>
-                NotifyUtils.simpleFailed("Lấy dữ liệu không thành công"),
-            refetchOnWindowFocus: false,
-            keepPreviousData: true,
-        },
-    );
+
+        refetchOnWindowFocus: false,
+        placeholderData: (previousData) => previousData,
+    });
+
+    useEffect(() => {
+        if (isErrorPreorderResponses) {
+            NotifyUtils.simpleFailed("Lấy dữ liệu không thành công");
+        }
+    }, [isErrorPreorderResponses]);
 
     return {
         preorderResponses,

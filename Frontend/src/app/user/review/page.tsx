@@ -1,5 +1,5 @@
 "use client";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
     Avatar,
     Button,
@@ -282,16 +282,20 @@ function useGetAllReviewsApi(activePage: number) {
         data: reviewResponses,
         isLoading: isLoadingReviewResponses,
         isError: isErrorReviewResponses,
-    } = useQuery<ListResponse<ClientReviewResponse>, ErrorMessage>(
-        ["client-api", "reviews", "getAllReviews", requestParams],
-        () => FetchUtils.getWithToken(ResourceURL.CLIENT_REVIEW, requestParams),
-        {
-            onError: () =>
-                NotifyUtils.simpleFailed("Lấy dữ liệu không thành công"),
-            refetchOnWindowFocus: false,
-            keepPreviousData: true,
-        },
-    );
+    } = useQuery<ListResponse<ClientReviewResponse>, ErrorMessage>({
+        queryKey: ["client-api", "reviews", "getAllReviews", requestParams],
+        queryFn: () =>
+            FetchUtils.getWithToken(ResourceURL.CLIENT_REVIEW, requestParams),
+
+        refetchOnWindowFocus: false,
+        placeholderData: (previousData) => previousData,
+    });
+
+    useEffect(() => {
+        if (isErrorReviewResponses) {
+            NotifyUtils.simpleFailed("Lấy dữ liệu không thành công");
+        }
+    }, [isErrorReviewResponses]);
 
     return {
         reviewResponses,
@@ -303,25 +307,22 @@ function useGetAllReviewsApi(activePage: number) {
 function useDeleteReviewApi() {
     const queryClient = useQueryClient();
 
-    return useMutation<void, ErrorMessage, number>(
-        (reviewId) =>
+    return useMutation<void, ErrorMessage, number>({
+        mutationFn: (reviewId) =>
             FetchUtils.deleteWithToken(
                 ResourceURL.CLIENT_REVIEW + "/" + reviewId,
                 [],
             ),
-        {
-            onSuccess: () => {
-                NotifyUtils.simpleSuccess("Xóa đánh giá thành công");
-                void queryClient.invalidateQueries([
-                    "client-api",
-                    "reviews",
-                    "getAllReviews",
-                ]);
-            },
-            onError: () =>
-                NotifyUtils.simpleFailed("Xóa đánh giá không thành công"),
+
+        onSuccess: () => {
+            NotifyUtils.simpleSuccess("Xóa đánh giá thành công");
+            void queryClient.invalidateQueries({
+                queryKey: ["client-api", "reviews", "getAllReviews"],
+            });
         },
-    );
+        onError: () =>
+            NotifyUtils.simpleFailed("Xóa đánh giá không thành công"),
+    });
 }
 
 export default ClientReview;
