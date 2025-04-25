@@ -3,6 +3,7 @@ import React, { useEffect } from "react";
 
 import { Space, Card, Typography, Input, Button } from "antd";
 import { useMutation } from "@tanstack/react-query";
+import { useRouter } from "next/navigation"; // Changed from useNavigate
 
 import { useForm, zodResolver } from "@mantine/form";
 import { z } from "zod";
@@ -18,18 +19,17 @@ import { useSearchParams } from "next/navigation";
 const { Title, Text } = Typography;
 
 function ClientChangePassword() {
-    const [searchParams] = useSearchParams();
+    const searchParams = useSearchParams();
+    const router = useRouter(); // Use Next.js router
 
     const token = searchParams.get("token");
     const email = searchParams.get("email");
 
-    const navigate = useNavigate();
-
     useEffect(() => {
         if (!token || !email) {
-            navigate("/");
+            router.push("/"); // Changed from navigate to router.push
         }
-    }, [email, navigate, token]);
+    }, [email, router, token]); // Updated dependency array
 
     const formSchema = z.object({
         newPassword: z
@@ -54,17 +54,17 @@ function ClientChangePassword() {
         Empty,
         ErrorMessage,
         ResetPasswordRequest
-    >(
-        (requestBody) =>
+    >({
+        mutationFn: (requestBody) =>
             FetchUtils.put(ResourceURL.CLIENT_RESET_PASSWORD, requestBody),
-        {
-            onSuccess: () => {
-                NotifyUtils.simpleSuccess("Đổi mật khẩu mới thành công");
-            },
-            onError: () =>
-                NotifyUtils.simpleFailed("Đổi mật khẩu không thành công"),
+
+        onSuccess: () => {
+            NotifyUtils.simpleSuccess("Đổi mật khẩu mới thành công");
+            router.push("/login"); // Add navigation to login page after successful password reset
         },
-    );
+        onError: () =>
+            NotifyUtils.simpleFailed("Đổi mật khẩu không thành công"),
+    });
 
     const handleFormSubmit = form.onSubmit((formValues) => {
         if (formValues.newPassword !== formValues.newPasswordAgain) {
@@ -193,12 +193,12 @@ function ClientChangePassword() {
                                     htmlType="submit"
                                     style={{ borderRadius: 6 }}
                                     block
-                                    loading={resetPasswordApi.isLoading}
+                                    loading={resetPasswordApi.isPending}
                                     disabled={
                                         MiscUtils.isEquals(
                                             initialFormValues,
                                             form.values,
-                                        ) || resetPasswordApi.isLoading
+                                        ) || resetPasswordApi.isPending
                                     }
                                 >
                                     Đổi mật khẩu
