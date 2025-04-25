@@ -1,5 +1,5 @@
 "use client";
-import React from "react";
+import React, { useEffect } from "react";
 import { Space, Skeleton, theme, Typography } from "antd";
 import { useQuery } from "@tanstack/react-query";
 import { useParams } from "next/navigation";
@@ -92,16 +92,20 @@ function useGetProductApi(productSlug: string) {
         data: productResponse,
         isLoading: isLoadingProductResponse,
         isError: isErrorProductResponse,
-    } = useQuery<ClientProductResponse, ErrorMessage>(
-        ["client-api", "products", "getProduct", productSlug],
-        () => FetchUtils.get(ResourceURL.CLIENT_PRODUCT + "/" + productSlug),
-        {
-            onError: () =>
-                NotifyUtils.simpleFailed("Lấy dữ liệu không thành công"),
-            refetchOnWindowFocus: false,
-            keepPreviousData: true,
-        },
-    );
+    } = useQuery<ClientProductResponse, ErrorMessage>({
+        queryKey: ["client-api", "products", "getProduct", productSlug],
+        queryFn: () =>
+            FetchUtils.get(ResourceURL.CLIENT_PRODUCT + "/" + productSlug),
+
+        refetchOnWindowFocus: false,
+        placeholderData: (previousData) => previousData,
+    });
+
+    useEffect(() => {
+        if (isErrorProductResponse) {
+            NotifyUtils.simpleFailed("Lấy dữ liệu không thành công");
+        }
+    }, [isErrorProductResponse]);
 
     return {
         productResponse,

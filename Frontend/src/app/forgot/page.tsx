@@ -35,20 +35,16 @@ function ClientForgotPassword() {
         Empty,
         ErrorMessage,
         { email: string }
-    >(
-        (request) =>
+    >({
+        mutationFn: (request) =>
             FetchUtils.get(ResourceURL.CLIENT_FORGOT_PASSWORD, {
                 email: request.email,
             }),
-        {
-            onSuccess: () =>
-                NotifyUtils.simpleSuccess(
-                    "Đã gửi email đổi mật khẩu thành công",
-                ),
-            onError: () =>
-                NotifyUtils.simpleFailed("Gửi email không thành công"),
-        },
-    );
+
+        onSuccess: () =>
+            NotifyUtils.simpleSuccess("Đã gửi email đổi mật khẩu thành công"),
+        onError: () => NotifyUtils.simpleFailed("Gửi email không thành công"),
+    });
 
     const handleFormSubmit = form.onSubmit((formValues) => {
         forgotPasswordApi.mutate({ email: formValues.email });
@@ -129,12 +125,12 @@ function ClientForgotPassword() {
                                     htmlType="submit"
                                     style={{ borderRadius: 6 }}
                                     block
-                                    loading={forgotPasswordApi.isLoading}
+                                    loading={forgotPasswordApi.isPending}
                                     disabled={
                                         MiscUtils.isEquals(
                                             initialFormValues,
                                             form.values,
-                                        ) || forgotPasswordApi.isLoading
+                                        ) || forgotPasswordApi.isPending
                                     }
                                 >
                                     Yêu cầu
