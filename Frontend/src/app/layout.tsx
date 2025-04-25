@@ -6,7 +6,7 @@ import FooterSection from "@/components/layout/footer";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 
 import "antd/dist/reset.css";
-import "@ant-design/v5-patch-for-react-19";
+
 import useAdminAuthStore from "@/stores/use-admin-auth-store";
 const queryClient = new QueryClient();
 
