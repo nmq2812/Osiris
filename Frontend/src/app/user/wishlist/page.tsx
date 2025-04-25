@@ -1,5 +1,5 @@
 "use client";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
     Button,
     Card,
@@ -223,16 +223,20 @@ function useGetAllWishesApi(activePage: number) {
         data: wishResponses,
         isLoading: isLoadingWishResponses,
         isError: isErrorWishResponses,
-    } = useQuery<ListResponse<ClientWishResponse>, ErrorMessage>(
-        ["client-api", "wishes", "getAllWishes", requestParams],
-        () => FetchUtils.getWithToken(ResourceURL.CLIENT_WISH, requestParams),
-        {
-            onError: () =>
-                NotifyUtils.simpleFailed("Lấy dữ liệu không thành công"),
-            refetchOnWindowFocus: false,
-            keepPreviousData: true,
-        },
-    );
+    } = useQuery<ListResponse<ClientWishResponse>, ErrorMessage>({
+        queryKey: ["client-api", "wishes", "getAllWishes", requestParams],
+        queryFn: () =>
+            FetchUtils.getWithToken(ResourceURL.CLIENT_WISH, requestParams),
+
+        refetchOnWindowFocus: false,
+        placeholderData: (previousData) => previousData,
+    });
+
+    useEffect(() => {
+        if (isErrorWishResponses) {
+            NotifyUtils.simpleFailed("Lấy dữ liệu không thành công");
+        }
+    }, [isErrorWishResponses]);
 
     return { wishResponses, isLoadingWishResponses, isErrorWishResponses };
 }
@@ -240,22 +244,19 @@ function useGetAllWishesApi(activePage: number) {
 function useDeleteWishesApi() {
     const queryClient = useQueryClient();
 
-    return useMutation<void, ErrorMessage, number[]>(
-        (entityIds) =>
+    return useMutation<void, ErrorMessage, number[]>({
+        mutationFn: (entityIds) =>
             FetchUtils.deleteWithToken(ResourceURL.CLIENT_WISH, entityIds),
-        {
-            onSuccess: () => {
-                NotifyUtils.simpleSuccess("Xóa sản phẩm yêu thích thành công");
-                void queryClient.invalidateQueries([
-                    "client-api",
-                    "wishes",
-                    "getAllWishes",
-                ]);
-            },
-            onError: () =>
-                NotifyUtils.simpleFailed("Xóa sản phẩm yêu thích thất bại"),
+
+        onSuccess: () => {
+            NotifyUtils.simpleSuccess("Xóa sản phẩm yêu thích thành công");
+            void queryClient.invalidateQueries({
+                queryKey: ["client-api", "wishes", "getAllWishes"],
+            });
         },
-    );
+        onError: () =>
+            NotifyUtils.simpleFailed("Xóa sản phẩm yêu thích thất bại"),
+    });
 }
 
 export default ClientWishlist;

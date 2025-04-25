@@ -10,6 +10,8 @@ import {
 } from "@mantine/core";
 import ProvinceConfigs from "./ProvinceConfigs";
 import useProvinceCreateViewModel from "./ProvinceCreate.vm";
+import CreateUpdateTitle from "@/components/CreateUpdateTitle";
+import DefaultPropertyPanel from "@/components/DefaultPropertyPanel";
 
 function ProvinceCreate() {
     const { form, handleFormSubmit } = useProvinceCreateViewModel();

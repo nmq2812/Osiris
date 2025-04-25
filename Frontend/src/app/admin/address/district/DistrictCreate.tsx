@@ -11,6 +11,8 @@ import {
 } from "@mantine/core";
 import DistrictConfigs from "./DistrictConfigs";
 import useDistrictCreateViewModel from "./DistrictCreate.vm";
+import CreateUpdateTitle from "@/components/CreateUpdateTitle";
+import DefaultPropertyPanel from "@/components/DefaultPropertyPanel";
 
 function DistrictCreate() {
     const { form, handleFormSubmit, provinceSelectList } =
