@@ -1,3 +1,4 @@
+'use client";';
 import ReviewStarGroup from "@/components/ReviewStarGroup";
 import ApplicationConstants from "@/constants/ApplicationConstants";
 import ResourceURL from "@/constants/ResourceURL";
@@ -19,7 +20,7 @@ import {
     Title,
     useMantineTheme,
 } from "@mantine/core";
-import { useState } from "react";
+import { use, useEffect, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { AlertCircle, AlertTriangle, Edit, Messages } from "tabler-icons-react";
 
@@ -194,26 +195,29 @@ function useGetAllReviewsByProduct(productSlug: string, activePage: number) {
         data: reviewResponses,
         isLoading: isLoadingReviewResponses,
         isError: isErrorReviewResponses,
-    } = useQuery<ListResponse<ClientSimpleReviewResponse>, ErrorMessage>(
-        [
+    } = useQuery<ListResponse<ClientSimpleReviewResponse>, ErrorMessage>({
+        queryKey: [
             "client-api",
             "reviews/products",
             "getAllReviewsByProduct",
             productSlug,
             requestParams,
         ],
-        () =>
+        queryFn: () =>
             FetchUtils.get(
                 ResourceURL.CLIENT_REVIEW_PRODUCT + "/" + productSlug,
                 requestParams,
             ),
-        {
-            onError: () =>
-                NotifyUtils.simpleFailed("Lấy dữ liệu không thành công"),
-            refetchOnWindowFocus: false,
-            keepPreviousData: true,
-        },
-    );
+
+        refetchOnWindowFocus: false,
+        placeholderData: (previousData) => previousData,
+    });
+
+    useEffect(() => {
+        if (isErrorReviewResponses) {
+            NotifyUtils.simpleFailed("Lấy dữ liệu không thành công");
+        }
+    }, [isErrorReviewResponses]);
 
     return {
         reviewResponses,

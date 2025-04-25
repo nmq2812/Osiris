@@ -1,5 +1,5 @@
 "use client";
-import React from "react";
+import React, { useEffect } from "react";
 import { useParams } from "next/navigation";
 import {
     Badge,
@@ -630,50 +630,53 @@ function useGetOrderApi(orderCode: string) {
         data: orderResponse,
         isLoading: isLoadingOrderResponse,
         isError: isErrorOrderResponse,
-    } = useQuery<ClientOrderDetailResponse, ErrorMessage>(
-        ["client-api", "orders", "getOrder", orderCode],
-        () =>
+    } = useQuery<ClientOrderDetailResponse, ErrorMessage>({
+        queryKey: ["client-api", "orders", "getOrder", orderCode],
+        queryFn: () =>
             FetchUtils.getWithToken(ResourceURL.CLIENT_ORDER + "/" + orderCode),
-        {
-            onError: () =>
-                NotifyUtils.simpleFailed("Lấy dữ liệu không thành công"),
-            keepPreviousData: true,
-        },
-    );
+
+        placeholderData: (previousData) => previousData,
+    });
+
+    useEffect(() => {
+        if (isErrorOrderResponse) {
+            NotifyUtils.simpleFailed("Lấy dữ liệu không thành công");
+        }
+    }, [isErrorOrderResponse]);
 
     return { orderResponse, isLoadingOrderResponse, isErrorOrderResponse };
 }
 
 function useCancelOrderApi(orderCode: string) {
     const queryClient = useQueryClient();
-    return useMutation<Empty, ErrorMessage, void>(
-        () =>
+    return useMutation<Empty, ErrorMessage, void>({
+        mutationFn: () =>
             FetchUtils.putWithToken(
                 ResourceURL.CLIENT_ORDER_CANCEL + "/" + orderCode,
                 {},
             ),
-        {
-            onSuccess: () => {
-                NotifyUtils.simpleSuccess("Hủy đơn hàng thành công");
-                void queryClient.invalidateQueries([
-                    "client-api",
-                    "orders",
-                    "getOrder",
-                    orderCode,
-                ]);
-            },
-            onError: () =>
-                NotifyUtils.simpleFailed("Hủy đơn hàng không thành công"),
+
+        onSuccess: () => {
+            NotifyUtils.simpleSuccess("Hủy đơn hàng thành công");
+            void queryClient.invalidateQueries({
+                queryKey: ["client-api", "orders", "getOrder", orderCode],
+            });
         },
-    );
+        onError: () =>
+            NotifyUtils.simpleFailed("Hủy đơn hàng không thành công"),
+    });
 }
 
 function useCreateReviewApi() {
     const queryClient = useQueryClient();
     return useMutation<ClientReviewResponse, ErrorMessage, ClientReviewRequest>(
-        (requestBody) =>
-            FetchUtils.postWithToken(ResourceURL.CLIENT_REVIEW, requestBody),
         {
+            mutationFn: (requestBody) =>
+                FetchUtils.postWithToken(
+                    ResourceURL.CLIENT_REVIEW,
+                    requestBody,
+                ),
+
             onSuccess: (response) => {
                 NotifyUtils.simpleSuccess(
                     <Text>
@@ -688,17 +691,17 @@ function useCreateReviewApi() {
                         . Vui lòng đợi duyệt để hiển thị.
                     </Text>,
                 );
-                void queryClient.invalidateQueries([
-                    "client-api",
-                    "orders",
-                    "getOrder",
-                ]);
+                void queryClient.invalidateQueries({
+                    queryKey: ["client-api", "orders"],
+                });
+                void queryClient.invalidateQueries({
+                    queryKey: ["client-api", "orders", "getOrder"],
+                });
             },
-            onError: () => {
+            onError: () =>
                 NotifyUtils.simpleFailed(
                     "Không thêm được đánh giá cho sản phẩm",
-                );
-            },
+                ),
         },
     );
 }

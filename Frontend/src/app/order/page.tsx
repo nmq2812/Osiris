@@ -1,5 +1,5 @@
 "use client";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
     Badge,
     Button,
@@ -335,16 +335,20 @@ function useGetAllOrdersApi(activePage: number) {
         data: orderResponses,
         isLoading: isLoadingOrderResponses,
         isError: isErrorOrderResponses,
-    } = useQuery<ListResponse<ClientSimpleOrderResponse>, ErrorMessage>(
-        ["client-api", "orders", "getAllOrders", requestParams],
-        () => FetchUtils.getWithToken(ResourceURL.CLIENT_ORDER, requestParams),
-        {
-            onError: () =>
-                NotifyUtils.simpleFailed("Lấy dữ liệu không thành công"),
-            keepPreviousData: true,
-            refetchOnWindowFocus: false,
-        },
-    );
+    } = useQuery<ListResponse<ClientSimpleOrderResponse>, ErrorMessage>({
+        queryKey: ["client-api", "orders", "getAllOrders", requestParams],
+        queryFn: () =>
+            FetchUtils.getWithToken(ResourceURL.CLIENT_ORDER, requestParams),
+        placeholderData: (previousData) => previousData,
+
+        refetchOnWindowFocus: false,
+    });
+
+    useEffect(() => {
+        if (isErrorOrderResponses) {
+            NotifyUtils.simpleFailed("Lấy dữ liệu không thành công");
+        }
+    }, [isErrorOrderResponses]);
 
     return { orderResponses, isLoadingOrderResponses, isErrorOrderResponses };
 }
