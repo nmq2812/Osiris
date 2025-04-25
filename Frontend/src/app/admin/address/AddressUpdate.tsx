@@ -12,6 +12,8 @@ import {
 import { useParams } from "next/navigation";
 import AddressConfigs from "./AddressConfigs";
 import useAddressUpdateViewModel from "./AddressUpdate.vm";
+import CreateUpdateTitle from "@/components/CreateUpdateTitle";
+import DefaultPropertyPanel from "@/components/DefaultPropertyPanel";
 
 function AddressUpdate() {
     const { id } = useParams();
