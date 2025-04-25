@@ -21,7 +21,7 @@ import {
     Tooltip,
     theme,
 } from "antd";
-import React, { useEffect, useRef, useState } from "react";
+import React, { use, useEffect, useRef, useState } from "react";
 import {
     AlertTriangle,
     Check,
@@ -806,7 +806,7 @@ function ConfirmedOrder({ closeModal }: { closeModal: () => void }) {
     const {
         mutate: createClientOrder,
         data: clientConfirmedOrderResponse,
-        isLoading,
+        isPending,
         isError,
     } = useCreateClientOrderApi();
 
@@ -1021,10 +1021,10 @@ function ConfirmedOrder({ closeModal }: { closeModal: () => void }) {
         <div
             style={{
                 position: "relative",
-                minHeight: isLoading ? 200 : "auto",
+                minHeight: isPending ? 200 : "auto",
             }}
         >
-            {isLoading && <Spin />}
+            {isPending && <Spin />}
             {contentFragment}
         </div>
     );
@@ -1035,15 +1035,18 @@ function useGetCartApi() {
         data: cartResponse,
         isLoading: isLoadingCartResponse,
         isError: isErrorCartResponse,
-    } = useQuery<ClientCartResponse | Empty, ErrorMessage>(
-        ["client-api", "carts", "getCart"],
-        () => FetchUtils.getWithToken(ResourceURL.CLIENT_CART),
-        {
-            onError: () =>
-                NotifyUtils.simpleFailed("Lấy dữ liệu không thành công"),
-            keepPreviousData: true,
-        },
-    );
+    } = useQuery<ClientCartResponse | Empty, ErrorMessage>({
+        queryKey: ["client-api", "carts", "getCart"],
+        queryFn: () => FetchUtils.getWithToken(ResourceURL.CLIENT_CART),
+
+        placeholderData: (previousData) => previousData,
+    });
+
+    useEffect(() => {
+        if (isErrorCartResponse) {
+            NotifyUtils.simpleFailed("Lấy dữ liệu không thành công");
+        }
+    }, [isErrorCartResponse]);
 
     return { cartResponse, isLoadingCartResponse, isErrorCartResponse };
 }
@@ -1053,16 +1056,18 @@ function useGetAllPaymentMethodsApi() {
         data: paymentMethodResponses,
         isLoading: isLoadingPaymentMethodResponses,
         isError: isErrorPaymentMethodResponses,
-    } = useQuery<CollectionWrapper<ClientPaymentMethodResponse>, ErrorMessage>(
-        ["client-api", "payment-methods", "getAllPaymentMethods"],
-        () => FetchUtils.get(ResourceURL.CLIENT_PAYMENT_METHOD),
-        {
-            onError: () =>
-                NotifyUtils.simpleFailed("Lấy dữ liệu không thành công"),
-            keepPreviousData: true,
-            refetchOnWindowFocus: false,
-        },
-    );
+    } = useQuery<CollectionWrapper<ClientPaymentMethodResponse>, ErrorMessage>({
+        queryKey: ["client-api", "payment-methods", "getAllPaymentMethods"],
+        queryFn: () => FetchUtils.get(ResourceURL.CLIENT_PAYMENT_METHOD),
+        placeholderData: (previousData) => previousData,
+        refetchOnWindowFocus: false,
+    });
+
+    useEffect(() => {
+        if (isErrorPaymentMethodResponses) {
+            NotifyUtils.simpleFailed("Lấy dữ liệu không thành công");
+        }
+    }, [isErrorPaymentMethodResponses]);
 
     return {
         paymentMethodResponses,
@@ -1077,26 +1082,20 @@ function useDeleteCartItemsApi() {
     const { currentTotalCartItems, updateCurrentTotalCartItems } =
         useAuthStore();
 
-    return useMutation<void, ErrorMessage, ClientCartVariantKeyRequest[]>(
-        (requestBody) =>
+    return useMutation<void, ErrorMessage, ClientCartVariantKeyRequest[]>({
+        mutationFn: (requestBody: ClientCartVariantKeyRequest[]) =>
             FetchUtils.deleteWithToken(ResourceURL.CLIENT_CART, requestBody),
-        {
-            onSuccess: (_, requestBody) => {
-                void queryClient.invalidateQueries([
-                    "client-api",
-                    "carts",
-                    "getCart",
-                ]);
-                updateCurrentTotalCartItems(
-                    currentTotalCartItems - requestBody.length,
-                );
-            },
-            onError: () =>
-                NotifyUtils.simpleFailed(
-                    "Không xóa được mặt hàng khỏi giỏ hàng",
-                ),
+        onSuccess: (_: void, variables: ClientCartVariantKeyRequest[]) => {
+            void queryClient.invalidateQueries({
+                queryKey: ["client-api", "carts", "getCart"],
+            });
+            updateCurrentTotalCartItems(
+                currentTotalCartItems - variables.length,
+            );
         },
-    );
+        onError: () =>
+            NotifyUtils.simpleFailed("Không xóa được mặt hàng khỏi giỏ hàng"),
+    });
 }
 
 function useCreateClientOrderApi() {
@@ -1108,21 +1107,17 @@ function useCreateClientOrderApi() {
         ClientConfirmedOrderResponse,
         ErrorMessage,
         ClientSimpleOrderRequest
-    >(
-        (requestBody) =>
+    >({
+        mutationFn: (requestBody: ClientSimpleOrderRequest) =>
             FetchUtils.postWithToken(ResourceURL.CLIENT_ORDER, requestBody),
-        {
-            onSuccess: () => {
-                void queryClient.invalidateQueries([
-                    "client-api",
-                    "carts",
-                    "getCart",
-                ]);
-                updateCurrentCartId(null);
-                updateCurrentTotalCartItems(0);
-            },
+        onSuccess: () => {
+            void queryClient.invalidateQueries({
+                queryKey: ["client-api", "carts", "getCart"],
+            });
+            updateCurrentCartId(null);
+            updateCurrentTotalCartItems(0);
         },
-    );
+    });
 }
 
 export default ClientCart;

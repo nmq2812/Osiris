@@ -248,8 +248,9 @@ function ClientChat() {
         </Layout.Content>
     );
 }
-
-export function FromMessage({ message }: { message: MessageResponse }) {
+export const FromMessage: React.FC<{ message: MessageResponse }> = ({
+    message,
+}) => {
     return (
         <Space
             style={{
@@ -287,9 +288,11 @@ export function FromMessage({ message }: { message: MessageResponse }) {
             </div>
         </Space>
     );
-}
+};
 
-export function ToMessage({ message }: { message: MessageResponse }) {
+export const ToMessage: React.FC<{ message: MessageResponse }> = ({
+    message,
+}) => {
     return (
         <div
             style={{
@@ -318,7 +321,7 @@ export function ToMessage({ message }: { message: MessageResponse }) {
             </Space>
         </div>
     );
-}
+};
 
 export function MessageInput({
     roomId,

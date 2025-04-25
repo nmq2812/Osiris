@@ -343,7 +343,7 @@ function HeaderSection() {
                 background: "#fff",
                 padding: "0",
                 boxShadow: "0 2px 8px rgba(0, 0, 0, 0.06)",
-                marginBottom: 24,
+                paddingBottom: 24,
                 height: "auto",
                 position: "sticky",
                 top: 0,
