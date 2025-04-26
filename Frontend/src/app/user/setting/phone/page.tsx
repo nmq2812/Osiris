@@ -63,22 +63,20 @@ function ClientSettingPhone() {
         UserResponse,
         ErrorMessage,
         ClientPhoneSettingUserRequest
-    >(
-        (requestBody) =>
+    >({
+        mutationFn: (requestBody) =>
             FetchUtils.postWithToken(
                 ResourceURL.CLIENT_USER_PHONE_SETTING,
                 requestBody,
             ),
-        {
-            onSuccess: (userResponse) => {
-                updateUser(userResponse);
-                NotifyUtils.simpleSuccess("Cập nhật thành công");
-                setFormChanged(false);
-            },
-            onError: () =>
-                NotifyUtils.simpleFailed("Cập nhật không thành công"),
+
+        onSuccess: (userResponse) => {
+            updateUser(userResponse);
+            NotifyUtils.simpleSuccess("Cập nhật thành công");
+            setFormChanged(false);
         },
-    );
+        onError: () => NotifyUtils.simpleFailed("Cập nhật không thành công"),
+    });
 
     // Handle form field changes
     const handleFieldChange = (changedValues: any) => {
@@ -181,7 +179,7 @@ function ClientSettingPhone() {
                                                         htmlType="submit"
                                                         disabled={!formChanged}
                                                         loading={
-                                                            updatePhoneSettingApi.isLoading
+                                                            updatePhoneSettingApi.isPending
                                                         }
                                                     >
                                                         Cập nhật

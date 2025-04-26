@@ -209,22 +209,20 @@ function ClientSettingPersonal() {
         UserResponse,
         ErrorMessage,
         ClientPersonalSettingUserRequest
-    >(
-        (requestBody) =>
+    >({
+        mutationFn: (requestBody) =>
             FetchUtils.postWithToken(
                 ResourceURL.CLIENT_USER_PERSONAL_SETTING,
                 requestBody,
             ),
-        {
-            onSuccess: (userResponse) => {
-                updateUser(userResponse);
-                NotifyUtils.simpleSuccess("Cập nhật thành công");
-                setFormChanged(false);
-            },
-            onError: () =>
-                NotifyUtils.simpleFailed("Cập nhật không thành công"),
+
+        onSuccess: (userResponse) => {
+            updateUser(userResponse);
+            NotifyUtils.simpleSuccess("Cập nhật thành công");
+            setFormChanged(false);
         },
-    );
+        onError: () => NotifyUtils.simpleFailed("Cập nhật không thành công"),
+    });
 
     // Handle form submission
     const handleFormSubmit = async (values: any) => {
@@ -497,7 +495,7 @@ function ClientSettingPersonal() {
                                                         htmlType="submit"
                                                         disabled={!formChanged}
                                                         loading={
-                                                            updatePersonalSettingApi.isLoading
+                                                            updatePersonalSettingApi.isPending
                                                         }
                                                     >
                                                         Cập nhật

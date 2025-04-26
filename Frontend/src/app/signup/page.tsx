@@ -191,7 +191,10 @@ function ClientSignupStepOne({ nextStep }: { nextStep: () => void }) {
             );
             setProvinceSelectList(selectList);
         },
-        { refetchOnWindowFocus: false },
+        {
+            refetchOnWindowFocus: false,
+            queryKey: [],
+        },
     );
 
     // Handle province change to load districts
@@ -221,7 +224,8 @@ function ClientSignupStepOne({ nextStep }: { nextStep: () => void }) {
         },
         {
             refetchOnWindowFocus: false,
-            enabled: !!selectedProvinceId, // Only fetch when province is selected
+            enabled: !!selectedProvinceId,
+            queryKey: [],
         },
     );
 
@@ -250,7 +254,8 @@ function ClientSignupStepOne({ nextStep }: { nextStep: () => void }) {
         },
         {
             refetchOnWindowFocus: false,
-            enabled: !!selectedDistrictId, // Only fetch when district is selected
+            enabled: !!selectedDistrictId,
+            queryKey: [],
         },
     );
 
@@ -258,19 +263,18 @@ function ClientSignupStepOne({ nextStep }: { nextStep: () => void }) {
         RegistrationResponse,
         ErrorMessage,
         UserRequest
-    >(
-        (requestBody) =>
+    >({
+        mutationFn: (requestBody) =>
             FetchUtils.post(ResourceURL.CLIENT_REGISTRATION, requestBody),
-        {
-            onSuccess: (registrationResponse) => {
-                NotifyUtils.simpleSuccess("Tạo tài khoản thành công");
-                updateCurrentSignupUserId(registrationResponse.userId);
-                nextStep();
-            },
-            onError: () =>
-                NotifyUtils.simpleFailed("Tạo tài khoản không thành công"),
+
+        onSuccess: (registrationResponse) => {
+            NotifyUtils.simpleSuccess("Tạo tài khoản thành công");
+            updateCurrentSignupUserId(registrationResponse.userId);
+            nextStep();
         },
-    );
+        onError: () =>
+            NotifyUtils.simpleFailed("Tạo tài khoản không thành công"),
+    });
 
     const handleFormSubmit = (values: any) => {
         const requestBody: UserRequest = {
@@ -440,7 +444,7 @@ function ClientSignupStepOne({ nextStep }: { nextStep: () => void }) {
                     <Button
                         type="primary"
                         htmlType="submit"
-                        loading={registerUserApi.isLoading}
+                        loading={registerUserApi.isPending}
                     >
                         Đăng ký
                     </Button>
@@ -469,66 +473,61 @@ function ClientSignupStepTwo({
         void,
         ErrorMessage,
         RegistrationRequest
-    >(
-        (requestBody) =>
+    >({
+        mutationFn: (requestBody) =>
             FetchUtils.post(
                 ResourceURL.CLIENT_REGISTRATION_CONFIRM,
                 requestBody,
             ),
-        {
-            onSuccess: () => {
-                NotifyUtils.simpleSuccess("Xác nhận tài khoản thành công");
-                updateCurrentSignupUserId(null);
-                nextStep();
-            },
-            onError: () =>
-                NotifyUtils.simpleFailed("Xác nhận tài khoản không thành công"),
+
+        onSuccess: () => {
+            NotifyUtils.simpleSuccess("Xác nhận tài khoản thành công");
+            updateCurrentSignupUserId(null);
+            nextStep();
         },
-    );
+        onError: () =>
+            NotifyUtils.simpleFailed("Xác nhận tài khoản không thành công"),
+    });
 
     const resendRegistrationTokenApi = useMutation<
         Empty,
         ErrorMessage,
         { userId: number }
-    >(
-        (request) =>
+    >({
+        mutationFn: (request) =>
             FetchUtils.get(
                 ResourceURL.CLIENT_REGISTRATION_RESEND_TOKEN(request.userId),
             ),
-        {
-            onSuccess: () => {
-                NotifyUtils.simpleSuccess("Đã gửi lại mã xác nhận thành công");
-                Modal.destroyAll();
-            },
-            onError: () =>
-                NotifyUtils.simpleFailed(
-                    "Gửi lại mã xác nhận không thành công",
-                ),
+
+        onSuccess: () => {
+            NotifyUtils.simpleSuccess("Đã gửi lại mã xác nhận thành công");
+            Modal.destroyAll();
         },
-    );
+        onError: () =>
+            NotifyUtils.simpleFailed("Gửi lại mã xác nhận không thành công"),
+    });
 
     const changeRegistrationEmailApi = useMutation<
         Empty,
         ErrorMessage,
         { userId: number; email: string }
-    >(
-        (request) =>
+    >({
+        mutationFn: (request) =>
             FetchUtils.put(
                 ResourceURL.CLIENT_REGISTRATION_CHANGE_EMAIL(request.userId),
                 {},
                 { email: request.email },
             ),
-        {
-            onSuccess: () => {
-                NotifyUtils.simpleSuccess(
-                    "Đã đổi email thành công và đã gửi lại mã xác nhận mới",
-                );
-                Modal.destroyAll();
-            },
-            onError: () =>
-                NotifyUtils.simpleFailed("Thay đổi email không thành công"),
+
+        onSuccess: () => {
+            NotifyUtils.simpleSuccess(
+                "Đã đổi email thành công và đã gửi lại mã xác nhận mới",
+            );
+            Modal.destroyAll();
         },
-    );
+        onError: () =>
+            NotifyUtils.simpleFailed("Thay đổi email không thành công"),
+    });
 
     const handleFormSubmit = (values: any) => {
         if (userId) {
@@ -552,7 +551,7 @@ function ClientSignupStepTwo({
                 okText: "Gửi",
                 cancelText: "Đóng",
                 okButtonProps: {
-                    loading: resendRegistrationTokenApi.isLoading,
+                    loading: resendRegistrationTokenApi.isPending,
                 },
             });
         }
@@ -602,7 +601,7 @@ function ClientSignupStepTwo({
                 // Trigger form submission
                 changeEmailForm.submit();
                 // Return promise to make modal wait for API response
-                return changeRegistrationEmailApi.isLoading
+                return changeRegistrationEmailApi.isPending
                     ? changeRegistrationEmailApi.mutateAsync({
                           userId: userId as number,
                           email: changeEmailForm.getFieldValue("email"),
@@ -610,7 +609,7 @@ function ClientSignupStepTwo({
                     : Promise.resolve();
             },
             okButtonProps: {
-                loading: changeRegistrationEmailApi.isLoading,
+                loading: changeRegistrationEmailApi.isPending,
             },
         });
     };
@@ -640,7 +639,7 @@ function ClientSignupStepTwo({
                         <Button
                             type="primary"
                             htmlType="submit"
-                            loading={confirmRegistrationApi.isLoading}
+                            loading={confirmRegistrationApi.isPending}
                         >
                             Xác nhận
                         </Button>
