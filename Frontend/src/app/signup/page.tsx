@@ -223,7 +223,7 @@ function ClientSignupStepOne({ nextStep }: { nextStep: () => void }) {
         },
         // {
         //     refetchOnWindowFocus: false,
-            
+
         // },
     );
 
@@ -645,7 +645,7 @@ function ClientSignupStepTwo({
 
                 <Divider>hoặc</Divider>
 
-                <Button type="default" onClick={handleResendTokenButton}>
+                <Button type="default" onClick={handleResendTokenButton} />
                 <Divider>hoặc</Divider>
 
                 <Button type="default" onClick={handleResendTokenButton}>
