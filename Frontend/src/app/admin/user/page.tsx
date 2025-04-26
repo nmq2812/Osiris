@@ -1,3 +1,4 @@
+"use client";
 import React from "react";
 import { Avatar, Badge, Highlight, Stack } from "@mantine/core";
 import FilterPanel from "@/components/FilterPanel/FilterPanel";
