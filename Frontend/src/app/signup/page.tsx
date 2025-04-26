@@ -191,10 +191,9 @@ function ClientSignupStepOne({ nextStep }: { nextStep: () => void }) {
             );
             setProvinceSelectList(selectList);
         },
-        {
-            refetchOnWindowFocus: false,
-            queryKey: [],
-        },
+        // {
+        //     refetchOnWindowFocus: false,
+        // },
     );
 
     // Handle province change to load districts
@@ -222,11 +221,10 @@ function ClientSignupStepOne({ nextStep }: { nextStep: () => void }) {
             );
             setDistrictSelectList(selectList);
         },
-        {
-            refetchOnWindowFocus: false,
-            enabled: !!selectedProvinceId,
-            queryKey: [],
-        },
+        // {
+        //     refetchOnWindowFocus: false,
+            
+        // },
     );
 
     // Handle district change to load wards
@@ -252,11 +250,10 @@ function ClientSignupStepOne({ nextStep }: { nextStep: () => void }) {
             );
             setWardSelectList(selectList);
         },
-        {
-            refetchOnWindowFocus: false,
-            enabled: !!selectedDistrictId,
-            queryKey: [],
-        },
+        // {
+        //     refetchOnWindowFocus: false,
+        //     enabled: true,
+        // },
     );
 
     const registerUserApi = useMutation<
@@ -646,6 +643,9 @@ function ClientSignupStepTwo({
                     </Form.Item>
                 </Form>
 
+                <Divider>hoặc</Divider>
+
+                <Button type="default" onClick={handleResendTokenButton}>
                 <Divider>hoặc</Divider>
 
                 <Button type="default" onClick={handleResendTokenButton}>
