@@ -1,15 +1,15 @@
 "use client";
-import React, { useCallback, useMemo } from "react";
-import { Table, Checkbox, Space, Button, Typography } from "antd";
-import { EditOutlined, EyeOutlined, DeleteOutlined } from "@ant-design/icons";
-import Link from "next/link";
 import { EntityPropertySchema } from "@/datas/EntityProperty";
 import BaseResponse from "@/models/BaseResponse";
 import { ListResponse } from "@/utils/FetchUtils";
+import { Group, ActionIcon, Checkbox, Table } from "@mantine/core";
+import React from "react";
+import { Eye, Link, Edit, Trash } from "tabler-icons-react";
 import useManageTableViewModel from "./ManageTable.vm";
-import { usePathname } from "next/navigation";
+import useManageTableStyles from "./ManageTable.styles";
+import { usePathname, useRouter } from "next/navigation";
 
-export interface ManageTableProps<T extends BaseResponse> {
+export interface ManageTableProps<T> {
     listResponse: ListResponse<T>;
     properties: EntityPropertySchema;
     resourceUrl: string;
@@ -18,134 +18,114 @@ export interface ManageTableProps<T extends BaseResponse> {
     entityDetailTableRowsFragment: (entity: T) => React.ReactNode;
 }
 
-function ManageTable<T extends BaseResponse>({
-    listResponse,
-    properties,
-    resourceUrl,
-    resourceKey,
-    showedPropertiesFragment,
-    entityDetailTableRowsFragment,
-}: ManageTableProps<T>) {
-    const pathName = usePathname();
-    // This pattern helps TypeScript better infer the generic type from props
+function ManageTable<T extends BaseResponse>(props: ManageTableProps<T>) {
+    const { classes, cx } = useManageTableStyles();
+    const pathname = usePathname();
+    const route = useRouter();
+
     const {
-        listResponse: typedListResponse,
+        listResponse,
         selection,
         tableHeads,
         handleToggleAllRowsCheckbox,
         handleToggleRowCheckbox,
         handleViewEntityButton,
         handleDeleteEntityButton,
-    } = useManageTableViewModel<T>({
-        listResponse,
-        properties,
-        resourceUrl,
-        resourceKey,
-        showedPropertiesFragment,
-        entityDetailTableRowsFragment,
-    });
+    } = useManageTableViewModel<T>(props);
 
-    // Memoize the row className function
-    const getRowClassName = useCallback(
-        (record: BaseResponse) =>
-            selection.includes(record.id) ? "ant-table-row-selected" : "",
-        [selection],
+    const entitiesTableHeadsFragment = (
+        <tr>
+            <th style={{ width: 40 }}>
+                <Checkbox
+                    onChange={handleToggleAllRowsCheckbox}
+                    checked={selection.length === listResponse.content.length}
+                    indeterminate={
+                        selection.length > 0 &&
+                        selection.length !== listResponse.content.length
+                    }
+                    transitionDuration={0}
+                />
+            </th>
+            {tableHeads.map((item) => (
+                <th key={item}>{item}</th>
+            ))}
+            <th style={{ width: 120 }}>Thao tác</th>
+        </tr>
     );
 
-    // Memoize column definitions to prevent unnecessary re-renders
-    const columns = useMemo(
-        () => [
-            {
-                title: (
-                    <Checkbox
-                        onChange={handleToggleAllRowsCheckbox}
-                        checked={
-                            selection.length === listResponse.content.length
-                        }
-                        indeterminate={
-                            selection.length > 0 &&
-                            selection.length !== listResponse.content.length
-                        }
-                    />
-                ),
-                width: 40,
-                render: (_: any, entity: BaseResponse) => (
+    const entitiesTableRowsFragment = listResponse.content.map((entity) => {
+        const selected = selection.includes(entity.id);
+
+        return (
+            <tr
+                key={entity.id}
+                className={cx({
+                    [classes.rowSelected]: selected,
+                })}
+            >
+                <td>
                     <Checkbox
                         checked={selection.includes(entity.id)}
                         onChange={() => handleToggleRowCheckbox(entity.id)}
+                        transitionDuration={0}
                     />
-                ),
-            },
-            ...tableHeads.map((head, index) => ({
-                title: head,
-                dataIndex: `column_${index}`,
-                key: `column_${index}`,
-                render: (_: any, entity: T) => {
-                    const propertyValues = showedPropertiesFragment(entity);
-                    return React.Children.toArray(propertyValues)[index];
-                },
-            })),
-            {
-                title: "Thao tác",
-                key: "action",
-                width: 120,
-                render: (_: any, entity: BaseResponse) => (
-                    <Space size="small">
-                        <Button
-                            type="primary"
-                            icon={<EyeOutlined />}
-                            size="small"
-                            shape="circle"
-                            onClick={() => handleViewEntityButton(entity.id)}
+                </td>
+                {props.showedPropertiesFragment(entity as T)}
+                <td>
+                    <Group spacing="xs">
+                        <ActionIcon
+                            color="blue"
+                            variant="outline"
+                            size={24}
                             title="Xem"
-                        />
-                        <Link href={`${pathName}/update/${entity.id}`} passHref>
-                            <Button
-                                type="primary"
-                                icon={<EditOutlined />}
-                                size="small"
-                                shape="circle"
-                                style={{ backgroundColor: "#13c2c2" }}
-                                title="Cập nhật"
-                            />
-                        </Link>
-                        <Button
-                            type="primary"
-                            danger
-                            icon={<DeleteOutlined />}
-                            size="small"
-                            shape="circle"
-                            onClick={() => handleDeleteEntityButton(entity.id)}
+                            onClick={() => handleViewEntityButton(entity.id)}
+                        >
+                            <Eye size={16} />
+                        </ActionIcon>
+                        <ActionIcon
+                            component={Link}
+                            onClick={() => {
+                                route.replace(
+                                    `${pathname}/update/${entity.id}`,
+                                );
+                            }}
+                            color="teal"
+                            variant="outline"
+                            size={24}
+                            title="Cập nhật"
+                        >
+                            <Edit size={16} />
+                        </ActionIcon>
+                        <ActionIcon
+                            color="red"
+                            variant="outline"
+                            size={24}
                             title="Xóa"
-                        />
-                    </Space>
-                ),
-            },
-        ],
-        [
-            handleToggleAllRowsCheckbox,
-            handleToggleRowCheckbox,
-            handleViewEntityButton,
-            handleDeleteEntityButton,
-            selection,
-            listResponse.content.length,
-            tableHeads,
-            showedPropertiesFragment,
-        ],
-    );
+                            onClick={() => handleDeleteEntityButton(entity.id)}
+                        >
+                            <Trash size={16} />
+                        </ActionIcon>
+                    </Group>
+                </td>
+            </tr>
+        );
+    });
 
     return (
         <Table
-            columns={columns}
-            dataSource={listResponse.content}
-            rowKey="id"
-            pagination={false}
-            size="middle"
-            bordered
-            style={{ borderRadius: 8, overflow: "hidden" }}
-            rowClassName={getRowClassName}
-        />
+            horizontalSpacing="sm"
+            verticalSpacing="sm"
+            highlightOnHover
+            striped
+            sx={(theme) => ({
+                borderRadius: theme.radius.sm,
+                overflow: "hidden",
+            })}
+        >
+            <thead>{entitiesTableHeadsFragment}</thead>
+            <tbody>{entitiesTableRowsFragment}</tbody>
+        </Table>
     );
 }
 
-export default React.memo(ManageTable);
+export default ManageTable;

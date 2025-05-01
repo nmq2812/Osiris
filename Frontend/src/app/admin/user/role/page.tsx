@@ -1,6 +1,6 @@
 "use client";
 import React from "react";
-import { Space, Typography, Badge, Tag } from "antd";
+import { Badge, Code, Highlight, Stack } from "@mantine/core";
 import FilterPanel from "@/components/FilterPanel/FilterPanel";
 import ManageHeader from "@/components/ManageHeader";
 import ManageHeaderButtons from "@/components/ManageHeaderButtons";
@@ -18,9 +18,6 @@ import DateUtils from "@/utils/DateUtils";
 import { ListResponse } from "@/utils/FetchUtils";
 import PageConfigs from "@/utils/PageConfigs";
 import RoleConfigs from "./RoleConfigs";
-import BaseResponse from "@/models/BaseResponse";
-
-const { Text } = Typography;
 
 function RoleManage() {
     useResetManagePageState();
@@ -36,54 +33,50 @@ function RoleManage() {
 
     const { searchToken } = useAppStore();
 
-    const getRoleStatusBadge = (status: number) => {
+    const roleStatusBadgeFragment = (status: number) => {
         if (status === 1) {
-            return <Badge status="success" text="Có hiệu lực" />;
+            return (
+                <Badge variant="outline" size="sm">
+                    Có hiệu lực
+                </Badge>
+            );
         }
 
-        return <Badge status="error" text="Vô hiệu lực" />;
+        return (
+            <Badge color="red" variant="outline" size="sm">
+                Vô hiệu lực
+            </Badge>
+        );
     };
 
-    const showedPropertiesFragment = (entity: any) => [
-        <div key="id">{entity.id}</div>,
-        <div key="createdAt">
-            {DateUtils.isoDateToString(entity.createdAt)}
-        </div>,
-        <div key="updatedAt">
-            {DateUtils.isoDateToString(entity.updatedAt)}
-        </div>,
-        <div key="code">
-            <Text
-                strong={Boolean(
-                    searchToken && entity.code.includes(searchToken),
-                )}
-                style={
-                    searchToken && entity.code.includes(searchToken)
-                        ? { backgroundColor: "#e6f7ff" }
-                        : {}
-                }
-            >
-                {entity.code}
-            </Text>
-        </div>,
-        <div key="name">
-            <Text
-                strong={Boolean(
-                    searchToken && entity.name.includes(searchToken),
-                )}
-                style={
-                    searchToken && entity.name.includes(searchToken)
-                        ? { backgroundColor: "#e6f7ff" }
-                        : {}
-                }
-            >
-                {entity.name}
-            </Text>
-        </div>,
-        <div key="status">{getRoleStatusBadge(entity.status)}</div>,
-    ];
+    const showedPropertiesFragment = (entity: RoleResponse) => (
+        <>
+            <td>{entity.id}</td>
+            <td>{DateUtils.isoDateToString(entity.createdAt)}</td>
+            <td>{DateUtils.isoDateToString(entity.updatedAt)}</td>
+            <td>
+                <Highlight
+                    highlight={searchToken}
+                    highlightColor="blue"
+                    size="sm"
+                >
+                    {entity.code}
+                </Highlight>
+            </td>
+            <td>
+                <Highlight
+                    highlight={searchToken}
+                    highlightColor="blue"
+                    size="sm"
+                >
+                    {entity.name}
+                </Highlight>
+            </td>
+            <td>{roleStatusBadgeFragment(entity.status)}</td>
+        </>
+    );
 
-    const entityDetailTableRowsFragment = (entity: any) => (
+    const entityDetailTableRowsFragment = (entity: RoleResponse) => (
         <>
             <tr>
                 <td>{RoleConfigs.properties.id.label}</td>
@@ -100,7 +93,7 @@ function RoleManage() {
             <tr>
                 <td>{RoleConfigs.properties.code.label}</td>
                 <td>
-                    <Typography.Text code>{entity.code}</Typography.Text>
+                    <Code>{entity.code}</Code>
                 </td>
             </tr>
             <tr>
@@ -109,22 +102,20 @@ function RoleManage() {
             </tr>
             <tr>
                 <td>{RoleConfigs.properties.status.label}</td>
-                <td>{getRoleStatusBadge(entity.status)}</td>
+                <td>{roleStatusBadgeFragment(entity.status)}</td>
             </tr>
         </>
     );
 
     return (
-        <Space direction="vertical" style={{ width: "100%" }}>
+        <Stack>
             <ManageHeader>
                 <ManageHeaderTitle
                     titleLinks={RoleConfigs.manageTitleLinks}
                     title={RoleConfigs.manageTitle}
                 />
                 <ManageHeaderButtons
-                    listResponse={
-                        listResponse as unknown as ListResponse<unknown>
-                    }
+                    listResponse={listResponse}
                     resourceUrl={RoleConfigs.resourceUrl}
                     resourceKey={RoleConfigs.resourceKey}
                 />
@@ -134,14 +125,9 @@ function RoleManage() {
 
             <FilterPanel />
 
-            <ManageMain
-                listResponse={listResponse as unknown as ListResponse<unknown>}
-                isLoading={isLoading}
-            >
+            <ManageMain listResponse={listResponse} isLoading={isLoading}>
                 <ManageTable
-                    listResponse={
-                        listResponse as unknown as ListResponse<BaseResponse>
-                    }
+                    listResponse={listResponse}
                     properties={RoleConfigs.properties}
                     resourceUrl={RoleConfigs.resourceUrl}
                     resourceKey={RoleConfigs.resourceKey}
@@ -152,10 +138,8 @@ function RoleManage() {
                 />
             </ManageMain>
 
-            <ManagePagination
-                listResponse={listResponse as unknown as ListResponse<unknown>}
-            />
-        </Space>
+            <ManagePagination listResponse={listResponse} />
+        </Stack>
     );
 }
 

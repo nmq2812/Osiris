@@ -38,12 +38,6 @@ function useProvinceUpdateViewModel(id: number) {
                 setPrevFormValues(formValues);
             }
         },
-        {
-            enabled: id > 0,
-            refetchOnWindowFocus: false,
-            staleTime: 30000,
-            queryKey: [],
-        },
     );
 
     const handleFormSubmit = form.onSubmit((formValues) => {

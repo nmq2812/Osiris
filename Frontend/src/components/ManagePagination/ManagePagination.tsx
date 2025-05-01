@@ -1,68 +1,66 @@
-import React from "react";
-import { Row, Pagination, Select, Typography, Space } from "antd";
+"use client";
+import React, { forwardRef } from "react";
+import { Group, Pagination, Select, Text } from "@mantine/core";
 import { ListResponse } from "@/utils/FetchUtils";
 import PageConfigs from "@/utils/PageConfigs";
 import useManagePaginationViewModel from "./ManagePagination.vm";
-
-const { Text } = Typography;
 
 interface ManagePaginationProps {
     listResponse: ListResponse;
 }
 
-function ManagePagination({ listResponse }: ManagePaginationProps) {
-    const {
-        activePage,
-        activePageSize,
-        handlePaginationButton,
-        handlePageSizeSelect,
-    } = useManagePaginationViewModel();
+// Sử dụng forwardRef để xử lý ref đúng cách trong React 19
+const ManagePagination = forwardRef<HTMLDivElement, ManagePaginationProps>(
+    function ManagePagination({ listResponse }, ref) {
+        const {
+            activePage,
+            activePageSize,
+            handlePaginationButton,
+            handlePageSizeSelect,
+        } = useManagePaginationViewModel();
 
-    const pageSizeSelectOptions = PageConfigs.initialPageSizeSelectList.map(
-        (pageSize) => ({
-            value: pageSize.value,
-            label: pageSize.label,
-            disabled: Number(pageSize.value) > listResponse.totalElements,
-        }),
-    );
+        const pageSizeSelectList = PageConfigs.initialPageSizeSelectList.map(
+            (pageSize) =>
+                Number(pageSize.value) > listResponse.totalElements
+                    ? { ...pageSize, disabled: true }
+                    : pageSize,
+        );
 
-    if (listResponse.totalElements === 0) {
-        return null;
-    }
+        if (listResponse.totalElements === 0) {
+            return null;
+        }
 
-    return (
-        <Row justify="space-between" align="middle">
-            <Text>
-                <Text strong style={{ marginRight: 4 }}>
-                    Trang {activePage}
-                </Text>
-                <span>/ {listResponse.totalPages} </span>
-                <Text type="secondary" style={{ fontSize: 14 }}>
-                    ({listResponse.totalElements})
-                </Text>
-            </Text>
-
-            <Pagination
-                current={activePage}
-                total={listResponse.totalElements}
-                pageSize={activePageSize}
-                onChange={handlePaginationButton}
-                showSizeChanger={false}
-                size="small"
-            />
-
-            <Space>
-                <Text style={{ fontSize: 14 }}>Số hàng trên trang</Text>
-                <Select
-                    style={{ width: 72 }}
-                    options={pageSizeSelectOptions}
-                    value={String(activePageSize)}
-                    onChange={handlePageSizeSelect}
-                    size="small"
-                />
-            </Space>
-        </Row>
-    );
-}
+        return (
+            <div ref={ref}>
+                <Group position="apart">
+                    <Text>
+                        <Text component="span" weight={500}>
+                            Trang {activePage}
+                        </Text>
+                        <span> / {listResponse.totalPages} </span>
+                        <Text component="span" color="gray" size="sm">
+                            ({listResponse.totalElements})
+                        </Text>
+                    </Text>
+                    <Pagination
+                        page={activePage}
+                        total={listResponse.totalPages}
+                        onChange={handlePaginationButton}
+                    />
+                    <Group>
+                        <Text size="sm">Số hàng trên trang</Text>
+                        <Select
+                            sx={{ width: 72 }}
+                            variant="filled"
+                            data={pageSizeSelectList}
+                            value={String(activePageSize)}
+                            onChange={handlePageSizeSelect}
+                        />
+                    </Group>
+                </Group>
+            </div>
+        );
+    },
+);
 
 export default React.memo(ManagePagination);

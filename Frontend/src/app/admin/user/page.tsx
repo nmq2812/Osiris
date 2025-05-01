@@ -1,6 +1,6 @@
 "use client";
 import React from "react";
-import { Avatar, Badge, Tag, Space, Typography } from "antd";
+import { Avatar, Badge, Highlight, Stack } from "@mantine/core";
 import FilterPanel from "@/components/FilterPanel/FilterPanel";
 import ManageHeader from "@/components/ManageHeader";
 import ManageHeaderButtons from "@/components/ManageHeaderButtons";
@@ -20,7 +20,6 @@ import PageConfigs from "@/utils/PageConfigs";
 import UserConfigs from "./UserConfigs";
 
 function UserManage() {
-    const { Text } = Typography;
     useResetManagePageState();
     useInitFilterPanelState(UserConfigs.properties);
 
@@ -36,76 +35,73 @@ function UserManage() {
 
     const userStatusBadgeFragment = (status: number) => {
         if (status === 1) {
-            return <Badge status="success" text="Đã kích hoạt" />;
+            return (
+                <Badge color="blue" variant="outline" size="sm">
+                    Đã kích hoạt
+                </Badge>
+            );
         }
-        return <Badge status="error" text="Chưa kích hoạt" />;
+
+        return (
+            <Badge color="red" variant="outline" size="sm">
+                Chưa kích hoạt
+            </Badge>
+        );
     };
 
-    const showedPropertiesFragment = (entity: any) => [
-        // Trả về mảng các phần tử React thay vì <td>
-        <span key="id">{entity.id}</span>,
-        <span key="username">
-            <Text
-                strong={Boolean(
-                    searchToken && entity.username?.includes(searchToken),
-                )}
-                style={
-                    searchToken && entity.username?.includes(searchToken)
-                        ? { backgroundColor: "#e6f7ff" }
-                        : {}
-                }
-            >
-                {entity.username}
-            </Text>
-        </span>,
-        <span key="fullname">
-            <Text
-                strong={Boolean(
-                    searchToken && entity.fullname?.includes(searchToken),
-                )}
-                style={
-                    searchToken && entity.fullname?.includes(searchToken)
-                        ? { backgroundColor: "#e6f7ff" }
-                        : {}
-                }
-            >
-                {entity.fullname}
-            </Text>
-        </span>,
-        <span key="phone">
-            <Text
-                strong={Boolean(
-                    searchToken && entity.phone?.includes(searchToken),
-                )}
-                style={
-                    searchToken && entity.phone?.includes(searchToken)
-                        ? { backgroundColor: "#e6f7ff" }
-                        : {}
-                }
-            >
-                {entity.phone}
-            </Text>
-        </span>,
-        <span key="gender">{entity.gender === "M" ? "Nam" : "Nữ"}</span>,
-        <span key="avatar">
-            <Avatar src={entity.avatar} alt={entity.fullname} size="small" />
-        </span>,
-        <span key="status">{userStatusBadgeFragment(entity.status)}</span>,
-        <span key="roles">
-            <Space
-                direction="vertical"
-                size="small"
-                style={{ display: "flex" }}
-            >
-                {entity.roles.map((role: any, index: React.Key) => (
-                    <Tag key={index} color="blue">
-                        {role.name}
-                    </Tag>
-                ))}
-            </Space>
-        </span>,
-    ];
-    const entityDetailTableRowsFragment = (entity: any) => (
+    const showedPropertiesFragment = (entity: UserResponse) => (
+        <>
+            <td>{entity.id}</td>
+            <td>
+                <Highlight
+                    highlight={searchToken}
+                    highlightColor="blue"
+                    size="sm"
+                >
+                    {entity.username}
+                </Highlight>
+            </td>
+            <td>
+                <Highlight
+                    highlight={searchToken}
+                    highlightColor="blue"
+                    size="sm"
+                >
+                    {entity.fullname}
+                </Highlight>
+            </td>
+            <td>
+                <Highlight
+                    highlight={searchToken}
+                    highlightColor="blue"
+                    size="sm"
+                >
+                    {entity.phone}
+                </Highlight>
+            </td>
+            <td>{entity.gender === "M" ? "Nam" : "Nữ"}</td>
+            <td>
+                <Avatar
+                    src={entity.avatar}
+                    alt={entity.fullname}
+                    radius="xl"
+                    size="sm"
+                />
+            </td>
+            <td>{userStatusBadgeFragment(entity.status)}</td>
+            <td>
+                <Stack spacing="xs" align="flex-start">
+                    {entity.roles.map((role, index) => (
+                        <Badge key={index} variant="dot" size="sm">
+                            {role.name}
+                        </Badge>
+                    ))}
+                </Stack>
+            </td>
+        </>
+    );
+
+    const entityDetailTableRowsFragment = (entity: UserResponse) => (
         <>
             <tr>
                 <td>{UserConfigs.properties.id.label}</td>
@@ -165,8 +161,8 @@ function UserManage() {
                     <Avatar
                         src={entity.avatar}
                         alt={entity.fullname}
-                        shape="circle"
-                        size="small"
+                        radius="xl"
+                        size="sm"
                     />
                 </td>
             </tr>
@@ -177,61 +173,20 @@ function UserManage() {
             <tr>
                 <td>{UserConfigs.properties.roles.label}</td>
                 <td>
-                    <Space
-                        direction="vertical"
-                        size="small"
-                        style={{ width: "100%" }}
-                    >
-                        {entity.roles.map(
-                            (
-                                role: {
-                                    name:
-                                        | string
-                                        | number
-                                        | bigint
-                                        | boolean
-                                        | React.ReactElement<
-                                              unknown,
-                                              | string
-                                              | React.JSXElementConstructor<any>
-                                          >
-                                        | Iterable<React.ReactNode>
-                                        | React.ReactPortal
-                                        | Promise<
-                                              | string
-                                              | number
-                                              | bigint
-                                              | boolean
-                                              | React.ReactPortal
-                                              | React.ReactElement<
-                                                    unknown,
-                                                    | string
-                                                    | React.JSXElementConstructor<any>
-                                                >
-                                              | Iterable<React.ReactNode>
-                                              | null
-                                              | undefined
-                                          >
-                                        | null
-                                        | undefined;
-                                },
-                                index: React.Key | null | undefined,
-                            ) => (
-                                <Badge
-                                    key={index}
-                                    status="default"
-                                    text={role.name}
-                                ></Badge>
-                            ),
-                        )}
-                    </Space>
+                    <Stack spacing="xs" align="flex-start">
+                        {entity.roles.map((role, index) => (
+                            <Badge key={index} variant="dot" size="sm">
+                                {role.name}
+                            </Badge>
+                        ))}
+                    </Stack>
                 </td>
             </tr>
         </>
     );
 
     return (
-        <Space direction="vertical" size="middle" style={{ width: "100%" }}>
+        <Stack>
             <ManageHeader>
                 <ManageHeaderTitle
                     titleLinks={UserConfigs.manageTitleLinks}
@@ -262,7 +217,7 @@ function UserManage() {
             </ManageMain>
 
             <ManagePagination listResponse={listResponse} />
-        </Space>
+        </Stack>
     );
 }
 

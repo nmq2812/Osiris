@@ -1,5 +1,5 @@
 "use client";
-import React from "react";
+import React, { useEffect } from "react";
 import {
     Button,
     Divider,
@@ -33,17 +33,29 @@ function ProvinceUpdate() {
     // Tạo Form instance để sử dụng với Ant Design
     const [antForm] = Form.useForm();
 
-    // Kiểm tra trạng thái loading
+    // Cập nhật form khi province thay đổi
+    useEffect(() => {
+        if (province) {
+            antForm.setFieldsValue({
+                name: province.name,
+                code: province.code,
+            });
+        }
+    }, [province, antForm]);
+
+    // Hiển thị trạng thái loading
     if (isLoading) {
         return (
             <div style={{ padding: 24, textAlign: "center" }}>
-                <Spin size="large" />
-                <div style={{ marginTop: 16 }}>Đang tải dữ liệu...</div>
+                <Space direction="vertical" align="center">
+                    <Spin size="large" />
+                    <Typography.Text>Đang tải dữ liệu...</Typography.Text>
+                </Space>
             </div>
         );
     }
 
-    // Kiểm tra lỗi
+    // Hiển thị lỗi nếu có
     if (isError || !province) {
         return (
             <Result
@@ -66,12 +78,6 @@ function ProvinceUpdate() {
         );
     }
 
-    // Logic khi có dữ liệu
-    const initialValues = {
-        name: form.values.name,
-        code: form.values.code,
-    };
-
     // Hàm submit cho Ant Design Form
     const onFinish = (values: any) => {
         form.setValues(values);
@@ -81,7 +87,13 @@ function ProvinceUpdate() {
     // Hàm reset form
     const handleReset = () => {
         antForm.resetFields();
-        form.reset();
+        if (province) {
+            // Reset về giá trị ban đầu từ province
+            antForm.setFieldsValue({
+                name: province.name,
+                code: province.code,
+            });
+        }
     };
 
     return (
@@ -92,19 +104,14 @@ function ProvinceUpdate() {
             />
 
             <DefaultPropertyPanel
-                id={province?.id}
-                createdAt={province?.createdAt}
-                updatedAt={province?.updatedAt}
+                id={province.id}
+                createdAt={province.createdAt}
+                updatedAt={province.updatedAt}
                 createdBy="1"
                 updatedBy="1"
             />
 
-            <Form
-                form={antForm}
-                layout="vertical"
-                initialValues={initialValues}
-                onFinish={onFinish}
-            >
+            <Form form={antForm} layout="vertical" onFinish={onFinish}>
                 <Card>
                     <Row gutter={16}>
                         <Col xs={24} sm={12}>
@@ -118,7 +125,7 @@ function ProvinceUpdate() {
                                     },
                                 ]}
                             >
-                                <Input />
+                                <Input placeholder="Nhập tên tỉnh/thành" />
                             </Form.Item>
                         </Col>
                         <Col xs={24} sm={12}>
@@ -132,7 +139,7 @@ function ProvinceUpdate() {
                                     },
                                 ]}
                             >
-                                <Input />
+                                <Input placeholder="Nhập mã tỉnh/thành" />
                             </Form.Item>
                         </Col>
                     </Row>

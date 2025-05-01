@@ -1,6 +1,6 @@
 "use client";
 import React from "react";
-import { Space, Typography } from "antd";
+import { Highlight, Stack } from "@mantine/core";
 import FilterPanel from "@/components/FilterPanel/FilterPanel";
 import ManageHeader from "@/components/ManageHeader";
 import ManageHeaderButtons from "@/components/ManageHeaderButtons";
@@ -19,8 +19,6 @@ import { ListResponse } from "@/utils/FetchUtils";
 import PageConfigs from "@/utils/PageConfigs";
 import ProvinceConfigs from "./ProvinceConfigs";
 
-const { Text } = Typography;
-
 function ProvinceManage() {
     useResetManagePageState();
     useInitFilterPanelState(ProvinceConfigs.properties);
@@ -31,58 +29,37 @@ function ProvinceManage() {
     } = useGetAllApi<ProvinceResponse>(
         ProvinceConfigs.resourceUrl,
         ProvinceConfigs.resourceKey,
-        undefined,
-        undefined,
-        {
-            refetchOnWindowFocus: false,
-            enabled: true,
-            staleTime: 30000,
-            queryKey: [],
-        },
     );
 
     const { searchToken } = useAppStore();
 
-    const showedPropertiesFragment = (entity: any) => [
-        <span key="id">{entity.id}</span>,
-        <span key="createdAt">
-            {DateUtils.isoDateToString(entity.createdAt)}
-        </span>,
-        <span key="updatedAt">
-            {DateUtils.isoDateToString(entity.updatedAt)}
-        </span>,
-        <span key="name">
-            <Text
-                strong={Boolean(
-                    searchToken && entity.name?.includes(searchToken),
-                )}
-                style={
-                    searchToken && entity.name?.includes(searchToken)
-                        ? { backgroundColor: "#e6f7ff" }
-                        : {}
-                }
-            >
-                {entity.name}
-            </Text>
-        </span>,
-        <span key="code">
-            <Text
-                strong={Boolean(
-                    searchToken && entity.code?.includes(searchToken),
-                )}
-                style={
-                    searchToken && entity.code?.includes(searchToken)
-                        ? { backgroundColor: "#e6f7ff" }
-                        : {}
-                }
-            >
-                {entity.code}
-            </Text>
-        </span>,
-    ];
+    const showedPropertiesFragment = (entity: ProvinceResponse) => (
+        <>
+            <td>{entity.id}</td>
+            <td>{DateUtils.isoDateToString(entity.createdAt)}</td>
+            <td>{DateUtils.isoDateToString(entity.updatedAt)}</td>
+            <td>
+                <Highlight
+                    highlight={searchToken}
+                    highlightColor="blue"
+                    size="sm"
+                >
+                    {entity.name}
+                </Highlight>
+            </td>
+            <td>
+                <Highlight
+                    highlight={searchToken}
+                    highlightColor="blue"
+                    size="sm"
+                >
+                    {entity.code}
+                </Highlight>
+            </td>
+        </>
+    );
 
-    // entityDetailTableRowsFragment vẫn giữ nguyên vì nó được sử dụng đúng trong context của nó
-    const entityDetailTableRowsFragment = (entity: any) => (
+    const entityDetailTableRowsFragment = (entity: ProvinceResponse) => (
         <>
             <tr>
                 <td>{ProvinceConfigs.properties.id.label}</td>
@@ -108,7 +85,7 @@ function ProvinceManage() {
     );
 
     return (
-        <Space direction="vertical" style={{ width: "100%" }}>
+        <Stack>
             <ManageHeader>
                 <ManageHeaderTitle
                     titleLinks={ProvinceConfigs.manageTitleLinks}
@@ -139,7 +116,7 @@ function ProvinceManage() {
             </ManageMain>
 
             <ManagePagination listResponse={listResponse} />
-        </Space>
+        </Stack>
     );
 }
 

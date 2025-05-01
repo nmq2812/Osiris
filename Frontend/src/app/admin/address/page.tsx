@@ -33,7 +33,7 @@ function AddressManage() {
 
     const { searchToken } = useAppStore();
 
-    const showedPropertiesFragment = (entity: any) => (
+    const showedPropertiesFragment = (entity: AddressResponse) => (
         <>
             <td>{entity.id}</td>
             <td>{DateUtils.isoDateToString(entity.createdAt)}</td>
@@ -68,7 +68,7 @@ function AddressManage() {
         </>
     );
 
-    const entityDetailTableRowsFragment = (entity: any) => (
+    const entityDetailTableRowsFragment = (entity: AddressResponse) => (
         <>
             <tr>
                 <td>{AddressConfigs.properties.id.label}</td>

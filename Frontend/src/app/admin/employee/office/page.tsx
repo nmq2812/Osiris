@@ -1,12 +1,11 @@
 "use client";
-import React from "react";
-import { Badge, Typography, Space } from "antd"; // Thay thế Mantine bằng Ant Design
+import React, { useEffect } from "react";
+import { Badge, Typography, Space } from "antd";
 import FilterPanel from "@/components/FilterPanel/FilterPanel";
 import ManageHeader from "@/components/ManageHeader";
 import ManageHeaderButtons from "@/components/ManageHeaderButtons";
 import ManageHeaderTitle from "@/components/ManageHeaderTitle";
 import ManageMain from "@/components/ManageMain";
-import ManagePagination from "@/components/ManagePagination/ManagePagination";
 import ManageTable from "@/components/ManageTable/ManageTable";
 import SearchPanel from "@/components/SearchPanel/SearchPanel";
 import useGetAllApi from "@/hooks/use-get-all-api";
@@ -25,15 +24,27 @@ function OfficeManage() {
     useResetManagePageState();
     useInitFilterPanelState(OfficeConfigs.properties);
 
+    const { searchToken, activePage, activePageSize } = useAppStore();
+
+    const requestParams = {
+        page: activePage,
+        size: activePageSize,
+    };
+
     const {
         isLoading,
         data: listResponse = PageConfigs.initialListResponse as ListResponse<OfficeResponse>,
+        refetch,
     } = useGetAllApi<OfficeResponse>(
         OfficeConfigs.resourceUrl,
         OfficeConfigs.resourceKey,
+        requestParams,
+        undefined,
     );
 
-    const { searchToken } = useAppStore();
+    useEffect(() => {
+        refetch();
+    }, [activePage, activePageSize, refetch]);
 
     const officeStatusBadgeFragment = (status: number) => {
         if (status === 1) {
@@ -185,8 +196,6 @@ function OfficeManage() {
                     }
                 />
             </ManageMain>
-
-            <ManagePagination listResponse={listResponse} />
         </Space>
     );
 }
