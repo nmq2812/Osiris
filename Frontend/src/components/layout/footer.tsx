@@ -9,16 +9,15 @@ import {
     InstagramOutlined,
     CustomerServiceOutlined,
 } from "@ant-design/icons";
-import useAdminAuthStore from "@/stores/use-admin-auth-store";
+import { usePathname } from "next/navigation";
 
 const { Footer } = Layout;
 const { Text, Title } = Typography;
 
 function ClientFooter() {
-    const { user } = useAdminAuthStore();
-
-    if (user) {
-        return null; // Không hiển thị footer nếu đã đăng nhập
+    const pathname = usePathname();
+    if (pathname.includes("/admin")) {
+        return null; // Don't render the footer on admin pages
     }
     return (
         <Footer className="bg-gray-100 pt-16 pb-8 mt-16 border-t border-gray-200">
