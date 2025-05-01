@@ -7,6 +7,7 @@ import { EntityPropertySchema } from "@/datas/EntityProperty";
 import BaseResponse from "@/models/BaseResponse";
 import { ListResponse } from "@/utils/FetchUtils";
 import useManageTableViewModel from "./ManageTable.vm";
+import { usePathname } from "next/navigation";
 
 export interface ManageTableProps<T extends BaseResponse> {
     listResponse: ListResponse<T>;
@@ -25,6 +26,7 @@ function ManageTable<T extends BaseResponse>({
     showedPropertiesFragment,
     entityDetailTableRowsFragment,
 }: ManageTableProps<T>) {
+    const pathName = usePathname();
     // This pattern helps TypeScript better infer the generic type from props
     const {
         listResponse: typedListResponse,
@@ -97,7 +99,7 @@ function ManageTable<T extends BaseResponse>({
                             onClick={() => handleViewEntityButton(entity.id)}
                             title="Xem"
                         />
-                        <Link href={`update/${entity.id}`} passHref>
+                        <Link href={`${pathName}/update/${entity.id}`} passHref>
                             <Button
                                 type="primary"
                                 icon={<EditOutlined />}
