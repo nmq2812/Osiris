@@ -16,7 +16,6 @@ function useDistrictUpdateViewModel(id: number) {
         schema: zodResolver(DistrictConfigs.createUpdateFormSchema),
     });
 
-    const [district, setDistrict] = useState<DistrictResponse>();
     const [prevFormValues, setPrevFormValues] = useState<typeof form.values>();
     const [provinceSelectList, setProvinceSelectList] = useState<
         SelectOption[]
@@ -27,22 +26,29 @@ function useDistrictUpdateViewModel(id: number) {
         DistrictConfigs.resourceKey,
         id,
     );
-    useGetByIdApi<DistrictResponse>(
+
+    const {
+        data: district,
+        isLoading: isDistrictLoading,
+        isError: isDistrictError,
+    } = useGetByIdApi<DistrictResponse>(
         DistrictConfigs.resourceUrl,
         DistrictConfigs.resourceKey,
         id,
         (districtResponse) => {
-            setDistrict(districtResponse);
-            const formValues: typeof form.values = {
-                name: districtResponse.name,
-                code: districtResponse.code,
-                provinceId: String(districtResponse.province.id),
-            };
-            form.setValues(formValues);
-            setPrevFormValues(formValues);
+            if (districtResponse) {
+                const formValues: typeof form.values = {
+                    name: districtResponse.name,
+                    code: districtResponse.code,
+                    provinceId: String(districtResponse.province?.id || ""),
+                };
+                form.setValues(formValues);
+                setPrevFormValues(formValues);
+            }
         },
     );
-    useGetAllApi<ProvinceResponse>(
+
+    const { isLoading: isProvincesLoading } = useGetAllApi<ProvinceResponse>(
         ProvinceConfigs.resourceUrl,
         ProvinceConfigs.resourceKey,
         { all: 1 },
@@ -69,11 +75,15 @@ function useDistrictUpdateViewModel(id: number) {
         }
     });
 
+    const isLoading = isDistrictLoading || isProvincesLoading;
+
     return {
         district,
         form,
         handleFormSubmit,
         provinceSelectList,
+        isLoading,
+        isError: isDistrictError,
     };
 }
 
