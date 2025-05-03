@@ -14,8 +14,8 @@ import MiscUtils from "@/utils/MiscUtils";
 import DistrictConfigs from "../address/district/DistrictConfigs";
 import ProvinceConfigs from "../address/province/ProvinceConfigs";
 import CustomerGroupConfigs from "./customer-group/CustomerGroupConfigs";
-import CustomerResourceConfigs from "./customer-resource/CustomerResourceConfigs";
-import CustomerStatusConfigs from "./customer-status/CustomerStatusConfigs";
+import CustomerResourceConfigs from "./resource/CustomerResourceConfigs";
+import CustomerStatusConfigs from "./status/CustomerStatusConfigs";
 import CustomerConfigs from "./CustomerConfigs";
 
 function useCustomerUpdateViewModel(id: number) {

@@ -13,8 +13,8 @@ import DistrictConfigs from "../address/district/DistrictConfigs";
 import ProvinceConfigs from "../address/province/ProvinceConfigs";
 import CustomerConfigs from "./CustomerConfigs";
 import CustomerGroupConfigs from "./customer-group/CustomerGroupConfigs";
-import CustomerResourceConfigs from "./customer-resource/CustomerResourceConfigs";
-import CustomerStatusConfigs from "./customer-status/CustomerStatusConfigs";
+import CustomerResourceConfigs from "./resource/CustomerResourceConfigs";
+import CustomerStatusConfigs from "./status/CustomerStatusConfigs";
 
 function useCustomerCreateViewModel() {
     const form = useForm({

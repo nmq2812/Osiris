@@ -25,6 +25,9 @@ import FetchUtils, { ErrorMessage } from "@/utils/FetchUtils";
 import NotifyUtils from "@/utils/NotifyUtils";
 import { useQuery, useQueryClient, useMutation } from "@tanstack/react-query";
 import { useStompClient, useSubscription } from "react-stomp-hooks";
+import { ToMessage } from "@/components/ToMessage";
+import { FromMessage } from "@/components/FromMessage";
+import { MessageInput } from "@/components/MessageInput";
 
 const { Text, Title } = Typography;
 
@@ -246,133 +249,6 @@ function ClientChat() {
                 </Row>
             </div>
         </Layout.Content>
-    );
-}
-const FromMessage: React.FC<{ message: MessageResponse }> = ({ message }) => {
-    return (
-        <Space
-            style={{
-                padding: "0 16px 16px 16px",
-                flexWrap: "nowrap",
-                alignItems: "flex-end",
-                display: "flex",
-            }}
-            size={8}
-        >
-            <Avatar style={{ backgroundColor: "#13c2c2" }}>
-                {message.user.username.toUpperCase().charAt(0)}
-            </Avatar>
-            <div>
-                <Text strong style={{ fontSize: 12, display: "block" }}>
-                    {message.user.fullname}
-                </Text>
-                <Space align="end" size={8}>
-                    <Card
-                        size="small"
-                        style={{
-                            maxWidth: 500,
-                            backgroundColor: "#f0f0f0",
-                            borderRadius: 8,
-                            margin: 0,
-                        }}
-                        bodyStyle={{ padding: "8px 16px" }}
-                    >
-                        <Text>{message.content}</Text>
-                    </Card>
-                    <Text type="secondary" style={{ fontSize: 12 }}>
-                        {DateUtils.isoDateToString(message.createdAt)}
-                    </Text>
-                </Space>
-            </div>
-        </Space>
-    );
-};
-
-const ToMessage: React.FC<{ message: MessageResponse }> = ({ message }) => {
-    return (
-        <div
-            style={{
-                padding: "0 16px 16px 16px",
-                display: "flex",
-                justifyContent: "flex-end",
-                alignItems: "flex-end",
-            }}
-        >
-            <Space align="end" size={8}>
-                <Text type="secondary" style={{ fontSize: 12 }}>
-                    {DateUtils.isoDateToString(message.createdAt)}
-                </Text>
-                <Card
-                    size="small"
-                    style={{
-                        maxWidth: 500,
-                        backgroundColor: "#1890ff",
-                        borderRadius: 8,
-                        margin: 0,
-                    }}
-                    bodyStyle={{ padding: "8px 16px" }}
-                >
-                    <Text style={{ color: "white" }}>{message.content}</Text>
-                </Card>
-            </Space>
-        </div>
-    );
-};
-
-function MessageInput({ roomId, userId }: { roomId: number; userId: number }) {
-    const [message, setMessage] = useState("");
-    const stompClient = useStompClient();
-
-    const handleSendMessageButton = () => {
-        if (message.trim() !== "" && stompClient) {
-            stompClient.publish({
-                destination: "/chat/send/" + roomId,
-                body: JSON.stringify({
-                    content: message.trim(),
-                    status: 1,
-                    userId: userId,
-                    roomId: roomId,
-                }),
-            });
-            setMessage("");
-        }
-    };
-
-    const handleSendMessageInput = (
-        event: React.KeyboardEvent<HTMLInputElement>,
-    ) => {
-        if (event.key === "Enter") {
-            handleSendMessageButton();
-        }
-    };
-
-    return (
-        <div
-            style={{
-                position: "absolute",
-                bottom: 0,
-                left: 0,
-                width: "100%",
-                padding: 16,
-                borderTop: "1px solid #f0f0f0",
-                display: "flex",
-                gap: 8,
-            }}
-        >
-            <Input
-                placeholder="Nhập tin nhắn"
-                value={message}
-                onChange={(e) => setMessage(e.target.value)}
-                onKeyDown={handleSendMessageInput}
-                style={{ flexGrow: 1 }}
-            />
-            <Button
-                type="primary"
-                icon={<SendOutlined />}
-                onClick={handleSendMessageButton}
-                title="Gửi tin nhắn"
-            />
-        </div>
     );
 }
 
