@@ -151,7 +151,7 @@ const navbarLinks: NavbarLink[] = [
         children: [
             {
                 key: "category",
-                link: "/admin/category",
+                link: "/admin/product/category",
                 label: "Danh mục sản phẩm",
             },
             {
