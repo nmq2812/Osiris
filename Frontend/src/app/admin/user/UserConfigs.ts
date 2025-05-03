@@ -128,6 +128,7 @@ class UserConfigs extends Configs {
         "address.line": "",
         "address.provinceId": null as string | null,
         "address.districtId": null as string | null,
+        "address.wardId": null as string | null,
         avatar: "",
         status: "1",
         roles: [] as string[],
