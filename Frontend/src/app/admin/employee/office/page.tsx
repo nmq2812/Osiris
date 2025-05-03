@@ -1,11 +1,12 @@
 "use client";
-import React, { useEffect } from "react";
-import { Badge, Typography, Space } from "antd";
+import React from "react";
+import { Badge, Box, Highlight, Stack } from "@mantine/core";
 import FilterPanel from "@/components/FilterPanel/FilterPanel";
 import ManageHeader from "@/components/ManageHeader";
 import ManageHeaderButtons from "@/components/ManageHeaderButtons";
 import ManageHeaderTitle from "@/components/ManageHeaderTitle";
 import ManageMain from "@/components/ManageMain";
+import ManagePagination from "@/components/ManagePagination/ManagePagination";
 import ManageTable from "@/components/ManageTable/ManageTable";
 import SearchPanel from "@/components/SearchPanel/SearchPanel";
 import useGetAllApi from "@/hooks/use-get-all-api";
@@ -18,100 +19,87 @@ import { ListResponse } from "@/utils/FetchUtils";
 import PageConfigs from "@/utils/PageConfigs";
 import OfficeConfigs from "./OfficeConfigs";
 
-const { Text } = Typography;
-
 function OfficeManage() {
     useResetManagePageState();
     useInitFilterPanelState(OfficeConfigs.properties);
 
-    const { searchToken, activePage, activePageSize } = useAppStore();
-
-    const requestParams = {
-        page: activePage,
-        size: activePageSize,
-    };
-
     const {
         isLoading,
         data: listResponse = PageConfigs.initialListResponse as ListResponse<OfficeResponse>,
-        refetch,
     } = useGetAllApi<OfficeResponse>(
         OfficeConfigs.resourceUrl,
         OfficeConfigs.resourceKey,
-        requestParams,
-        undefined,
     );
 
-    useEffect(() => {
-        refetch();
-    }, [activePage, activePageSize, refetch]);
+    const { searchToken } = useAppStore();
 
     const officeStatusBadgeFragment = (status: number) => {
         if (status === 1) {
-            return <Badge status="success" text="Đang hoạt động" />;
+            return (
+                <Box component="div">
+                    <Badge variant="outline" size="sm">
+                        Đang hoạt động
+                    </Badge>
+                </Box>
+            );
         }
 
         if (status === 2) {
-            return <Badge status="warning" text="Ít hoạt động" />;
+            return (
+                <Box component="div">
+                    <Badge color="teal" variant="outline" size="sm">
+                        Ít hoạt động
+                    </Badge>
+                </Box>
+            );
         }
 
-        return <Badge status="error" text="Không hoạt động" />;
+        return (
+            <Box component="div">
+                <Badge color="red" variant="outline" size="sm">
+                    Không hoạt động
+                </Badge>
+            </Box>
+        );
     };
 
-    const showedPropertiesFragment = (entity: any) => [
-        <span key="id">{entity.id}</span>,
-        <span key="createdAt">
-            {DateUtils.isoDateToString(entity.createdAt)}
-        </span>,
-        <span key="updatedAt">
-            {DateUtils.isoDateToString(entity.updatedAt)}
-        </span>,
-        <span key="name">
-            <Text
-                strong={Boolean(
-                    searchToken && entity.name?.includes(searchToken),
-                )}
-                style={
-                    searchToken && entity.name?.includes(searchToken)
-                        ? { backgroundColor: "#e6f7ff" }
-                        : {}
-                }
-            >
-                {entity.name}
-            </Text>
-        </span>,
-        <span key="address-line">
-            <Text
-                strong={Boolean(
-                    searchToken && entity.address?.line?.includes(searchToken),
-                )}
-                style={
-                    searchToken && entity.address?.line?.includes(searchToken)
-                        ? { backgroundColor: "#e6f7ff" }
-                        : {}
-                }
-            >
-                {entity.address?.line || ""}
-            </Text>
-        </span>,
-        <span key="province-name">
-            <Text
-                strong={Boolean(
-                    searchToken &&
-                        entity.address?.province?.name?.includes(searchToken),
-                )}
-                style={
-                    searchToken &&
-                    entity.address?.province?.name?.includes(searchToken)
-                        ? { backgroundColor: "#e6f7ff" }
-                        : {}
-                }
-            >
-                {entity.address?.province?.name || ""}
-            </Text>
-        </span>,
-        <span key="status">{officeStatusBadgeFragment(entity.status)}</span>,
-    ];
+    const showedPropertiesFragment = (entity: any) => (
+        <>
+            <td>{entity.id}</td>
+            <td>{DateUtils.isoDateToString(entity.createdAt)}</td>
+            <td>{DateUtils.isoDateToString(entity.updatedAt)}</td>
+            <td>
+                <Highlight
+                    highlight={searchToken}
+                    highlightColor="blue"
+                    size="sm"
+                >
+                    {entity.name}
+                </Highlight>
+            </td>
+            <td>
+                <Highlight
+                    highlight={searchToken}
+                    highlightColor="blue"
+                    size="sm"
+                >
+                    {entity.address.line || ""}
+                </Highlight>
+            </td>
+            <td>
+                <Highlight
+                    highlight={searchToken}
+                    highlightColor="blue"
+                    size="sm"
+                >
+                    {entity.address.province?.name || ""}
+                </Highlight>
+            </td>
+            <td>
+                <div>{officeStatusBadgeFragment(entity.status)}</div>
+            </td>
+        </>
+    );
 
     const entityDetailTableRowsFragment = (entity: any) => (
         <>
@@ -161,13 +149,15 @@ function OfficeManage() {
             </tr>
             <tr>
                 <td>{OfficeConfigs.properties.status.label}</td>
-                <td>{officeStatusBadgeFragment(entity.status)}</td>
+                <td>
+                    <div>{officeStatusBadgeFragment(entity.status)}</div>
+                </td>
             </tr>
         </>
     );
 
     return (
-        <Space direction="vertical" style={{ width: "100%" }}>
+        <Stack>
             <ManageHeader>
                 <ManageHeaderTitle
                     titleLinks={OfficeConfigs.manageTitleLinks}
@@ -196,7 +186,9 @@ function OfficeManage() {
                     }
                 />
             </ManageMain>
-        </Space>
+
+            <ManagePagination listResponse={listResponse} />
+        </Stack>
     );
 }
 

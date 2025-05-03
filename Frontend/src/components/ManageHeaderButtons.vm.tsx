@@ -1,3 +1,4 @@
+"use client";
 import React from "react";
 import { Modal, Typography, theme } from "antd";
 import useDeleteByIdsApi from "@/hooks/use-delete-by-ids-api";

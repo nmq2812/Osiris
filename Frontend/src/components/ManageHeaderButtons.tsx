@@ -1,3 +1,4 @@
+"use client";
 import React, { use } from "react";
 import { Button, Space } from "antd";
 import { PlusOutlined, DeleteOutlined } from "@ant-design/icons";
