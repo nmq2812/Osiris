@@ -1,5 +1,5 @@
 "use client";
-import React from "react";
+import React, { useEffect } from "react";
 import {
     Button,
     Divider,
@@ -10,30 +10,47 @@ import {
     Form,
     Select,
     Space,
+    Spin,
+    Result,
 } from "antd";
+import { useParams } from "next/navigation";
 import CreateUpdateTitle from "@/components/CreateUpdateTitle";
 import DefaultPropertyPanel from "@/components/DefaultPropertyPanel";
-import DepartmentConfigs from "../DepartmentConfigs";
-import useDepartmentCreateViewModel from "../DepartmentCreate.vm";
+import JobTypeConfigs from "../../JobTypeConfigs";
+import useJobTypeUpdateViewModel from "../../JobTypeUpdate.vm";
 
-function DepartmentCreate() {
+function JobTypeUpdate() {
     // Form instance của Ant Design
     const [form] = Form.useForm();
 
+    const param = useParams();
+    const id = typeof param.slug === "string" ? parseInt(param.slug) : 0;
+
     const {
+        jobType,
         form: mantineForm,
         handleFormSubmit,
         handleReset,
         statusSelectList,
         isLoading,
         isError,
-    } = useDepartmentCreateViewModel();
+    } = useJobTypeUpdateViewModel(Number(id));
 
     // Chuyển đổi dữ liệu cho Ant Design Select
     const statusOptions = statusSelectList.map((item) => ({
         value: item.value,
         label: item.label,
     }));
+
+    // Cập nhật form khi jobType thay đổi
+    useEffect(() => {
+        if (jobType) {
+            form.setFieldsValue({
+                name: jobType.name,
+                status: String(jobType.status),
+            });
+        }
+    }, [form, jobType]);
 
     // Xử lý submit form
     const onFinish = (
@@ -43,22 +60,63 @@ function DepartmentCreate() {
         handleFormSubmit(new Event("submit") as any);
     };
 
+    // Hiển thị loading state
+    if (isLoading) {
+        return (
+            <div style={{ textAlign: "center", padding: "50px 0" }}>
+                <Space direction="vertical" align="center">
+                    <Spin size="large" />
+                    <div>Đang tải dữ liệu loại công việc...</div>
+                </Space>
+            </div>
+        );
+    }
+
+    // Hiển thị lỗi
+    if (isError || !jobType) {
+        return (
+            <Result
+                status="error"
+                title="Không thể tải thông tin loại công việc"
+                subTitle="Có thể do ID không hợp lệ hoặc đã xảy ra lỗi khi truy vấn dữ liệu."
+                extra={[
+                    <Button key="back" onClick={() => window.history.back()}>
+                        Quay lại
+                    </Button>,
+                    <Button
+                        key="reload"
+                        type="primary"
+                        onClick={() => window.location.reload()}
+                    >
+                        Tải lại trang
+                    </Button>,
+                ]}
+            />
+        );
+    }
+
     return (
         <Space direction="vertical" style={{ width: "100%", maxWidth: 800 }}>
             <CreateUpdateTitle
-                managerPath={DepartmentConfigs.managerPath}
-                title={DepartmentConfigs.createTitle}
+                managerPath={JobTypeConfigs.managerPath}
+                title={JobTypeConfigs.updateTitle}
             />
 
-            <DefaultPropertyPanel />
+            <DefaultPropertyPanel
+                id={jobType.id}
+                createdAt={jobType.createdAt}
+                updatedAt={jobType.updatedAt}
+                createdBy="1"
+                updatedBy="1"
+            />
 
             <Form
                 form={form}
                 layout="vertical"
                 onFinish={onFinish}
                 initialValues={{
-                    name: "",
-                    status: "1", // Mặc định là "Đang hoạt động"
+                    name: jobType.name,
+                    status: String(jobType.status),
                 }}
             >
                 <Card>
@@ -66,23 +124,22 @@ function DepartmentCreate() {
                         <Col xs={24} sm={12}>
                             <Form.Item
                                 name="name"
-                                label={DepartmentConfigs.properties.name.label}
+                                label={JobTypeConfigs.properties.name.label}
                                 rules={[
                                     {
                                         required: true,
-                                        message: "Vui lòng nhập tên phòng ban",
+                                        message:
+                                            "Vui lòng nhập tên loại công việc",
                                     },
                                 ]}
                             >
-                                <Input placeholder="Nhập tên phòng ban" />
+                                <Input />
                             </Form.Item>
                         </Col>
                         <Col xs={24} sm={12}>
                             <Form.Item
                                 name="status"
-                                label={
-                                    DepartmentConfigs.properties.status.label
-                                }
+                                label={JobTypeConfigs.properties.status.label}
                                 rules={[
                                     {
                                         required: true,
@@ -91,7 +148,7 @@ function DepartmentCreate() {
                                 ]}
                             >
                                 <Select
-                                    placeholder="--Chọn trạng thái--"
+                                    placeholder="--"
                                     options={statusOptions}
                                 />
                             </Form.Item>
@@ -115,7 +172,7 @@ function DepartmentCreate() {
                             Mặc định
                         </Button>
                         <Button type="primary" htmlType="submit">
-                            Thêm
+                            Cập nhật
                         </Button>
                     </div>
                 </Card>
@@ -124,4 +181,4 @@ function DepartmentCreate() {
     );
 }
 
-export default DepartmentCreate;
+export default JobTypeUpdate;

@@ -13,10 +13,10 @@ import {
 } from "antd";
 import CreateUpdateTitle from "@/components/CreateUpdateTitle";
 import DefaultPropertyPanel from "@/components/DefaultPropertyPanel";
-import DepartmentConfigs from "../DepartmentConfigs";
-import useDepartmentCreateViewModel from "../DepartmentCreate.vm";
+import JobLevelConfigs from "../JobLevelConfigs";
+import useJobLevelCreateViewModel from "../JobLevelCreate.vm";
 
-function DepartmentCreate() {
+function JobLevelCreate() {
     // Form instance của Ant Design
     const [form] = Form.useForm();
 
@@ -27,7 +27,7 @@ function DepartmentCreate() {
         statusSelectList,
         isLoading,
         isError,
-    } = useDepartmentCreateViewModel();
+    } = useJobLevelCreateViewModel();
 
     // Chuyển đổi dữ liệu cho Ant Design Select
     const statusOptions = statusSelectList.map((item) => ({
@@ -46,8 +46,8 @@ function DepartmentCreate() {
     return (
         <Space direction="vertical" style={{ width: "100%", maxWidth: 800 }}>
             <CreateUpdateTitle
-                managerPath={DepartmentConfigs.managerPath}
-                title={DepartmentConfigs.createTitle}
+                managerPath={JobLevelConfigs.managerPath}
+                title={JobLevelConfigs.createTitle}
             />
 
             <DefaultPropertyPanel />
@@ -58,7 +58,7 @@ function DepartmentCreate() {
                 onFinish={onFinish}
                 initialValues={{
                     name: "",
-                    status: "1", // Mặc định là "Đang hoạt động"
+                    status: "1", // Mặc định là "Có hiệu lực"
                 }}
             >
                 <Card>
@@ -66,23 +66,22 @@ function DepartmentCreate() {
                         <Col xs={24} sm={12}>
                             <Form.Item
                                 name="name"
-                                label={DepartmentConfigs.properties.name.label}
+                                label={JobLevelConfigs.properties.name.label}
                                 rules={[
                                     {
                                         required: true,
-                                        message: "Vui lòng nhập tên phòng ban",
+                                        message:
+                                            "Vui lòng nhập tên cấp độ công việc",
                                     },
                                 ]}
                             >
-                                <Input placeholder="Nhập tên phòng ban" />
+                                <Input placeholder="Nhập tên cấp độ công việc" />
                             </Form.Item>
                         </Col>
                         <Col xs={24} sm={12}>
                             <Form.Item
                                 name="status"
-                                label={
-                                    DepartmentConfigs.properties.status.label
-                                }
+                                label={JobLevelConfigs.properties.status.label}
                                 rules={[
                                     {
                                         required: true,
@@ -124,4 +123,4 @@ function DepartmentCreate() {
     );
 }
 
-export default DepartmentCreate;
+export default JobLevelCreate;
