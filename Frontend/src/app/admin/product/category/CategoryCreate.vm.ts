@@ -1,3 +1,4 @@
+"use client";
 import { useForm, zodResolver } from "@mantine/form";
 import { useState, useEffect } from "react";
 import { useQueryClient } from "@tanstack/react-query";
