@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useForm, zodResolver } from "@mantine/form";
 import PurchaseOrderConfigs from "@/app/admin/inventory/purchase-order/PurchaseOrderConfigs";
 import {
@@ -39,6 +39,8 @@ function usePurchaseOrderUpdateViewModel(id: number) {
     >([]);
     const [variants, setVariants] = useState<VariantResponse[]>([]);
 
+    const formInitialized = useRef(false);
+
     // API hooks với destructuring thay vì callback
     const updateApi = useUpdateApi<PurchaseOrderRequest, PurchaseOrderResponse>(
         PurchaseOrderConfigs.resourceUrl,
@@ -74,7 +76,7 @@ function usePurchaseOrderUpdateViewModel(id: number) {
 
     // useEffect xử lý dữ liệu purchase order khi thay đổi
     useEffect(() => {
-        if (purchaseOrderData) {
+        if (purchaseOrderData && !formInitialized.current) {
             setPurchaseOrder(purchaseOrderData);
             const formValues: typeof form.values = {
                 code: purchaseOrderData.code,
@@ -100,8 +102,9 @@ function usePurchaseOrderUpdateViewModel(id: number) {
                     (purchaseOrderVariant) => purchaseOrderVariant.variant,
                 ),
             );
+            formInitialized.current = true;
         }
-    }, [purchaseOrderData, form]);
+    }, [purchaseOrderData]);
 
     // useEffect xử lý dữ liệu nhà cung cấp khi thay đổi
     useEffect(() => {
