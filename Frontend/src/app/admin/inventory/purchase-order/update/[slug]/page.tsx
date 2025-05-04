@@ -24,7 +24,6 @@ import MiscUtils from "@/utils/MiscUtils";
 import { PurchaseOrderVariantRequest } from "@/models/PurchaseOrderVariant";
 
 const { TextArea } = Input;
-const { Text } = Typography;
 
 function PurchaseOrderUpdate() {
     const { slug } = useParams();
@@ -55,27 +54,36 @@ function PurchaseOrderUpdate() {
         }));
     };
 
-    // Fix 1: Move useMemo outside of JSX
-    const memoizedTotalAmount = React.useMemo(
-        () => (mantineForm.values ? mantineForm.values.totalAmount : 0),
-        [mantineForm.values],
-    );
+    // THAY ĐỔI 1: Sửa useMemo để tránh phụ thuộc vào mantineForm.values
+    const formInitialized = React.useRef(false);
+    const totalAmountRef = React.useRef(0);
 
-    // Fix 2: Format price outside of JSX
+    // Thay thế cách memoize để tránh phụ thuộc vào mantineForm.values
+    React.useEffect(() => {
+        // Chỉ cập nhật ref khi có giá trị mới thực sự
+        if (
+            mantineForm.values &&
+            mantineForm.values.totalAmount !== totalAmountRef.current
+        ) {
+            totalAmountRef.current = mantineForm.values.totalAmount || 0;
+        }
+    }, [mantineForm.values?.totalAmount]);
+
+    // Memoize format price sử dụng ref thay vì state
     const formattedPrice = React.useMemo(() => {
-        return MiscUtils.formatPrice(memoizedTotalAmount) + " ₫";
-    }, [memoizedTotalAmount]);
+        return MiscUtils.formatPrice(totalAmountRef.current) + " ₫";
+    }, [totalAmountRef.current]);
 
-    // Initialize form when data is loaded
+    // THAY ĐỔI 2: Tách và cải thiện effect khởi tạo form
     useEffect(() => {
-        if (purchaseOrder && mantineForm.values) {
+        if (purchaseOrder && !formInitialized.current) {
             form.setFieldsValue({
                 code: purchaseOrder.code,
                 supplierId: String(purchaseOrder.supplier.id),
                 destinationId: String(purchaseOrder.destination.id),
                 note: purchaseOrder.note || "",
                 status: String(purchaseOrder.status),
-                // Hidden fields - don't reference mantineForm.values in dependency
+                // Hidden fields - don't reference mantineForm.values
                 purchaseOrderVariants: purchaseOrder.purchaseOrderVariants.map(
                     (item) => ({
                         variantId: item.variant.id,
@@ -86,8 +94,14 @@ function PurchaseOrderUpdate() {
                 ),
                 totalAmount: purchaseOrder.totalAmount,
             });
+
+            // Set value cho totalAmountRef
+            totalAmountRef.current = purchaseOrder.totalAmount;
+
+            // Đánh dấu đã khởi tạo
+            formInitialized.current = true;
         }
-    }, [purchaseOrder, form]); // Remove mantineForm.values from dependencies
+    }, [purchaseOrder, form]);
 
     // Handle form submission
     const onFinish = (
@@ -173,8 +187,9 @@ function PurchaseOrderUpdate() {
 
                         <Divider />
 
+                        {/* THAY ĐỔI 3: Thay thế cách hiển thị total amount trong JSX */}
                         <div style={{ textAlign: "right", padding: "8px" }}>
-                            <Text style={{ fontSize: "14px", fontWeight: 500 }}>
+                            <div style={{ fontSize: "14px", fontWeight: 500 }}>
                                 Tổng thành tiền:{" "}
                                 <span
                                     style={{
@@ -182,9 +197,11 @@ function PurchaseOrderUpdate() {
                                         color: "#1890ff",
                                     }}
                                 >
-                                    {formattedPrice}
+                                    {MiscUtils.formatPrice(
+                                        totalAmountRef.current,
+                                    ) + " ₫"}
                                 </span>
-                            </Text>
+                            </div>
                         </div>
                     </Card>
                 </Col>
