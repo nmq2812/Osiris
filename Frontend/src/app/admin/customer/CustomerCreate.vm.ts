@@ -12,9 +12,10 @@ import { useState, useEffect } from "react";
 import DistrictConfigs from "../address/district/DistrictConfigs";
 import ProvinceConfigs from "../address/province/ProvinceConfigs";
 import CustomerConfigs from "./CustomerConfigs";
-import CustomerGroupConfigs from "./customer-group/CustomerGroupConfigs";
+
 import CustomerResourceConfigs from "./resource/CustomerResourceConfigs";
 import CustomerStatusConfigs from "./status/CustomerStatusConfigs";
+import CustomerGroupConfigs from "./group/CustomerGroupConfigs";
 
 function useCustomerCreateViewModel() {
     const form = useForm({
