@@ -26,18 +26,19 @@ function useCustomerStatusUpdateViewModel(id: number) {
     >(CustomerStatusConfigs.resourceUrl, CustomerStatusConfigs.resourceKey, id);
 
     // Lấy dữ liệu trạng thái khách hàng theo ID
-    const { data: customerStatusData } = useGetByIdApi<CustomerStatusResponse>(
-        CustomerStatusConfigs.resourceUrl,
-        CustomerStatusConfigs.resourceKey,
-        id,
-        undefined,
-        {
-            enabled: id > 0,
-            refetchOnWindowFocus: false,
-            staleTime: 30000,
-            queryKey: [`customer-status-${id}`],
-        },
-    );
+    const { data: customerStatusData, isLoading } =
+        useGetByIdApi<CustomerStatusResponse>(
+            CustomerStatusConfigs.resourceUrl,
+            CustomerStatusConfigs.resourceKey,
+            id,
+            undefined,
+            {
+                enabled: id > 0,
+                refetchOnWindowFocus: false,
+                staleTime: 30000,
+                queryKey: [`customer-status-${id}`],
+            },
+        );
 
     // Xử lý dữ liệu khi fetch thành công
     useEffect(() => {
@@ -96,6 +97,7 @@ function useCustomerStatusUpdateViewModel(id: number) {
         statusSelectList,
         isSubmitDisabled,
         updateStatus: updateApi.status,
+        isLoading, // Thêm isLoading vào đây
     };
 }
 
