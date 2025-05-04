@@ -7,6 +7,8 @@ import {
 import { SupplierResponse } from "./Supplier";
 
 export interface PurchaseOrderResponse extends BaseResponse {
+    createdBy: any;
+    updatedBy: any;
     code: string;
     supplier: SupplierResponse;
     purchaseOrderVariants: PurchaseOrderVariantResponse[];

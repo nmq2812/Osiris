@@ -2,6 +2,8 @@ import { AddressRequest, AddressResponse } from "./Address";
 import BaseResponse from "./BaseResponse";
 
 export interface DestinationResponse extends BaseResponse {
+    createdBy: any;
+    updatedBy: any;
     contactFullname: string | null;
     contactEmail: string | null;
     contactPhone: string | null;
