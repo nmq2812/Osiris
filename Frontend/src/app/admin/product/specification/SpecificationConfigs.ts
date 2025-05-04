@@ -11,42 +11,44 @@ import PageConfigs from "@/utils/PageConfigs";
 import { z } from "zod";
 import ProductConfigs from "../ProductConfigs";
 
-class PropertyConfigs extends Configs {
-    static managerPath = ManagerPath.PROPERTY;
-    static resourceUrl = ResourceURL.PROPERTY;
-    static resourceKey = "properties";
-    static createTitle = "Thêm thuộc tính sản phẩm";
-    static updateTitle = "Cập nhật thuộc tính sản phẩm";
-    static manageTitle = "Quản lý thuộc tính sản phẩm";
+class SpecificationConfigs extends Configs {
+    static managerPath = ManagerPath.SPECIFICATION;
+    static resourceUrl = ResourceURL.SPECIFICATION;
+    static resourceKey = "specifications";
+    static createTitle = "Thêm thông số sản phẩm";
+    static updateTitle = "Cập nhật thông số sản phẩm";
+    static manageTitle = "Quản lý thông số sản phẩm";
 
     static manageTitleLinks: TitleLink[] = ProductConfigs.manageTitleLinks;
 
     protected static _rawProperties = {
         ...PageConfigs.getProperties(true, true, true),
         name: {
-            label: "Tên thuộc tính sản phẩm",
+            label: "Tên thông số sản phẩm",
             type: EntityPropertyType.STRING,
             isShowInTable: true,
         },
         code: {
-            label: "Mã thuộc tính sản phẩm",
+            label: "Mã thông số sản phẩm",
             type: EntityPropertyType.STRING,
             isShowInTable: true,
         },
         description: {
-            label: "Mô tả thuộc tính sản phẩm",
+            label: "Mô tả thông số sản phẩm",
             type: EntityPropertyType.STRING,
         },
         status: {
-            label: "Trạng thái thuộc tính sản phẩm",
+            label: "Trạng thái thông số sản phẩm",
             type: EntityPropertyType.NUMBER,
             isShowInTable: true,
         },
     };
 
-    static properties = PropertyConfigs._rawProperties as EntityPropertySchema<
-        typeof PropertyConfigs._rawProperties & typeof PageConfigs.properties
-    >;
+    static properties =
+        SpecificationConfigs._rawProperties as EntityPropertySchema<
+            typeof SpecificationConfigs._rawProperties &
+                typeof PageConfigs.properties
+        >;
 
     static initialCreateUpdateFormValues = {
         name: "",
@@ -58,11 +60,14 @@ class PropertyConfigs extends Configs {
     static createUpdateFormSchema = z.object({
         name: z
             .string()
-            .min(2, MessageUtils.min(PropertyConfigs.properties.name.label, 2)),
+            .min(
+                2,
+                MessageUtils.min(SpecificationConfigs.properties.name.label, 2),
+            ),
         code: z.string(),
         description: z.string(),
         status: z.string(),
     });
 }
 
-export default PropertyConfigs;
+export default SpecificationConfigs;

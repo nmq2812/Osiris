@@ -30,17 +30,32 @@ class MiscUtils {
     static formatPrice = (price: number): string =>
         new Intl.NumberFormat("vi-VN").format(price);
 
-    static recursiveFlatMap = (
-        arrays: string[][],
-        i = 0,
-        combination: string[] = [],
-    ): string[][] => {
-        if (i === arrays.length) {
-            return [combination];
+    static recursiveFlatMap = (arrays: any[][]): string[][] => {
+        // Xử lý đầu vào
+        if (!arrays || arrays.length === 0) return [[]];
+
+        // Đảm bảo tất cả phần tử đều là mảng hợp lệ
+        const validArrays = arrays
+            .map((arr) => (Array.isArray(arr) ? arr : []))
+            .filter((arr) => arr.length > 0);
+
+        if (validArrays.length === 0) return [[]];
+
+        // Triển khai tổ hợp mà không cần dùng flatMap
+        function combine(index: number, current: any[] = []): any[][] {
+            if (index === validArrays.length) {
+                return [current];
+            }
+
+            const results: any[][] = [];
+            for (const value of validArrays[index]) {
+                const newCombinations = combine(index + 1, [...current, value]);
+                results.push(...newCombinations);
+            }
+            return results;
         }
-        return arrays[i].flatMap((n) =>
-            MiscUtils.recursiveFlatMap(arrays, i + 1, [...combination, n]),
-        );
+
+        return combine(0);
     };
 
     static parserPrice = (value?: string) => (value || "").replace(/(\.)/g, "");

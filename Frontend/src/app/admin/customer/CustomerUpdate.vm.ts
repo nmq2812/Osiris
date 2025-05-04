@@ -13,10 +13,11 @@ import { ProvinceResponse } from "@/models/Province";
 import MiscUtils from "@/utils/MiscUtils";
 import DistrictConfigs from "../address/district/DistrictConfigs";
 import ProvinceConfigs from "../address/province/ProvinceConfigs";
-import CustomerGroupConfigs from "./customer-group/CustomerGroupConfigs";
+
 import CustomerResourceConfigs from "./resource/CustomerResourceConfigs";
 import CustomerStatusConfigs from "./status/CustomerStatusConfigs";
 import CustomerConfigs from "./CustomerConfigs";
+import CustomerGroupConfigs from "./group/CustomerGroupConfigs";
 
 function useCustomerUpdateViewModel(id: number) {
     const form = useForm({

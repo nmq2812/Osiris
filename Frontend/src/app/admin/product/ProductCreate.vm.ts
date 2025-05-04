@@ -27,11 +27,15 @@ import { UnitResponse } from "@/models/Unit";
 import { VariantRequest } from "@/models/Variant";
 import MiscUtils from "@/utils/MiscUtils";
 import ProductConfigs from "./ProductConfigs";
-import CategoryConfigs from "@/app/category/CategoryConfigs";
-import BrandConfigs from "@/app/brand/BrandConfigs";
+
 import SupplierConfigs from "./supplier/SupplierConfigs";
 import UnitConfigs from "./unit/UnitConfigs";
 import TagConfigs from "./tag/TagConfigs";
+import GuaranteeConfigs from "./guarantee/GuaranteeConfigs";
+import PropertyConfigs from "./property/PropertyConfigs";
+import SpecificationConfigs from "./specification/SpecificationConfigs";
+import BrandConfigs from "./brand/BrandConfigs";
+import CategoryConfigs from "./category/CategoryConfigs";
 
 function useProductCreateViewModel() {
     const form = useForm({
@@ -77,54 +81,59 @@ function useProductCreateViewModel() {
     };
 
     // Tách riêng từng query
-    const categoryQuery = useQuery({
+    const categoryQuery = useQuery<CollectionWrapper<CategoryResponse>>({
         queryKey: [CategoryConfigs.resourceKey, "getAll"],
         queryFn: () =>
-            FetchUtils.get(`${CategoryConfigs.resourceUrl}`, { all: 1 }),
+            FetchUtils.get<CollectionWrapper<CategoryResponse>>(
+                `${CategoryConfigs.resourceUrl}`,
+                { all: 1 },
+            ),
         ...commonOptions,
     });
 
-    const brandQuery = useQuery({
+    const brandQuery = useQuery<CollectionWrapper<BrandResponse>>({
         queryKey: [BrandConfigs.resourceKey, "getAll"],
         queryFn: () =>
             FetchUtils.get(`${BrandConfigs.resourceUrl}`, { all: 1 }),
         ...commonOptions,
     });
 
-    const supplierQuery = useQuery({
+    const supplierQuery = useQuery<CollectionWrapper<SupplierResponse>>({
         queryKey: [SupplierConfigs.resourceKey, "getAll"],
         queryFn: () =>
             FetchUtils.get(`${SupplierConfigs.resourceUrl}`, { all: 1 }),
         ...commonOptions,
     });
 
-    const unitQuery = useQuery({
+    const unitQuery = useQuery<CollectionWrapper<UnitResponse>>({
         queryKey: [UnitConfigs.resourceKey, "getAll"],
         queryFn: () => FetchUtils.get(`${UnitConfigs.resourceUrl}`, { all: 1 }),
         ...commonOptions,
     });
 
-    const tagQuery = useQuery({
+    const tagQuery = useQuery<CollectionWrapper<TagResponse>>({
         queryKey: [TagConfigs.resourceKey, "getAll"],
         queryFn: () => FetchUtils.get(`${TagConfigs.resourceUrl}`, { all: 1 }),
         ...commonOptions,
     });
 
-    const guaranteeQuery = useQuery({
+    const guaranteeQuery = useQuery<CollectionWrapper<GuaranteeResponse>>({
         queryKey: [GuaranteeConfigs.resourceKey, "getAll"],
         queryFn: () =>
             FetchUtils.get(`${GuaranteeConfigs.resourceUrl}`, { all: 1 }),
         ...commonOptions,
     });
 
-    const specificationQuery = useQuery({
+    const specificationQuery = useQuery<
+        CollectionWrapper<SpecificationResponse>
+    >({
         queryKey: [SpecificationConfigs.resourceKey, "getAll"],
         queryFn: () =>
             FetchUtils.get(`${SpecificationConfigs.resourceUrl}`, { all: 1 }),
         ...commonOptions,
     });
 
-    const propertyQuery = useQuery({
+    const propertyQuery = useQuery<CollectionWrapper<PropertyResponse>>({
         queryKey: [PropertyConfigs.resourceKey, "getAll"],
         queryFn: () =>
             FetchUtils.get(`${PropertyConfigs.resourceUrl}`, { all: 1 }),
@@ -340,10 +349,9 @@ function useProductCreateViewModel() {
             };
             createApi.mutate(requestBody, {
                 onSuccess: async (productResponse) => {
-                    await queryClient.invalidateQueries([
-                        TagConfigs.resourceKey,
-                        "getAll",
-                    ]);
+                    await queryClient.invalidateQueries({
+                        queryKey: [TagConfigs.resourceKey, "getAll"],
+                    });
                     const tags = productResponse.tags
                         .sort((a, b) => a.name.localeCompare(b.name))
                         .map((tag) => String(tag.id) + "#ORIGINAL");

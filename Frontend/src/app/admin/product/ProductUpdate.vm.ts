@@ -1,14 +1,13 @@
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useForm, zodResolver } from "@mantine/form";
-import BrandConfigs from "@/app/brand/BrandConfigs";
-import CategoryConfigs from "@/app/category/CategoryConfigs";
-import TagConfigs from "@/app/tag/TagConfigs";
+
 import { CollectionWrapper } from "@/datas/CollectionWrapper";
 import { FileWithPreview } from "@/datas/FileWithPreview";
 import { SelectOption } from "@/datas/SelectOption";
 import useGetAllApi from "@/hooks/use-get-all-api";
 import useGetByIdApi from "@/hooks/use-get-by-id-api";
 import useUpdateApi from "@/hooks/use-update-api";
+import useUploadMultipleImagesApi from "@/hooks/use-upload-multiple-images-api";
 
 import { BrandResponse } from "@/models/Brand";
 import { CategoryResponse } from "@/models/Category";
@@ -30,8 +29,18 @@ import { VariantRequest } from "@/models/Variant";
 import MiscUtils from "@/utils/MiscUtils";
 import { useQueryClient } from "@tanstack/react-query";
 import ProductConfigs from "./ProductConfigs";
+import BrandConfigs from "./brand/BrandConfigs";
+import CategoryConfigs from "./category/CategoryConfigs";
+import GuaranteeConfigs from "./guarantee/GuaranteeConfigs";
+import PropertyConfigs from "./property/PropertyConfigs";
+import SpecificationConfigs from "./specification/SpecificationConfigs";
+import SupplierConfigs from "./supplier/SupplierConfigs";
+import TagConfigs from "./tag/TagConfigs";
+import UnitConfigs from "./unit/UnitConfigs";
 
 function useProductUpdateViewModel(id: number) {
+    const initialized = useRef(false);
+
     const form = useForm({
         initialValues: ProductConfigs.initialCreateUpdateFormValues,
         schema: zodResolver(ProductConfigs.createUpdateFormSchema),
@@ -65,67 +74,85 @@ function useProductUpdateViewModel(id: number) {
     const [selectedVariantIndexes, setSelectedVariantIndexes] = useState<
         number[]
     >([]);
-
     const queryClient = useQueryClient();
     const updateApi = useUpdateApi<ProductRequest, ProductResponse>(
         ProductConfigs.resourceUrl,
         ProductConfigs.resourceKey,
         id,
     );
-    useGetByIdApi<ProductResponse>(
+
+    const uploadMultipleImagesApi = useUploadMultipleImagesApi();
+
+    const { data: productResponse, isLoading } = useGetByIdApi<ProductResponse>(
         ProductConfigs.resourceUrl,
         ProductConfigs.resourceKey,
         id,
-        async (productResponse) => {
-            await queryClient.invalidateQueries({
-                queryKey: [TagConfigs.resourceKey, "getAll"],
-            });
-            setProduct(productResponse);
-            setProduct(productResponse);
-            const formValues: typeof form.values = {
-                name: productResponse.name,
-                code: productResponse.code,
-                slug: productResponse.slug,
-                shortDescription: productResponse.shortDescription || "",
-                description: productResponse.description || "",
-                images: productResponse.images,
-                status: String(productResponse.status),
-                categoryId: productResponse.category
-                    ? String(productResponse.category.id)
-                    : null,
-                brandId: productResponse.brand
-                    ? String(productResponse.brand.id)
-                    : null,
-                supplierId: productResponse.supplier
-                    ? String(productResponse.supplier.id)
-                    : null,
-                unitId: productResponse.unit
-                    ? String(productResponse.unit.id)
-                    : null,
-                tags: productResponse.tags
-                    .sort((a, b) => a.name.localeCompare(b.name))
-                    .map((tag) => String(tag.id) + "#ORIGINAL"),
-                specifications: productResponse.specifications,
-                properties: productResponse.properties,
-                variants: productResponse.variants,
-                weight: productResponse.weight || 0.0,
-                guaranteeId: productResponse.guarantee
-                    ? String(productResponse.guarantee.id)
-                    : null,
-            };
-            form.setValues(formValues);
-            setPrevFormValues(formValues);
-            if (productResponse.images.some((image) => !image.isEliminated)) {
-                setThumbnailName(
-                    (
-                        productResponse.images.find(
-                            (image) => image.isThumbnail,
-                        ) || {}
-                    ).name || "",
-                );
-            }
-        },
+        undefined,
     );
+
+    useEffect(() => {
+        const initializeData = async () => {
+            if (productResponse && !initialized.current) {
+                await queryClient.invalidateQueries({
+                    queryKey: [TagConfigs.resourceKey, "getAll"],
+                });
+
+                setProduct(productResponse);
+
+                const formValues: typeof form.values = {
+                    name: productResponse.name,
+                    code: productResponse.code,
+                    slug: productResponse.slug,
+                    shortDescription: productResponse.shortDescription || "",
+                    description: productResponse.description || "",
+                    images: productResponse.images,
+                    status: String(productResponse.status),
+                    categoryId: productResponse.category
+                        ? String(productResponse.category.id)
+                        : null,
+                    brandId: productResponse.brand
+                        ? String(productResponse.brand.id)
+                        : null,
+                    supplierId: productResponse.supplier
+                        ? String(productResponse.supplier.id)
+                        : null,
+                    unitId: productResponse.unit
+                        ? String(productResponse.unit.id)
+                        : null,
+                    tags: productResponse.tags
+                        .sort((a, b) => a.name.localeCompare(b.name))
+                        .map((tag) => String(tag.id) + "#ORIGINAL"),
+                    specifications: productResponse.specifications,
+                    properties: productResponse.properties,
+                    variants: productResponse.variants,
+                    weight: productResponse.weight || 0.0,
+                    guaranteeId: productResponse.guarantee
+                        ? String(productResponse.guarantee.id)
+                        : null,
+                };
+
+                form.setValues(formValues);
+                setPrevFormValues(formValues);
+
+                if (
+                    productResponse.images.some((image) => !image.isEliminated)
+                ) {
+                    setThumbnailName(
+                        (
+                            productResponse.images.find(
+                                (image) => image.isThumbnail,
+                            ) || {}
+                        ).name || "",
+                    );
+                }
+
+                initialized.current = true;
+            }
+        };
+
+        initializeData();
+    }, [productResponse, form, queryClient]);
+
     useGetAllApi<CategoryResponse>(
         CategoryConfigs.resourceUrl,
         CategoryConfigs.resourceKey,
@@ -142,6 +169,7 @@ function useProductUpdateViewModel(id: number) {
             setCategorySelectList(selectList);
         },
     );
+
     useGetAllApi<BrandResponse>(
         BrandConfigs.resourceUrl,
         BrandConfigs.resourceKey,
@@ -156,6 +184,7 @@ function useProductUpdateViewModel(id: number) {
             setBrandSelectList(selectList);
         },
     );
+
     useGetAllApi<SupplierResponse>(
         SupplierConfigs.resourceUrl,
         SupplierConfigs.resourceKey,
@@ -170,6 +199,7 @@ function useProductUpdateViewModel(id: number) {
             setSupplierSelectList(selectList);
         },
     );
+
     useGetAllApi<UnitResponse>(
         UnitConfigs.resourceUrl,
         UnitConfigs.resourceKey,
@@ -184,6 +214,7 @@ function useProductUpdateViewModel(id: number) {
             setUnitSelectList(selectList);
         },
     );
+
     useGetAllApi<TagResponse>(
         TagConfigs.resourceUrl,
         TagConfigs.resourceKey,
@@ -198,6 +229,7 @@ function useProductUpdateViewModel(id: number) {
             setTagSelectList(selectList);
         },
     );
+
     useGetAllApi<GuaranteeResponse>(
         GuaranteeConfigs.resourceUrl,
         GuaranteeConfigs.resourceKey,
@@ -211,6 +243,7 @@ function useProductUpdateViewModel(id: number) {
             setGuaranteeSelectList(selectList);
         },
     );
+
     useGetAllApi<SpecificationResponse>(
         SpecificationConfigs.resourceUrl,
         SpecificationConfigs.resourceKey,
@@ -237,6 +270,7 @@ function useProductUpdateViewModel(id: number) {
             setSpecificationSelectList(selectList);
         },
     );
+
     useGetAllApi<PropertyResponse>(
         PropertyConfigs.resourceUrl,
         PropertyConfigs.resourceKey,
@@ -279,11 +313,6 @@ function useProductUpdateViewModel(id: number) {
     const transformImages = (
         uploadedImageResponses: UploadedImageResponse[],
     ): ImageRequest[] => {
-        /**
-         * NOTE:
-         * - thumbnailIndex >= 0 khi có tải hình mới và có chọn thumbnail trong danh sách hình mới (imageFiles)
-         * - thumbnailIndex = -1 khi có tải hình mới nhưng không chọn thumbnail trong đó
-         */
         const thumbnailIndex = imageFiles.findIndex(
             (imageFile) => imageFile.name === thumbnailName,
         );
@@ -427,6 +456,8 @@ function useProductUpdateViewModel(id: number) {
         selectedVariantIndexes,
         setSelectedVariantIndexes,
         resetForm,
+        isLoading,
+        updateStatus: updateApi.status,
     };
 }
 

@@ -1,21 +1,24 @@
 import { SelectOption } from "@/datas/SelectOption";
 import useCreateApi from "@/hooks/use-create-api";
-import { PropertyRequest, PropertyResponse } from "@/models/Property";
+import {
+    SpecificationRequest,
+    SpecificationResponse,
+} from "@/models/Specification";
 import { useForm, zodResolver } from "@mantine/form";
-import PropertyConfigs from "./PropertyConfigs";
+import SpecificationConfigs from "./SpecificationConfigs";
 
-function usePropertyCreateViewModel() {
+function useSpecificationCreateViewModel() {
     const form = useForm({
-        initialValues: PropertyConfigs.initialCreateUpdateFormValues,
-        schema: zodResolver(PropertyConfigs.createUpdateFormSchema),
+        initialValues: SpecificationConfigs.initialCreateUpdateFormValues,
+        schema: zodResolver(SpecificationConfigs.createUpdateFormSchema),
     });
 
-    const createApi = useCreateApi<PropertyRequest, PropertyResponse>(
-        PropertyConfigs.resourceUrl,
+    const createApi = useCreateApi<SpecificationRequest, SpecificationResponse>(
+        SpecificationConfigs.resourceUrl,
     );
 
     const handleFormSubmit = form.onSubmit((formValues) => {
-        const requestBody: PropertyRequest = {
+        const requestBody: SpecificationRequest = {
             name: formValues.name,
             code: formValues.code,
             description: formValues.description || null,
@@ -42,4 +45,4 @@ function usePropertyCreateViewModel() {
     };
 }
 
-export default usePropertyCreateViewModel;
+export default useSpecificationCreateViewModel;
