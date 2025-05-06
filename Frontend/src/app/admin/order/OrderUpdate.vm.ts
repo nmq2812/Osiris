@@ -118,7 +118,7 @@ function useOrderUpdateViewModel(id: number) {
                 ),
             );
         }
-    }, [orderResponse, form]);
+    }, [orderResponse]);
 
     useEffect(() => {
         if (orderResourceListResponse?.content) {

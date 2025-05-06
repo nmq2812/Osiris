@@ -1,150 +1,280 @@
-import React from 'react';
-import { Button, Divider, Grid, Group, NumberInput, Paper, Select, Stack, Text, TextInput } from '@mantine/core';
-import { useParams } from 'react-router-dom';
-import { CreateUpdateTitle, DefaultPropertyPanel, EntityFinder } from 'components';
-import PromotionConfigs from 'pages/promotion/PromotionConfigs';
-import usePromotionUpdateViewModel from 'pages/promotion/PromotionUpdate.vm';
-import { ProductResponse } from 'models/Product';
-import ProductConfigs from 'pages/product/ProductConfigs';
-import { DateRangePicker } from '@mantine/dates';
-import DateUtils from 'utils/DateUtils';
+"use client";
+import React from "react";
+import {
+    Button,
+    Card,
+    Col,
+    Divider,
+    Form,
+    Input,
+    InputNumber,
+    Row,
+    Select,
+    Space,
+    Spin,
+    Typography,
+    DatePicker,
+} from "antd";
+import { useParams } from "next/navigation";
+import CreateUpdateTitle from "@/components/CreateUpdateTitle";
+import DefaultPropertyPanel from "@/components/DefaultPropertyPanel";
+
+import { ProductResponse } from "@/models/Product";
+import ProductConfigs from "@/app/admin/product/ProductConfigs";
+import dayjs from "dayjs";
+import MiscUtils from "@/utils/MiscUtils";
+import PromotionConfigs from "../../PromotionConfigs";
+import usePromotionUpdateViewModel from "../../PromotionUpdate.vm";
+import EntityFinder from "@/components/EntityFinder";
+
+const { Text } = Typography;
+const { RangePicker } = DatePicker;
 
 function PromotionUpdate() {
-  const { id } = useParams();
-  const {
-    promotion,
-    form,
-    handleFormSubmit,
-    statusSelectList,
-    products, setProducts,
-    handleAddProductFinder,
-    handleDeleteProductFinder,
-  } = usePromotionUpdateViewModel(Number(id));
+    // Cập nhật cách lấy param theo cấu trúc Next.js
+    const params = useParams();
+    const slug = params?.slug;
 
-  if (!promotion) {
-    return null;
-  }
+    const {
+        promotion,
+        form,
+        handleFormSubmit,
+        statusSelectList,
+        products,
+        setProducts,
+        handleAddProductFinder,
+        handleDeleteProductFinder,
+    } = usePromotionUpdateViewModel(Number(slug));
 
-  const resetForm = () => {
-    form.reset();
-    setProducts([]);
-  };
+    if (!promotion) {
+        return <Spin size="large" tip="Đang tải..." />;
+    }
 
-  return (
-    <Stack pb={50}>
-      <CreateUpdateTitle
-        managerPath={PromotionConfigs.managerPath}
-        title={PromotionConfigs.updateTitle}
-      />
+    const resetForm = () => {
+        form.reset();
+        setProducts([]);
+    };
 
-      <DefaultPropertyPanel
-        id={promotion.id}
-        createdAt={promotion.createdAt}
-        updatedAt={promotion.updatedAt}
-        createdBy="1"
-        updatedBy="1"
-      />
+    // Chuyển đổi giá trị form từ Mantine sang Ant Design
+    const initialValues = {
+        name: form.values.name,
+        range: form.values.range
+            ? [dayjs(form.values.range[0]), dayjs(form.values.range[1])]
+            : null,
+        percent: form.values.percent,
+        status: form.values.status,
+    };
 
-      <Grid>
-        <Grid.Col xs={8}>
-          <Paper shadow="xs" p="sm">
-            <EntityFinder<ProductResponse>
-              selections={products}
-              onClickItem={handleAddProductFinder}
-              onDeleteItem={handleDeleteProductFinder}
-              options={{
-                resourceUrl: ProductConfigs.resourceUrl,
-                resourceKey: ProductConfigs.resourceKey,
-                resultListSize: 5,
-                resultFragment: productResponse => (
-                  <Stack spacing={2}>
-                    <Text size="sm">{productResponse.name}</Text>
-                    <Group spacing="xs">
-                      <Text size="xs" color="dimmed">Mã: {productResponse.code}</Text>
-                      <Text size="xs" color="dimmed">Danh mục: {productResponse.category?.name}</Text>
-                    </Group>
-                  </Stack>
-                ),
-                inputLabel: 'Thêm sản phẩm',
-                inputPlaceholder: 'Nhập tên sản phẩm',
-                selectedFragment: productResponse => (
-                  <Stack spacing={2}>
-                    <Text size="sm">{productResponse.name}</Text>
-                    <Group spacing="xs">
-                      <Text size="xs" color="dimmed">Mã: {productResponse.code}</Text>
-                      <Text size="xs" color="dimmed">Danh mục: {productResponse.category?.name}</Text>
-                    </Group>
-                  </Stack>
-                ),
-                deleteButtonTitle: 'Xóa sản phẩm này',
-              }}
-              errorSearchInput={form.errors.productIds}
+    // Điều chỉnh onFinish để phù hợp với Ant Design Form
+    const onFinish = (values: any) => {
+        // Đồng bộ giá trị từ Ant Design form sang Mantine form
+        form.setValues({
+            ...form.values,
+            name: values.name,
+            range: values.range
+                ? [values.range[0].toDate(), values.range[1].toDate()]
+                : form.values.range,
+            percent: values.percent,
+            status: values.status,
+        });
+
+        // Gọi submit sau khi đồng bộ
+        setTimeout(() => {
+            handleFormSubmit();
+        }, 0);
+    };
+
+    return (
+        <Space
+            direction="vertical"
+            size="middle"
+            style={{ width: "100%", paddingBottom: 50 }}
+        >
+            <CreateUpdateTitle
+                managerPath={PromotionConfigs.managerPath}
+                title={PromotionConfigs.updateTitle}
             />
-          </Paper>
-        </Grid.Col>
 
-        <Grid.Col xs={4}>
-          <form onSubmit={handleFormSubmit}>
-            <Paper shadow="xs">
-              <Stack spacing={0}>
-                <Grid p="sm">
-                  <Grid.Col>
-                    <TextInput
-                      required
-                      label={PromotionConfigs.properties.name.label}
-                      {...form.getInputProps('name')}
-                    />
-                  </Grid.Col>
-                  <Grid.Col>
-                    <DateRangePicker
-                      required
-                      locale="vi"
-                      inputFormat="DD/MM/YYYY"
-                      labelFormat="MM/YYYY"
-                      clearable={false}
-                      minDate={DateUtils.today()}
-                      allowSingleDateInRange={false}
-                      label="Khoảng thời gian"
-                      placeholder="Chọn thời gian diễn ra khuyến mãi"
-                      value={form.values.range}
-                      onChange={value => form.setFieldValue('range', value)}
-                      error={form.errors['range.0']}
-                      disabled
-                    />
-                  </Grid.Col>
-                  <Grid.Col>
-                    <NumberInput
-                      required
-                      label={PromotionConfigs.properties.percent.label}
-                      min={1}
-                      max={100}
-                      {...form.getInputProps('percent')}
-                    />
-                  </Grid.Col>
-                  <Grid.Col>
-                    <Select
-                      required
-                      label={PromotionConfigs.properties.status.label}
-                      placeholder="--"
-                      data={statusSelectList}
-                      {...form.getInputProps('status')}
-                    />
-                  </Grid.Col>
-                </Grid>
+            <DefaultPropertyPanel
+                id={promotion.id}
+                createdAt={promotion.createdAt}
+                updatedAt={promotion.updatedAt}
+                createdBy="1"
+                updatedBy="1"
+            />
 
-                <Divider mt="xs"/>
+            <Row gutter={16}>
+                <Col xs={24} md={16}>
+                    <Card>
+                        <EntityFinder<ProductResponse>
+                            selections={products}
+                            onClickItem={handleAddProductFinder}
+                            onDeleteItem={handleDeleteProductFinder}
+                            options={{
+                                resourceUrl: ProductConfigs.resourceUrl,
+                                resourceKey: ProductConfigs.resourceKey,
+                                resultListSize: 5,
+                                resultFragment: (
+                                    productResponse: ProductResponse,
+                                ) => (
+                                    <Space direction="vertical" size={2}>
+                                        <Text>{productResponse.name}</Text>
+                                        <Space size="small">
+                                            <Text
+                                                type="secondary"
+                                                style={{ fontSize: 12 }}
+                                            >
+                                                Mã: {productResponse.code}
+                                            </Text>
+                                            <Text
+                                                type="secondary"
+                                                style={{ fontSize: 12 }}
+                                            >
+                                                Danh mục:{" "}
+                                                {productResponse.category?.name}
+                                            </Text>
+                                        </Space>
+                                    </Space>
+                                ),
+                                inputLabel: "Thêm sản phẩm",
+                                inputPlaceholder: "Nhập tên sản phẩm",
+                                selectedFragment: (productResponse) => (
+                                    <Space direction="vertical" size={2}>
+                                        <Text>{productResponse.name}</Text>
+                                        <Space size="small">
+                                            <Text
+                                                type="secondary"
+                                                style={{ fontSize: 12 }}
+                                            >
+                                                Mã: {productResponse.code}
+                                            </Text>
+                                            <Text
+                                                type="secondary"
+                                                style={{ fontSize: 12 }}
+                                            >
+                                                Danh mục:{" "}
+                                                {productResponse.category?.name}
+                                            </Text>
+                                        </Space>
+                                    </Space>
+                                ),
+                                deleteButtonTitle: "Xóa sản phẩm này",
+                            }}
+                            errorSearchInput={form.errors.productIds}
+                        />
+                    </Card>
+                </Col>
 
-                <Group position="apart" p="sm">
-                  <Button variant="default" onClick={resetForm}>Mặc định</Button>
-                  <Button type="submit">Cập nhật</Button>
-                </Group>
-              </Stack>
-            </Paper>
-          </form>
-        </Grid.Col>
-      </Grid>
-    </Stack>
-  );
+                <Col xs={24} md={8}>
+                    <Card>
+                        <Form
+                            layout="vertical"
+                            initialValues={initialValues}
+                            onFinish={onFinish}
+                        >
+                            <Form.Item
+                                label={PromotionConfigs.properties.name.label}
+                                name="name"
+                                rules={[
+                                    {
+                                        required: true,
+                                        message: "Vui lòng nhập tên khuyến mãi",
+                                    },
+                                ]}
+                                validateStatus={form.errors.name ? "error" : ""}
+                                help={form.errors.name}
+                            >
+                                <Input />
+                            </Form.Item>
+
+                            <Form.Item
+                                label="Khoảng thời gian"
+                                name="range"
+                                rules={[
+                                    {
+                                        required: true,
+                                        message: "Vui lòng chọn thời gian",
+                                    },
+                                ]}
+                                validateStatus={
+                                    form.errors["range.0"] ? "error" : ""
+                                }
+                                help={form.errors["range.0"]}
+                            >
+                                <RangePicker
+                                    format="DD/MM/YYYY"
+                                    disabledDate={(current) =>
+                                        current &&
+                                        current < dayjs().startOf("day")
+                                    }
+                                    disabled
+                                    style={{ width: "100%" }}
+                                />
+                            </Form.Item>
+
+                            <Form.Item
+                                label={
+                                    PromotionConfigs.properties.percent.label
+                                }
+                                name="percent"
+                                rules={[
+                                    {
+                                        required: true,
+                                        message:
+                                            "Vui lòng nhập phần trăm giảm giá",
+                                    },
+                                ]}
+                                validateStatus={
+                                    form.errors.percent ? "error" : ""
+                                }
+                                help={form.errors.percent}
+                            >
+                                <InputNumber
+                                    min={1}
+                                    max={100}
+                                    style={{ width: "100%" }}
+                                />
+                            </Form.Item>
+
+                            <Form.Item
+                                label={PromotionConfigs.properties.status.label}
+                                name="status"
+                                rules={[
+                                    {
+                                        required: true,
+                                        message: "Vui lòng chọn trạng thái",
+                                    },
+                                ]}
+                                validateStatus={
+                                    form.errors.status ? "error" : ""
+                                }
+                                help={form.errors.status}
+                            >
+                                <Select
+                                    placeholder="--"
+                                    options={statusSelectList}
+                                />
+                            </Form.Item>
+
+                            <Divider />
+
+                            <Space
+                                style={{
+                                    width: "100%",
+                                    justifyContent: "space-between",
+                                }}
+                            >
+                                <Button onClick={resetForm}>Mặc định</Button>
+                                <Button type="primary" htmlType="submit">
+                                    Cập nhật
+                                </Button>
+                            </Space>
+                        </Form>
+                    </Card>
+                </Col>
+            </Row>
+        </Space>
+    );
 }
 
 export default PromotionUpdate;

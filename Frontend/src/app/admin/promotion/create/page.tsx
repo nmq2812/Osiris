@@ -1,176 +1,342 @@
-import React, { useState } from 'react';
-import { Button, Divider, Grid, Group, NumberInput, Paper, Select, Stack, Tabs, Text, TextInput } from '@mantine/core';
-import { CreateUpdateTitle, DefaultPropertyPanel, EntityFinder } from 'components';
-import PromotionConfigs, { AddProductMode } from 'pages/promotion/PromotionConfigs';
-import usePromotionCreateViewModel from 'pages/promotion/PromotionCreate.vm';
-import { DateRangePicker } from '@mantine/dates';
-import DateUtils from 'utils/DateUtils';
-import { CategoryResponse } from 'models/Category';
-import CategoryConfigs from 'pages/category/CategoryConfigs';
-import { ProductResponse } from 'models/Product';
-import ProductConfigs from 'pages/product/ProductConfigs';
+"use client";
+import React, { useState } from "react";
+import {
+    Button,
+    Card,
+    Col,
+    DatePicker,
+    Divider,
+    Form,
+    Input,
+    InputNumber,
+    Row,
+    Select,
+    Space,
+    Tabs,
+    Typography,
+} from "antd";
+import CreateUpdateTitle from "@/components/CreateUpdateTitle";
+import DefaultPropertyPanel from "@/components/DefaultPropertyPanel";
+import EntityFinder from "@/components/EntityFinder";
+
+import { CategoryResponse } from "@/models/Category";
+
+import { ProductResponse } from "@/models/Product";
+import ProductConfigs from "@/app/admin/product/ProductConfigs";
+import dayjs from "dayjs";
+import CategoryConfigs from "../../product/category/CategoryConfigs";
+import PromotionConfigs, { AddProductMode } from "../PromotionConfigs";
+import usePromotionCreateViewModel from "../PromotionCreate.vm";
+
+const { Text } = Typography;
+const { RangePicker } = DatePicker;
+const { TabPane } = Tabs;
 
 function PromotionCreate() {
-  const {
-    form,
-    handleFormSubmit,
-    statusSelectList,
-    setAddProductMode,
-    categories, setCategories,
-    handleAddCategoryFinder,
-    handleDeleteCategoryFinder,
-    products, setProducts,
-    handleAddProductFinder,
-    handleDeleteProductFinder,
-  } = usePromotionCreateViewModel();
+    const {
+        form,
+        handleFormSubmit,
+        statusSelectList,
+        setAddProductMode,
+        categories,
+        setCategories,
+        handleAddCategoryFinder,
+        handleDeleteCategoryFinder,
+        products,
+        setProducts,
+        handleAddProductFinder,
+        handleDeleteProductFinder,
+    } = usePromotionCreateViewModel();
 
-  const [activeTab, setActiveTab] = useState(0);
+    const [activeTab, setActiveTab] = useState("PRODUCT");
 
-  const onTabChange = (active: number, tabKey: AddProductMode) => {
-    setActiveTab(active);
-    setAddProductMode(tabKey);
-    form.setFieldValue('categoryIds', []);
-    form.setFieldValue('productIds', []);
-    setCategories([]);
-    setProducts([]);
-  };
+    const onTabChange = (activeKey: string) => {
+        setActiveTab(activeKey);
+        setAddProductMode(activeKey as AddProductMode);
+        form.setFieldValue("categoryIds", []);
+        form.setFieldValue("productIds", []);
+        setCategories([]);
+        setProducts([]);
+    };
 
-  const resetForm = () => {
-    form.reset();
-    setCategories([]);
-    setProducts([]);
-  };
+    const resetForm = () => {
+        form.reset();
+        setCategories([]);
+        setProducts([]);
+    };
 
-  return (
-    <Stack pb={50}>
-      <CreateUpdateTitle
-        managerPath={PromotionConfigs.managerPath}
-        title={PromotionConfigs.createTitle}
-      />
+    // Chuyển đổi giá trị form từ Mantine sang Ant Design
+    const initialValues = {
+        name: form.values.name,
+        range: form.values.range
+            ? [dayjs(form.values.range[0]), dayjs(form.values.range[1])]
+            : null,
+        percent: form.values.percent,
+        status: form.values.status,
+    };
 
-      <DefaultPropertyPanel/>
+    // Điều chỉnh onFinish để phù hợp với Ant Design Form
+    const onFinish = (values: any) => {
+        // Đồng bộ giá trị từ Ant Design form sang Mantine form
+        form.setValues({
+            ...form.values,
+            name: values.name,
+            range: values.range
+                ? [values.range[0].toDate(), values.range[1].toDate()]
+                : form.values.range,
+            percent: values.percent,
+            status: values.status,
+        });
 
-      <Grid>
-        <Grid.Col xs={8}>
-          <Paper shadow="xs" p="sm">
-            <Tabs variant="pills" active={activeTab} onTabChange={onTabChange}>
-              <Tabs.Tab tabKey={AddProductMode.CATEGORY} label="Danh mục">
-                <EntityFinder<CategoryResponse>
-                  selections={categories}
-                  onClickItem={handleAddCategoryFinder}
-                  onDeleteItem={handleDeleteCategoryFinder}
-                  options={{
-                    resourceUrl: CategoryConfigs.resourceUrl,
-                    resourceKey: CategoryConfigs.resourceKey,
-                    resultListSize: 5,
-                    resultFragment: categoryResponse => <Text size="sm">{categoryResponse.name}</Text>,
-                    inputLabel: 'Thêm danh mục sản phẩm',
-                    inputPlaceholder: 'Nhập tên danh mục sản phẩm',
-                    selectedFragment: categoryResponse => <Text size="sm">{categoryResponse.name}</Text>,
-                    deleteButtonTitle: 'Xóa danh mục sản phẩm này',
-                  }}
-                  errorSearchInput={form.errors.categoryIds}
-                />
-              </Tabs.Tab>
-              <Tabs.Tab tabKey={AddProductMode.PRODUCT} label="Sản phẩm">
-                <EntityFinder<ProductResponse>
-                  selections={products}
-                  onClickItem={handleAddProductFinder}
-                  onDeleteItem={handleDeleteProductFinder}
-                  options={{
-                    resourceUrl: ProductConfigs.resourceUrl,
-                    resourceKey: ProductConfigs.resourceKey,
-                    resultListSize: 5,
-                    resultFragment: productResponse => (
-                      <Stack spacing={2}>
-                        <Text size="sm">{productResponse.name}</Text>
-                        <Group spacing="xs">
-                          <Text size="xs" color="dimmed">Mã: {productResponse.code}</Text>
-                          <Text size="xs" color="dimmed">Danh mục: {productResponse.category?.name}</Text>
-                        </Group>
-                      </Stack>
-                    ),
-                    inputLabel: 'Thêm sản phẩm',
-                    inputPlaceholder: 'Nhập tên sản phẩm',
-                    selectedFragment: productResponse => (
-                      <Stack spacing={2}>
-                        <Text size="sm">{productResponse.name}</Text>
-                        <Group spacing="xs">
-                          <Text size="xs" color="dimmed">Mã: {productResponse.code}</Text>
-                          <Text size="xs" color="dimmed">Danh mục: {productResponse.category?.name}</Text>
-                        </Group>
-                      </Stack>
-                    ),
-                    deleteButtonTitle: 'Xóa sản phẩm này',
-                  }}
-                  errorSearchInput={form.errors.productIds}
-                />
-              </Tabs.Tab>
-            </Tabs>
-          </Paper>
-        </Grid.Col>
+        // Gọi submit sau khi đồng bộ
+        setTimeout(() => {
+            handleFormSubmit();
+        }, 0);
+    };
 
-        <Grid.Col xs={4}>
-          <form onSubmit={handleFormSubmit}>
-            <Paper shadow="xs">
-              <Stack spacing={0}>
-                <Grid p="sm">
-                  <Grid.Col>
-                    <TextInput
-                      required
-                      label={PromotionConfigs.properties.name.label}
-                      {...form.getInputProps('name')}
-                    />
-                  </Grid.Col>
-                  <Grid.Col>
-                    <DateRangePicker
-                      required
-                      locale="vi"
-                      inputFormat="DD/MM/YYYY"
-                      labelFormat="MM/YYYY"
-                      clearable={false}
-                      minDate={DateUtils.today()}
-                      allowSingleDateInRange={false}
-                      label="Khoảng thời gian"
-                      placeholder="Chọn thời gian diễn ra khuyến mãi"
-                      value={form.values.range}
-                      onChange={value => form.setFieldValue('range', value)}
-                      error={form.errors['range.0']}
-                    />
-                  </Grid.Col>
-                  <Grid.Col>
-                    <NumberInput
-                      required
-                      label={PromotionConfigs.properties.percent.label}
-                      min={1}
-                      max={100}
-                      {...form.getInputProps('percent')}
-                    />
-                  </Grid.Col>
-                  <Grid.Col>
-                    <Select
-                      required
-                      label={PromotionConfigs.properties.status.label}
-                      placeholder="--"
-                      data={statusSelectList}
-                      {...form.getInputProps('status')}
-                    />
-                  </Grid.Col>
-                </Grid>
+    return (
+        <Space
+            direction="vertical"
+            size="middle"
+            style={{ width: "100%", paddingBottom: 50 }}
+        >
+            <CreateUpdateTitle
+                managerPath={PromotionConfigs.managerPath}
+                title={PromotionConfigs.createTitle}
+            />
 
-                <Divider mt="xs"/>
+            <DefaultPropertyPanel />
 
-                <Group position="apart" p="sm">
-                  <Button variant="default" onClick={resetForm}>Mặc định</Button>
-                  <Button type="submit">Thêm</Button>
-                </Group>
-              </Stack>
-            </Paper>
-          </form>
-        </Grid.Col>
-      </Grid>
-    </Stack>
-  );
+            <Row gutter={16}>
+                <Col xs={24} md={16}>
+                    <Card>
+                        <Tabs
+                            activeKey={activeTab}
+                            onChange={onTabChange}
+                            type="card"
+                        >
+                            <TabPane
+                                tab="Danh mục"
+                                key={AddProductMode.CATEGORY}
+                            >
+                                <EntityFinder<CategoryResponse>
+                                    selections={categories}
+                                    onClickItem={handleAddCategoryFinder}
+                                    onDeleteItem={handleDeleteCategoryFinder}
+                                    options={{
+                                        resourceUrl:
+                                            CategoryConfigs.resourceUrl,
+                                        resourceKey:
+                                            CategoryConfigs.resourceKey,
+                                        resultListSize: 5,
+                                        resultFragment: (categoryResponse) => (
+                                            <Text>{categoryResponse.name}</Text>
+                                        ),
+                                        inputLabel: "Thêm danh mục sản phẩm",
+                                        inputPlaceholder:
+                                            "Nhập tên danh mục sản phẩm",
+                                        selectedFragment: (
+                                            categoryResponse,
+                                        ) => (
+                                            <Text>{categoryResponse.name}</Text>
+                                        ),
+                                        deleteButtonTitle:
+                                            "Xóa danh mục sản phẩm này",
+                                    }}
+                                    errorSearchInput={form.errors.categoryIds}
+                                />
+                            </TabPane>
+                            <TabPane
+                                tab="Sản phẩm"
+                                key={AddProductMode.PRODUCT}
+                            >
+                                <EntityFinder<ProductResponse>
+                                    selections={products}
+                                    onClickItem={handleAddProductFinder}
+                                    onDeleteItem={handleDeleteProductFinder}
+                                    options={{
+                                        resourceUrl: ProductConfigs.resourceUrl,
+                                        resourceKey: ProductConfigs.resourceKey,
+                                        resultListSize: 5,
+                                        resultFragment: (productResponse) => (
+                                            <Space
+                                                direction="vertical"
+                                                size={2}
+                                            >
+                                                <Text>
+                                                    {productResponse.name}
+                                                </Text>
+                                                <Space size="small">
+                                                    <Text
+                                                        type="secondary"
+                                                        style={{ fontSize: 12 }}
+                                                    >
+                                                        Mã:{" "}
+                                                        {productResponse.code}
+                                                    </Text>
+                                                    <Text
+                                                        type="secondary"
+                                                        style={{ fontSize: 12 }}
+                                                    >
+                                                        Danh mục:{" "}
+                                                        {
+                                                            productResponse
+                                                                .category?.name
+                                                        }
+                                                    </Text>
+                                                </Space>
+                                            </Space>
+                                        ),
+                                        inputLabel: "Thêm sản phẩm",
+                                        inputPlaceholder: "Nhập tên sản phẩm",
+                                        selectedFragment: (productResponse) => (
+                                            <Space
+                                                direction="vertical"
+                                                size={2}
+                                            >
+                                                <Text>
+                                                    {productResponse.name}
+                                                </Text>
+                                                <Space size="small">
+                                                    <Text
+                                                        type="secondary"
+                                                        style={{ fontSize: 12 }}
+                                                    >
+                                                        Mã:{" "}
+                                                        {productResponse.code}
+                                                    </Text>
+                                                    <Text
+                                                        type="secondary"
+                                                        style={{ fontSize: 12 }}
+                                                    >
+                                                        Danh mục:{" "}
+                                                        {
+                                                            productResponse
+                                                                .category?.name
+                                                        }
+                                                    </Text>
+                                                </Space>
+                                            </Space>
+                                        ),
+                                        deleteButtonTitle: "Xóa sản phẩm này",
+                                    }}
+                                    errorSearchInput={form.errors.productIds}
+                                />
+                            </TabPane>
+                        </Tabs>
+                    </Card>
+                </Col>
+
+                <Col xs={24} md={8}>
+                    <Card>
+                        <Form
+                            layout="vertical"
+                            initialValues={initialValues}
+                            onFinish={onFinish}
+                            style={{ width: "100%" }}
+                        >
+                            <Form.Item
+                                label={PromotionConfigs.properties.name.label}
+                                name="name"
+                                rules={[
+                                    {
+                                        required: true,
+                                        message: "Vui lòng nhập tên khuyến mãi",
+                                    },
+                                ]}
+                                validateStatus={form.errors.name ? "error" : ""}
+                                help={form.errors.name}
+                            >
+                                <Input />
+                            </Form.Item>
+
+                            <Form.Item
+                                label="Khoảng thời gian"
+                                name="range"
+                                rules={[
+                                    {
+                                        required: true,
+                                        message: "Vui lòng chọn thời gian",
+                                    },
+                                ]}
+                                validateStatus={
+                                    form.errors["range.0"] ? "error" : ""
+                                }
+                                help={form.errors["range.0"]}
+                            >
+                                <RangePicker
+                                    format="DD/MM/YYYY"
+                                    disabledDate={(current) =>
+                                        current &&
+                                        current < dayjs().startOf("day")
+                                    }
+                                    style={{ width: "100%" }}
+                                />
+                            </Form.Item>
+
+                            <Form.Item
+                                label={
+                                    PromotionConfigs.properties.percent.label
+                                }
+                                name="percent"
+                                rules={[
+                                    {
+                                        required: true,
+                                        message:
+                                            "Vui lòng nhập phần trăm giảm giá",
+                                    },
+                                ]}
+                                validateStatus={
+                                    form.errors.percent ? "error" : ""
+                                }
+                                help={form.errors.percent}
+                            >
+                                <InputNumber
+                                    min={1}
+                                    max={100}
+                                    style={{ width: "100%" }}
+                                />
+                            </Form.Item>
+
+                            <Form.Item
+                                label={PromotionConfigs.properties.status.label}
+                                name="status"
+                                rules={[
+                                    {
+                                        required: true,
+                                        message: "Vui lòng chọn trạng thái",
+                                    },
+                                ]}
+                                validateStatus={
+                                    form.errors.status ? "error" : ""
+                                }
+                                help={form.errors.status}
+                            >
+                                <Select
+                                    placeholder="--"
+                                    options={statusSelectList}
+                                />
+                            </Form.Item>
+
+                            <Divider />
+
+                            <Space
+                                style={{
+                                    width: "100%",
+                                    justifyContent: "space-between",
+                                }}
+                            >
+                                <Button onClick={resetForm}>Mặc định</Button>
+                                <Button type="primary" htmlType="submit">
+                                    Thêm
+                                </Button>
+                            </Space>
+                        </Form>
+                    </Card>
+                </Col>
+            </Row>
+        </Space>
+    );
 }
 
 export default PromotionCreate;

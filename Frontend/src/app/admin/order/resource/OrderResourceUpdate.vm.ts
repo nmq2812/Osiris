@@ -59,7 +59,7 @@ function useOrderResourceUpdateViewModel(id: number) {
             form.setValues(formValues);
             setPrevFormValues(formValues);
         }
-    }, [orderResourceResponse, form]);
+    }, [orderResourceResponse]);
 
     useEffect(() => {
         if (customerResourceListResponse?.content) {

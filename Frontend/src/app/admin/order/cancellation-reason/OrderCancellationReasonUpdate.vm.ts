@@ -50,7 +50,7 @@ function useOrderCancellationReasonUpdateViewModel(id: number) {
             form.setValues(formValues);
             setPrevFormValues(formValues);
         }
-    }, [orderCancellationReasonResponse, form]);
+    }, [orderCancellationReasonResponse]);
 
     const handleFormSubmit = form.onSubmit((formValues) => {
         setPrevFormValues(formValues);

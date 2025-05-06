@@ -36,8 +36,8 @@ class ResourceURL {
     static SPECIFICATION = apiPath + "/specifications";
     static VARIANT = apiPath + "/variants";
 
-    static PRODUCT_INVENTORY = apiPath + "/product_inventories";
-    static VARIANT_INVENTORY = apiPath + "/variant_inventories";
+    static PRODUCT_INVENTORY = apiPath + "/product-inventories";
+    static VARIANT_INVENTORY = apiPath + "/variant-inventories";
     static WAREHOUSE = apiPath + "/warehouses";
     static PURCHASE_ORDER = apiPath + "/purchase_orders";
     static PURCHASE_ORDER_VARIANT = apiPath + "/purchase_order_variants";
