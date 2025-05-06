@@ -20,7 +20,7 @@ function ClientFooter() {
         return null; // Don't render the footer on admin pages
     }
     return (
-        <Footer className="bg-gray-100 pt-16 pb-8 mt-16 border-t border-gray-200">
+        <Footer className="bg-gray-100 pt-16 pb-8 border-t border-gray-200">
             <div className="container mx-auto max-w-7xl px-4">
                 <Row gutter={[32, 48]}>
                     <Col xs={24} md={12}>

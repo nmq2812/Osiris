@@ -15,7 +15,7 @@ import FetchUtils, { ListResponse, ErrorMessage } from "@/utils/FetchUtils";
 import NotifyUtils from "@/utils/NotifyUtils";
 import { useRouter } from "next/navigation";
 
-function ClientHomeLatestProducts() {
+function ClientHomeHotProducts() {
     const requestParams = { size: 12, newable: true, saleable: true };
     const route = useRouter();
 
@@ -112,7 +112,7 @@ function ClientHomeLatestProducts() {
             >
                 <Typography.Title level={2}>
                     <Typography.Text style={{ color: "orange" }}>
-                        Sản phẩm mới nhất
+                        Sản phẩm bán chạy
                     </Typography.Text>
                 </Typography.Title>
                 <Button
@@ -132,4 +132,4 @@ function ClientHomeLatestProducts() {
     );
 }
 
-export default ClientHomeLatestProducts;
+export default ClientHomeHotProducts;

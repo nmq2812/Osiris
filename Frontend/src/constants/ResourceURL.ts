@@ -86,7 +86,7 @@ class ResourceURL {
     static CLIENT_REVIEW_PRODUCT = ResourceURL.CLIENT_REVIEW + "/products";
     static CLIENT_NOTIFICATION = clientApiPath + "/notifications";
     static CLIENT_NOTIFICATION_INIT_EVENTS =
-        ResourceURL.CLIENT_NOTIFICATION + "/init_events";
+        ResourceURL.CLIENT_NOTIFICATION + "/init-events";
     static CLIENT_NOTIFICATION_EVENTS =
         ResourceURL.CLIENT_NOTIFICATION + "/events";
     static CLIENT_CART = clientApiPath + "/carts";
