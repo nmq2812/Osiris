@@ -94,7 +94,7 @@ class ResourceURL {
     static CLIENT_ORDER = clientApiPath + "/orders";
     static CLIENT_ORDER_CANCEL = ResourceURL.CLIENT_ORDER + "/cancel";
     static CLIENT_CHAT = clientApiPath + "/chat";
-    static CLIENT_CHAT_GET_ROOM = ResourceURL.CLIENT_CHAT + "/get_room";
+    static CLIENT_CHAT_GET_ROOM = ResourceURL.CLIENT_CHAT + "/get-room";
     static CLIENT_CHAT_CREATE_ROOM = ResourceURL.CLIENT_CHAT + "/create_room";
     static CLIENT_REWARD = clientApiPath + "/rewards";
 
