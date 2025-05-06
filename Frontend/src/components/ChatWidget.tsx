@@ -9,7 +9,7 @@ const GEMINI_API_KEY = "AIzaSyDwT8Vll0UKMP3JhaZS8EwHjf1CGanmQLU";
 const ai = new GoogleGenAI({ apiKey: GEMINI_API_KEY });
 
 export default function ChatWidget() {
-    const [open, setOpen] = useState(true);
+    const [open, setOpen] = useState(false);
     const [messages, setMessages] = useState<
         { role: string; content: string }[]
     >([]);

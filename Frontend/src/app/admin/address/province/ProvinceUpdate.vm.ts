@@ -36,7 +36,7 @@ function useProvinceUpdateViewModel(id: number) {
                     name: provinceResponse.name,
                     code: provinceResponse.code,
                 };
-                console.log("Province data loaded:", provinceResponse);
+
                 form.setValues(formValues);
                 setPrevFormValues(formValues);
             }
@@ -61,10 +61,8 @@ function useProvinceUpdateViewModel(id: number) {
                 code: formValues.code,
             };
 
-            console.log("Submitting province data:", requestBody);
             updateApi.mutate(requestBody, {
                 onSuccess: (response) => {
-                    console.log("Province updated successfully:", response);
                     // Có thể thêm thông báo thành công ở đây
                 },
                 onError: (error) => {
@@ -73,7 +71,6 @@ function useProvinceUpdateViewModel(id: number) {
                 },
             });
         } else {
-            console.log("No changes detected, skipping update");
         }
     });
 

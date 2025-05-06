@@ -23,10 +23,8 @@ function useDepartmentCreateViewModel() {
             status: Number(formValues.status),
         };
 
-        console.log("Submitting department data:", requestBody);
         createApi.mutate(requestBody, {
             onSuccess: (response) => {
-                console.log("Department created successfully:", response);
                 // Reset form sau khi tạo thành công
                 form.reset();
             },

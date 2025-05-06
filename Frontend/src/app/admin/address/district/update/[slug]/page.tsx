@@ -117,8 +117,6 @@ function DistrictUpdate() {
         value: item.value,
     }));
 
-    console.log("provinceOptions", provinceOptions);
-
     // UI chính khi đã có dữ liệu
     return (
         <Space direction="vertical" style={{ width: "100%", maxWidth: 800 }}>

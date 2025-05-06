@@ -7,100 +7,56 @@ import { MessageResponse } from "@/models/Message";
 class MockUtils {
     static featuredCategories: ClientCategoryResponse[] = [
         {
-            categoryName: "Gundam",
-            categorySlug: "gundam",
-            categoryChildren: [
-                {
-                    categoryName: "SD Gundam",
-                    categorySlug: "sd-gundam",
-                    categoryChildren: [],
-                },
-                {
-                    categoryName: "HG Gundam",
-                    categorySlug: "hg-gundam",
-                    categoryChildren: [],
-                },
-                {
-                    categoryName: "MG Gundam",
-                    categorySlug: "mg-gundam",
-                    categoryChildren: [],
-                },
-                {
-                    categoryName: "PG Gundam",
-                    categorySlug: "pg-gundam",
-                    categoryChildren: [],
-                },
-            ],
+            categoryName: "Model Kit",
+            categorySlug: "Model Kit",
+            categoryChildren: [],
+        },
+        {
+            categoryName: "Metal Build",
+            categorySlug: "Metal Build",
+            categoryChildren: [],
         },
         {
             categoryName: "Figure",
             categorySlug: "figure",
-            categoryChildren: [
-                {
-                    categoryName: "Figure Anime",
-                    categorySlug: "figure-anime",
-                    categoryChildren: [],
-                },
-                {
-                    categoryName: "Figure Game",
-                    categorySlug: "figure-game",
-                    categoryChildren: [],
-                },
-            ],
+            categoryChildren: [],
         },
         {
-            categoryName: "Khác",
-            categorySlug: "khac",
+            categoryName: "Dụng cụ",
+            categorySlug: "Dụng cụ",
+            categoryChildren: [],
+        },
+        {
+            categoryName: "Phụ kiện",
+            categorySlug: "Phụ kiện",
             categoryChildren: [],
         },
     ];
 
     static allCategories: ClientCategoryResponse[] = [
         {
-            categoryName: "Gundam",
-            categorySlug: "gundam",
-            categoryChildren: [
-                {
-                    categoryName: "SD Gundam",
-                    categorySlug: "sd-gundam",
-                    categoryChildren: [],
-                },
-                {
-                    categoryName: "HG Gundam",
-                    categorySlug: "hg-gundam",
-                    categoryChildren: [],
-                },
-                {
-                    categoryName: "MG Gundam",
-                    categorySlug: "mg-gundam",
-                    categoryChildren: [],
-                },
-                {
-                    categoryName: "PG Gundam",
-                    categorySlug: "pg-gundam",
-                    categoryChildren: [],
-                },
-            ],
+            categoryName: "Model Kit",
+            categorySlug: "Model Kit",
+            categoryChildren: [],
+        },
+        {
+            categoryName: "Metal Build",
+            categorySlug: "Metal Build",
+            categoryChildren: [],
         },
         {
             categoryName: "Figure",
             categorySlug: "figure",
-            categoryChildren: [
-                {
-                    categoryName: "Figure Anime",
-                    categorySlug: "figure-anime",
-                    categoryChildren: [],
-                },
-                {
-                    categoryName: "Figure Game",
-                    categorySlug: "figure-game",
-                    categoryChildren: [],
-                },
-            ],
+            categoryChildren: [],
         },
         {
-            categoryName: "Khác",
-            categorySlug: "khac",
+            categoryName: "Dụng cụ",
+            categorySlug: "Dụng cụ",
+            categoryChildren: [],
+        },
+        {
+            categoryName: "Phụ kiện",
+            categorySlug: "Phụ kiện",
             categoryChildren: [],
         },
     ];

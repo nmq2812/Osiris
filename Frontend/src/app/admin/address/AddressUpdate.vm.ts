@@ -79,7 +79,7 @@ function useAddressUpdateViewModel(id: number) {
                         value: String(item.id),
                         label: item.name,
                     }));
-                console.log("Provinces loaded:", selectList.length);
+
                 setProvinceSelectList(selectList);
             },
             {
@@ -108,7 +108,7 @@ function useAddressUpdateViewModel(id: number) {
                         // Lưu thêm provinceId để lọc
                         provinceId: String(item.province?.id || ""),
                     }));
-                console.log("Districts loaded:", selectList.length);
+
                 setDistrictSelectList(selectList);
             },
             {
@@ -135,10 +135,6 @@ function useAddressUpdateViewModel(id: number) {
                     provinceId: String(item.province?.id || ""),
                 }));
 
-            console.log(
-                `Filtered districts for province ${provinceId}:`,
-                filteredDistricts.length,
-            );
             setDistrictSelectList(filteredDistricts);
         } else if (allDistricts.length > 0) {
             // Nếu không chọn province, hiển thị tất cả districts

@@ -43,7 +43,6 @@ function useDistrictUpdateViewModel(id: number) {
                     provinceId: String(districtResponse.province?.id || ""),
                 };
 
-                console.log("District data loaded:", districtResponse);
                 form.setValues(formValues);
                 setPrevFormValues(formValues);
             }
@@ -71,7 +70,7 @@ function useDistrictUpdateViewModel(id: number) {
                         value: String(item.id),
                         label: item.name,
                     }));
-                console.log("Provinces loaded:", selectList.length);
+
                 setProvinceSelectList(selectList);
             }
         },
@@ -103,7 +102,6 @@ function useDistrictUpdateViewModel(id: number) {
                 provinceId: Number(formValues.provinceId),
             };
 
-            console.log("Submitting district data:", requestBody);
             updateApi.mutate(requestBody);
         }
     });

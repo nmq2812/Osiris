@@ -37,7 +37,7 @@ function useDepartmentUpdateViewModel(id: number) {
                     name: departmentResponse.name,
                     status: String(departmentResponse.status),
                 };
-                console.log("Department data loaded:", departmentResponse);
+
                 form.setValues(formValues);
                 setPrevFormValues(formValues);
             }
