@@ -7,7 +7,7 @@ export interface AdminSiteState {
 }
 
 const initialAdminSiteState = {
-    opened: false,
+    opened: true,
 };
 
 const createAdminSiteSlice: SliceCreator<AdminSiteState> = (set) => ({

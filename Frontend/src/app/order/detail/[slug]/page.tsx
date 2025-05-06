@@ -1,38 +1,30 @@
-"use client";
-import React, { useEffect } from "react";
-import { useParams } from "next/navigation";
+import React from "react";
 import {
+    Anchor,
     Badge,
     Button,
     Card,
+    Container,
     Divider,
-    Row,
-    Col,
+    Grid,
+    Group,
     Image,
+    MantineColor,
+    ScrollArea,
     Skeleton,
-    Space,
+    Stack,
     Table,
-    Typography,
+    Text,
+    Textarea,
+    ThemeIcon,
+    Title,
     Tooltip,
-    Modal,
-} from "antd";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { z } from "zod";
-import { useForm, zodResolver } from "@mantine/form";
-import {
-    InfoCircleOutlined,
-    ExclamationCircleOutlined,
-} from "@ant-design/icons";
+    useMantineTheme,
+} from "@mantine/core";
+import { useModals } from "@mantine/modals";
+import ClientUserNavbar from "@/components/ClientUserNavbar";
 import ApplicationConstants from "@/constants/ApplicationConstants";
 import ResourceURL from "@/constants/ResourceURL";
-import ClientUserNavbar from "@/components/ClientUserNavbar";
-import DateUtils from "@/utils/DateUtils";
-import FetchUtils, { ErrorMessage } from "@/utils/FetchUtils";
-import MiscUtils from "@/utils/MiscUtils";
-import NotifyUtils from "@/utils/NotifyUtils";
-import PageConfigs from "@/utils/PageConfigs";
-import { useAuthStore } from "@/stores/authStore";
-import useTitle from "@/hooks/use-title";
 import {
     ClientOrderDetailResponse,
     ClientWaybillLogResponse,
@@ -41,144 +33,237 @@ import {
     ClientReviewResponse,
 } from "@/datas/ClientUI";
 import { Empty } from "@/datas/Utility";
+import useTitle from "@/hooks/use-title";
+import { useAuthStore } from "@/stores/authStore";
+import DateUtils from "@/utils/DateUtils";
+import FetchUtils, { ErrorMessage } from "@/utils/FetchUtils";
+import MiscUtils from "@/utils/MiscUtils";
+import NotifyUtils from "@/utils/NotifyUtils";
+import PageConfigs from "@/utils/PageConfigs";
+import { useForm, zodResolver } from "@mantine/form";
+import { useParams } from "next/navigation";
+import { Rating } from "@smastrom/react-rating";
 
-const { Text, Title } = Typography;
-const { confirm } = Modal;
+import {
+    Icon,
+    Circle,
+    Plus,
+    ArrowRight,
+    Check,
+    X,
+    AlertTriangle,
+    InfoCircle,
+    Link,
+} from "tabler-icons-react";
+import { z } from "zod";
+import { useQuery, useQueryClient, useMutation } from "@tanstack/react-query";
 
 function ClientOrderDetail() {
     useTitle();
+
+    const theme = useMantineTheme();
+    const modals = useModals();
+
     const { code } = useParams();
 
     const { orderResponse, isLoadingOrderResponse, isErrorOrderResponse } =
         useGetOrderApi(code as string);
-    const cancelOrderApi = useCancelOrderApi(code as string);
     const order = orderResponse as ClientOrderDetailResponse;
 
+    const cancelOrderApi = useCancelOrderApi(code as string);
+
     const handleCancelOrderButton = () => {
-        confirm({
-            title: "Xác nhận hủy",
-            icon: <ExclamationCircleOutlined />,
-            content: "Bạn có muốn hủy đơn hàng này, không thể hoàn tác?",
-            okText: "Hủy",
-            cancelText: "Không hủy",
-            okButtonProps: { danger: true },
-            onOk: () => cancelOrderApi.mutate(),
+        modals.openConfirmModal({
+            size: "xs",
+            overlayColor:
+                theme.colorScheme === "dark"
+                    ? theme.colors.dark[9]
+                    : theme.colors.gray[2],
+            overlayOpacity: 0.55,
+            overlayBlur: 3,
+            closeOnClickOutside: false,
+            title: <strong>Xác nhận hủy</strong>,
+            children: (
+                <Text size="sm">
+                    Bạn có muốn hủy đơn hàng này, không thể hoàn tác?
+                </Text>
+            ),
+            labels: {
+                cancel: "Không hủy",
+                confirm: "Hủy",
+            },
+            confirmProps: { color: "red" },
+            onConfirm: () => cancelOrderApi.mutate(),
         });
     };
 
     const orderStatusBadgeFragment = (status: number) => {
         switch (status) {
             case 1:
-                return <Badge color="gray" text="Đơn hàng mới" />;
+                return (
+                    <Badge color="gray" variant="filled" size="sm">
+                        Đơn hàng mới
+                    </Badge>
+                );
             case 2:
-                return <Badge color="blue" text="Đang xử lý" />;
+                return (
+                    <Badge color="blue" variant="filled" size="sm">
+                        Đang xử lý
+                    </Badge>
+                );
             case 3:
-                return <Badge color="purple" text="Đang giao hàng" />;
+                return (
+                    <Badge color="violet" variant="filled" size="sm">
+                        Đang giao hàng
+                    </Badge>
+                );
             case 4:
-                return <Badge color="green" text="Đã giao hàng" />;
+                return (
+                    <Badge color="green" variant="filled" size="sm">
+                        Đã giao hàng
+                    </Badge>
+                );
             case 5:
-                return <Badge color="red" text="Hủy bỏ" />;
-            default:
-                return null;
+                return (
+                    <Badge color="red" variant="filled" size="sm">
+                        Hủy bỏ
+                    </Badge>
+                );
         }
     };
 
     const orderPaymentStatusBadgeFragment = (paymentStatus: number) => {
         switch (paymentStatus) {
             case 1:
-                return <Badge color="gray" text="Chưa thanh toán" />;
+                return (
+                    <Badge color="gray" variant="filled" size="sm">
+                        Chưa thanh toán
+                    </Badge>
+                );
             case 2:
-                return <Badge color="green" text="Đã thanh toán" />;
-            default:
-                return null;
+                return (
+                    <Badge color="green" variant="filled" size="sm">
+                        Đã thanh toán
+                    </Badge>
+                );
         }
     };
 
     const getWaybillLogInfo = (waybillLog: ClientWaybillLogResponse) => {
         type WaybillLogInfo = {
-            color: string;
+            icon: Icon;
+            color: MantineColor;
             text: string;
-            icon: React.ReactNode;
         };
-        // Replace with whichever icons you prefer
+
         const waybillLogMap: Record<number, WaybillLogInfo> = {
-            0: { color: "gray", text: "Trạng thái vận đơn không rõ", icon: "" },
+            0: {
+                icon: Circle,
+                color: "gray",
+                text: "Trạng thái vận đơn không rõ",
+            },
             1: {
+                icon: Plus,
                 color: "blue",
                 text: "Đơn hàng được duyệt và vận đơn được tạo",
-                icon: "",
             },
-            2: { color: "orange", text: "Đang giao hàng", icon: "" },
-            3: { color: "green", text: "Giao hàng thành công", icon: "" },
-            4: { color: "pink", text: "Vận đơn bị hủy", icon: "" },
+            2: {
+                icon: ArrowRight,
+                color: "orange",
+                text: "Đang giao hàng",
+            },
+            3: {
+                icon: Check,
+                color: "teal",
+                text: "Giao hàng thành công",
+            },
+            4: {
+                icon: X,
+                color: "pink",
+                text: "Vận đơn bị hủy",
+            },
         };
+
         return waybillLogMap[waybillLog.waybillLogCurrentStatus || 0];
     };
 
-    let orderContentFragment: React.ReactNode = null;
+    let orderContentFragment;
 
     if (isLoadingOrderResponse) {
         orderContentFragment = (
-            <Space direction="vertical" style={{ width: "100%" }}>
-                {Array.from({ length: 5 }, (_, index) => (
-                    <Skeleton key={index} active />
-                ))}
-            </Space>
+            <Stack>
+                {Array(5)
+                    .fill(0)
+                    .map((_, index) => (
+                        <Skeleton key={index} height={50} radius="md" />
+                    ))}
+            </Stack>
         );
     }
 
     if (isErrorOrderResponse) {
         orderContentFragment = (
-            <Space
-                direction="vertical"
-                align="center"
-                style={{ width: "100%", marginTop: 48, color: "#ffadd2" }}
+            <Stack
+                my={theme.spacing.xl}
+                sx={{ alignItems: "center", color: theme.colors.pink[6] }}
             >
-                <ExclamationCircleOutlined style={{ fontSize: 80 }} />
-                <Text style={{ fontSize: 18, fontWeight: 500 }}>
+                <AlertTriangle size={125} strokeWidth={1} />
+                <Text size="xl" weight={500}>
                     Đã có lỗi xảy ra
                 </Text>
-            </Space>
+            </Stack>
         );
     }
+
+    const cardStyles = {
+        backgroundColor:
+            theme.colorScheme === "dark"
+                ? theme.colors.dark[5]
+                : theme.colors.gray[0],
+        height: "100%",
+    };
 
     if (order) {
         const PaymentMethodIcon =
             PageConfigs.paymentMethodIconMap[order.orderPaymentMethodType];
 
         orderContentFragment = (
-            <Space direction="vertical" style={{ width: "100%" }}>
-                <Card>
-                    <Row justify="space-between">
-                        <Space>
-                            <Text strong>Mã đơn hàng: {order.orderCode}</Text>
-                            <Text type="secondary">
+            <Stack>
+                <Card p="md" radius="md" sx={cardStyles}>
+                    <Group position="apart">
+                        <Group>
+                            <Text weight={500}>
+                                Mã đơn hàng: {order.orderCode}
+                            </Text>
+                            <Text color="dimmed">
                                 Ngày tạo:{" "}
                                 {DateUtils.isoDateToString(
                                     order.orderCreatedAt,
                                 )}
                             </Text>
-                        </Space>
-                        <Space>
+                        </Group>
+                        <Group spacing="xs">
                             {orderStatusBadgeFragment(order.orderStatus)}
                             {orderPaymentStatusBadgeFragment(
                                 order.orderPaymentStatus,
                             )}
-                        </Space>
-                    </Row>
+                        </Group>
+                    </Group>
                 </Card>
 
-                <Row gutter={[16, 16]}>
-                    <Col md={8}>
-                        <Card>
-                            <Space direction="vertical" size="small">
-                                <Text type="secondary" strong>
+                <Grid>
+                    <Grid.Col md={4}>
+                        <Card p="md" radius="md" sx={cardStyles}>
+                            <Stack spacing="xs">
+                                <Text weight={500} color="dimmed">
                                     Thông tin người nhận
                                 </Text>
-                                <Space direction="vertical" size={0}>
-                                    <Text strong>{order.orderToName}</Text>
-                                    <Text>{order.orderToPhone}</Text>
-                                    <Text>
+                                <Stack spacing={5}>
+                                    <Text size="sm" weight={500}>
+                                        {order.orderToName}
+                                    </Text>
+                                    <Text size="sm">{order.orderToPhone}</Text>
+                                    <Text size="sm">
                                         {[
                                             order.orderToAddress,
                                             order.orderToWardName,
@@ -188,92 +273,92 @@ function ClientOrderDetail() {
                                             .filter(Boolean)
                                             .join(", ")}
                                     </Text>
-                                </Space>
-                            </Space>
+                                </Stack>
+                            </Stack>
                         </Card>
-                    </Col>
+                    </Grid.Col>
 
-                    <Col md={8}>
-                        <Card>
-                            <Space direction="vertical" size="small">
-                                <Text type="secondary" strong>
+                    <Grid.Col md={4}>
+                        <Card p="md" radius="md" sx={cardStyles}>
+                            <Stack spacing="xs">
+                                <Text weight={500} color="dimmed">
                                     Hình thức giao hàng
                                 </Text>
                                 <Image
-                                    width={170}
                                     src={MiscUtils.ghnLogoPath}
-                                    preview={false}
+                                    styles={{ image: { maxWidth: 170 } }}
                                 />
-                            </Space>
+                            </Stack>
                         </Card>
-                    </Col>
+                    </Grid.Col>
 
-                    <Col md={8}>
-                        <Card>
-                            <Space direction="vertical" size="small">
-                                <Text type="secondary" strong>
+                    <Grid.Col md={4}>
+                        <Card p="md" radius="md" sx={cardStyles}>
+                            <Stack spacing="xs">
+                                <Text weight={500} color="dimmed">
                                     Hình thức thanh toán
                                 </Text>
-                                <Space>
+                                <Group spacing="xs">
                                     <PaymentMethodIcon
-                                        style={{ color: "#999" }}
+                                        color={theme.colors.gray[5]}
                                     />
-                                    <Text>
+                                    <Text size="sm">
                                         {
                                             PageConfigs.paymentMethodNameMap[
                                                 order.orderPaymentMethodType
                                             ]
                                         }
                                     </Text>
-                                </Space>
-                            </Space>
+                                </Group>
+                            </Stack>
                         </Card>
-                    </Col>
-                </Row>
+                    </Grid.Col>
+                </Grid>
 
-                <Card>
-                    <Space direction="vertical" style={{ width: "100%" }}>
-                        <Text type="secondary" strong>
+                <Card p="md" radius="md" sx={cardStyles}>
+                    <Stack spacing="xs">
+                        <Text weight={500} color="dimmed">
                             Theo dõi vận đơn
                         </Text>
                         {order.orderWaybill ? (
-                            <Row gutter={[16, 16]}>
-                                <Col sm={6}>
-                                    <Space direction="vertical">
-                                        <Space direction="vertical" size={0}>
-                                            <Text strong>Mã vận đơn</Text>
+                            <Grid>
+                                <Grid.Col sm={3}>
+                                    <Stack>
+                                        <Stack align="flex-start" spacing={5}>
+                                            <Text size="sm" weight={500}>
+                                                Mã vận đơn
+                                            </Text>
                                             <Badge
-                                                color="purple"
-                                                text={
-                                                    order.orderWaybill
-                                                        .waybillCode
-                                                }
-                                            />
-                                        </Space>
-                                        <Space direction="vertical" size={0}>
-                                            <Text strong>
+                                                radius="md"
+                                                size="lg"
+                                                variant="filled"
+                                                color="grape"
+                                            >
+                                                {order.orderWaybill.waybillCode}
+                                            </Badge>
+                                        </Stack>
+
+                                        <Stack align="flex-start" spacing={5}>
+                                            <Text size="sm" weight={500}>
                                                 Dự kiến giao hàng
                                             </Text>
-                                            <Text>
+                                            <Text size="sm">
                                                 {DateUtils.isoDateToString(
                                                     order.orderWaybill
                                                         .waybillExpectedDeliveryTime,
                                                     "DD/MM/YYYY",
                                                 )}
                                             </Text>
-                                        </Space>
-                                    </Space>
-                                </Col>
-                                <Col sm={18}>
-                                    <Space
-                                        direction="vertical"
-                                        style={{ width: "100%" }}
-                                    >
-                                        <Text strong>Lịch sử vận đơn</Text>
-                                        <Space
-                                            direction="vertical"
-                                            size="small"
-                                        >
+                                        </Stack>
+                                    </Stack>
+                                </Grid.Col>
+
+                                <Grid.Col sm={9}>
+                                    <Stack align="flex-start" spacing="xs">
+                                        <Text size="sm" weight={500}>
+                                            Lịch sử vận đơn
+                                        </Text>
+                                        <Stack spacing={5}>
                                             {[...order.orderWaybill.waybillLogs]
                                                 .reverse()
                                                 .map((waybillLog) => {
@@ -281,108 +366,138 @@ function ClientOrderDetail() {
                                                         getWaybillLogInfo(
                                                             waybillLog,
                                                         );
+
                                                     return (
-                                                        <Space
+                                                        <Group
                                                             key={
                                                                 waybillLog.waybillLogId
                                                             }
+                                                            spacing="sm"
+                                                            sx={{
+                                                                flexWrap:
+                                                                    "nowrap",
+                                                            }}
                                                         >
-                                                            <Text type="secondary">
+                                                            <ThemeIcon
+                                                                color={
+                                                                    waybillLogInfo.color
+                                                                }
+                                                                size="sm"
+                                                                variant="filled"
+                                                                radius="xl"
+                                                            >
+                                                                <waybillLogInfo.icon
+                                                                    size={12}
+                                                                />
+                                                            </ThemeIcon>
+                                                            <Text
+                                                                size="xs"
+                                                                color="dimmed"
+                                                            >
                                                                 {DateUtils.isoDateToString(
                                                                     waybillLog.waybillLogCreatedAt,
                                                                 )}
                                                             </Text>
-                                                            <Text>
+                                                            <Text size="xs">
                                                                 {
                                                                     waybillLogInfo.text
                                                                 }
                                                             </Text>
-                                                        </Space>
+                                                        </Group>
                                                     );
                                                 })}
-                                        </Space>
-                                    </Space>
-                                </Col>
-                            </Row>
+                                        </Stack>
+                                    </Stack>
+                                </Grid.Col>
+                            </Grid>
                         ) : (
-                            <Text>Hiện đơn hàng chưa có vận đơn</Text>
+                            <Text size="sm">Hiện đơn hàng chưa có vận đơn</Text>
                         )}
-                    </Space>
+                    </Stack>
                 </Card>
 
-                <Card bodyStyle={{ padding: 0 }}>
-                    <div style={{ overflowX: "auto" }}>
-                        <Table
-                            dataSource={order.orderItems}
-                            rowKey={(item) => item.orderItemVariant.variantId}
-                            pagination={false}
-                        >
-                            <Table.Column
-                                title={<Text type="secondary">Mặt hàng</Text>}
-                                render={(
-                                    orderItem: ClientOrderVariantResponse,
-                                ) => (
+                <Card p={0} radius="md" sx={cardStyles}>
+                    <ScrollArea>
+                        <Table verticalSpacing="sm" horizontalSpacing="lg">
+                            <thead>
+                                <tr>
+                                    <th style={{ minWidth: 325 }}>
+                                        <Text
+                                            weight="initial"
+                                            size="sm"
+                                            color="dimmed"
+                                        >
+                                            Mặt hàng
+                                        </Text>
+                                    </th>
+                                    <th style={{ minWidth: 125 }}>
+                                        <Text
+                                            weight="initial"
+                                            size="sm"
+                                            color="dimmed"
+                                        >
+                                            Đơn giá
+                                        </Text>
+                                    </th>
+                                    <th style={{ minWidth: 150 }}>
+                                        <Text
+                                            weight="initial"
+                                            size="sm"
+                                            color="dimmed"
+                                        >
+                                            Số lượng
+                                        </Text>
+                                    </th>
+                                    {/* TODO: Thêm discountPercent cho OrderVariant */}
+                                    {/*<th style={{ minWidth: 125 }}><Text weight="initial" size="sm" color="dimmed">Giảm giá</Text></th>*/}
+                                    <th style={{ minWidth: 125 }}>
+                                        <Text
+                                            weight="initial"
+                                            size="sm"
+                                            color="dimmed"
+                                        >
+                                            Thành tiền
+                                        </Text>
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {order.orderItems.map((orderItem) => (
                                     <OrderItemTableRow
+                                        key={
+                                            orderItem.orderItemVariant.variantId
+                                        }
                                         orderItem={orderItem}
                                         canReview={
                                             order.orderStatus === 4 &&
                                             order.orderPaymentStatus === 2
                                         }
                                     />
-                                )}
-                            />
-                            <Table.Column
-                                title={<Text type="secondary">Đơn giá</Text>}
-                                render={(
-                                    orderItem: ClientOrderVariantResponse,
-                                ) => (
-                                    <Text>
-                                        {MiscUtils.formatPrice(
-                                            orderItem.orderItemPrice,
-                                        )}{" "}
-                                        ₫
-                                    </Text>
-                                )}
-                            />
-                            <Table.Column
-                                title={<Text type="secondary">Số lượng</Text>}
-                                render={(
-                                    orderItem: ClientOrderVariantResponse,
-                                ) => <Text>{orderItem.orderItemQuantity}</Text>}
-                            />
-                            <Table.Column
-                                title={<Text type="secondary">Thành tiền</Text>}
-                                render={(
-                                    orderItem: ClientOrderVariantResponse,
-                                ) => (
-                                    <Text style={{ color: "blue" }} strong>
-                                        {MiscUtils.formatPrice(
-                                            orderItem.orderItemAmount,
-                                        )}{" "}
-                                        ₫
-                                    </Text>
-                                )}
-                            />
+                                ))}
+                            </tbody>
                         </Table>
-                    </div>
+                    </ScrollArea>
                 </Card>
 
-                <Row gutter={[16, 16]}>
-                    <Col sm={7} md={8} lg={9}></Col>
-                    <Col sm={5} md={4} lg={3}>
-                        <Space direction="vertical" style={{ width: "100%" }}>
-                            <Row justify="space-between">
-                                <Text type="secondary">Tạm tính</Text>
-                                <Text>
+                <Grid>
+                    <Grid.Col sm={7} md={8} lg={9} />
+                    <Grid.Col sm={5} md={4} lg={3}>
+                        <Stack spacing="xs">
+                            <Group position="apart">
+                                <Text size="sm" color="dimmed">
+                                    Tạm tính
+                                </Text>
+                                <Text size="sm" sx={{ textAlign: "right" }}>
                                     {MiscUtils.formatPrice(
                                         order.orderTotalAmount,
-                                    )}{" "}
-                                    ₫
+                                    ) + "\u00A0₫"}
                                 </Text>
-                            </Row>
-                            <Row justify="space-between">
-                                <Text type="secondary">Thuế (10%)</Text>
-                                <Text>
+                            </Group>
+                            <Group position="apart">
+                                <Text size="sm" color="dimmed">
+                                    Thuế (10%)
+                                </Text>
+                                <Text size="sm" sx={{ textAlign: "right" }}>
                                     {MiscUtils.formatPrice(
                                         Number(
                                             (
@@ -390,75 +505,93 @@ function ClientOrderDetail() {
                                                 ApplicationConstants.DEFAULT_TAX
                                             ).toFixed(0),
                                         ),
-                                    )}{" "}
-                                    ₫
+                                    ) + "\u00A0₫"}
                                 </Text>
-                            </Row>
-                            <Row justify="space-between">
-                                <Space>
-                                    <Text type="secondary">Phí vận chuyển</Text>
+                            </Group>
+                            <Group position="apart">
+                                <Group spacing="xs">
+                                    <Text size="sm" color="dimmed">
+                                        Phí vận chuyển
+                                    </Text>
                                     {order.orderStatus === 1 && (
-                                        <Tooltip title="Phí vận chuyển có thể chưa được tính và sẽ còn cập nhật">
-                                            <InfoCircleOutlined
-                                                style={{ color: "#1890ff" }}
-                                            />
+                                        <Tooltip
+                                            label="Phí vận chuyển có thể chưa được tính và sẽ còn cập nhật"
+                                            withArrow
+                                            sx={{ height: 20 }}
+                                        >
+                                            <ThemeIcon
+                                                variant="light"
+                                                color="blue"
+                                                size="sm"
+                                            >
+                                                <InfoCircle size={14} />
+                                            </ThemeIcon>
                                         </Tooltip>
                                     )}
-                                </Space>
-                                <Text>
+                                </Group>
+                                <Text size="sm" sx={{ textAlign: "right" }}>
                                     {MiscUtils.formatPrice(
                                         order.orderShippingCost,
-                                    )}{" "}
-                                    ₫
+                                    ) + "\u00A0₫"}
                                 </Text>
-                            </Row>
-                            <Divider style={{ margin: "12px 0" }} />
-                            <Row justify="space-between">
-                                <Text strong>Tổng tiền</Text>
+                            </Group>
+                            <Group position="apart">
+                                <Text size="sm" weight={500}>
+                                    Tổng tiền
+                                </Text>
                                 <Text
-                                    strong
-                                    style={{ color: "blue", fontSize: 16 }}
+                                    size="lg"
+                                    weight={700}
+                                    color="blue"
+                                    sx={{ textAlign: "right" }}
                                 >
-                                    {MiscUtils.formatPrice(order.orderTotalPay)}{" "}
-                                    ₫
+                                    {MiscUtils.formatPrice(
+                                        order.orderTotalPay,
+                                    ) + "\u00A0₫"}
                                 </Text>
-                            </Row>
-                        </Space>
-                    </Col>
-                </Row>
+                            </Group>
+                        </Stack>
+                    </Grid.Col>
+                </Grid>
 
                 <Divider />
+
                 <Button
-                    danger
+                    color="pink"
+                    radius="md"
+                    sx={{ width: "fit-content" }}
                     onClick={handleCancelOrderButton}
                     disabled={![1, 2].includes(order.orderStatus)}
                 >
                     Hủy đơn hàng
                 </Button>
-            </Space>
+            </Stack>
         );
     }
 
     return (
-        <div style={{ padding: "24px" }}>
-            <Row gutter={[24, 24]}>
-                <Col md={3}>
-                    <ClientUserNavbar />
-                </Col>
-                <Col md={9}>
-                    <Card>
-                        <Space direction="vertical" style={{ width: "100%" }}>
-                            <Title level={2}>Chi tiết đơn hàng</Title>
-                            {orderContentFragment}
-                        </Space>
-                    </Card>
-                </Col>
-            </Row>
-        </div>
+        <main>
+            <Container size="xl">
+                <Grid gutter="lg">
+                    <Grid.Col md={3}>
+                        <ClientUserNavbar />
+                    </Grid.Col>
+
+                    <Grid.Col md={9}>
+                        <Card radius="md" shadow="sm" p="lg">
+                            <Stack>
+                                <Title order={2}>Chi tiết đơn hàng</Title>
+
+                                {orderContentFragment}
+                            </Stack>
+                        </Card>
+                    </Grid.Col>
+                </Grid>
+            </Container>
+        </main>
     );
 }
 
-// Row content below is adapted similarly, removing mantine logic.
 function OrderItemTableRow({
     orderItem,
     canReview,
@@ -466,67 +599,117 @@ function OrderItemTableRow({
     orderItem: ClientOrderVariantResponse;
     canReview: boolean;
 }) {
+    const theme = useMantineTheme();
+    const modals = useModals();
+
     const handleOpenReviewModalButton = () => {
-        Modal.info({
-            title: "Đánh giá sản phẩm",
-            content: <ReviewProductModal orderItem={orderItem} />,
-            okButtonProps: { style: { display: "none" } },
-            maskClosable: true,
+        modals.openModal({
+            size: "lg",
+            overlayColor:
+                theme.colorScheme === "dark"
+                    ? theme.colors.dark[9]
+                    : theme.colors.gray[2],
+            overlayOpacity: 0.55,
+            overlayBlur: 3,
+            closeOnClickOutside: false,
+            title: <strong>Đánh giá sản phẩm</strong>,
+            children: <ReviewProductModal orderItem={orderItem} />,
         });
     };
 
     return (
-        <Space direction="vertical">
-            <Space>
-                <Image
-                    width={65}
-                    height={65}
-                    src={
-                        orderItem.orderItemVariant.variantProduct
-                            .productThumbnail || ""
-                    }
-                    alt={
-                        orderItem.orderItemVariant.variantProduct.productName ||
-                        ""
-                    }
-                    preview={false}
-                />
-                <Space direction="vertical" size={0}>
-                    <a
-                        href={`/product/${orderItem.orderItemVariant.variantProduct.productSlug}`}
-                    >
-                        {orderItem.orderItemVariant.variantProduct.productName}
-                    </a>
-                    {orderItem.orderItemVariant.variantProperties && (
-                        <Space direction="vertical" size="small">
-                            {orderItem.orderItemVariant.variantProperties.content.map(
-                                (prop) => (
-                                    <Text
-                                        key={prop.id}
-                                        type="secondary"
-                                        style={{ fontSize: 12 }}
-                                    >
-                                        {prop.name}: {prop.value}
-                                    </Text>
-                                ),
-                            )}
-                        </Space>
-                    )}
-                    {canReview && (
-                        <Button
-                            size="small"
-                            onClick={handleOpenReviewModalButton}
-                            disabled={
+        <tr key={orderItem.orderItemVariant.variantId}>
+            <td>
+                <Group spacing="xs">
+                    <Image
+                        radius="md"
+                        width={65}
+                        height={65}
+                        src={
+                            orderItem.orderItemVariant.variantProduct
+                                .productThumbnail || undefined
+                        }
+                        alt={
+                            orderItem.orderItemVariant.variantProduct
+                                .productName
+                        }
+                    />
+                    <Stack spacing={3.5}>
+                        <Anchor
+                            component={Link}
+                            to={
+                                "/product/" +
                                 orderItem.orderItemVariant.variantProduct
-                                    .productIsReviewed
+                                    .productSlug
                             }
+                            size="sm"
                         >
-                            Đánh giá
-                        </Button>
-                    )}
-                </Space>
-            </Space>
-        </Space>
+                            {
+                                orderItem.orderItemVariant.variantProduct
+                                    .productName
+                            }
+                        </Anchor>
+                        {orderItem.orderItemVariant.variantProperties && (
+                            <Stack spacing={1.5}>
+                                {orderItem.orderItemVariant.variantProperties.content.map(
+                                    (variantProperty) => (
+                                        <Text
+                                            key={variantProperty.id}
+                                            size="xs"
+                                            color="dimmed"
+                                        >
+                                            {variantProperty.name}:{" "}
+                                            {variantProperty.value}
+                                        </Text>
+                                    ),
+                                )}
+                            </Stack>
+                        )}
+                        {canReview && (
+                            <Button
+                                size="xs"
+                                radius="md"
+                                variant="outline"
+                                mt={5}
+                                sx={{ width: "fit-content" }}
+                                onClick={handleOpenReviewModalButton}
+                                disabled={
+                                    orderItem.orderItemVariant.variantProduct
+                                        .productIsReviewed
+                                }
+                                title={
+                                    orderItem.orderItemVariant.variantProduct
+                                        .productIsReviewed
+                                        ? "Sản phẩm đã được bạn đánh giá"
+                                        : ""
+                                }
+                            >
+                                Đánh giá
+                            </Button>
+                        )}
+                    </Stack>
+                </Group>
+            </td>
+            <td>
+                <Text size="sm">
+                    {MiscUtils.formatPrice(orderItem.orderItemPrice) + " ₫"}
+                </Text>
+            </td>
+            <td>
+                <Text size="sm">{orderItem.orderItemQuantity}</Text>
+            </td>
+            {/* TODO: Thêm discountPercent cho OrderVariant */}
+            {/*<td>*/}
+            {/*  <Text size="sm">*/}
+            {/*    {MiscUtils.formatPrice(0) + ' ₫'}*/}
+            {/*  </Text>*/}
+            {/*</td>*/}
+            <td>
+                <Text weight={500} size="sm" color="blue">
+                    {MiscUtils.formatPrice(orderItem.orderItemAmount) + " ₫"}
+                </Text>
+            </td>
+        </tr>
     );
 }
 
@@ -543,10 +726,15 @@ function ReviewProductModal({
 }: {
     orderItem: ClientOrderVariantResponse;
 }) {
+    const modals = useModals();
+
     const { user } = useAuthStore();
 
     const form = useForm({
-        initialValues: { rating: 5, review: "" },
+        initialValues: {
+            rating: 5,
+            review: "",
+        },
         schema: zodResolver(
             z.object({
                 rating: z.number().min(1).max(5),
@@ -559,69 +747,71 @@ function ReviewProductModal({
 
     const createReviewApi = useCreateReviewApi();
 
-    const handleFormSubmit = form.onSubmit((values) => {
+    const handleFormSubmit = form.onSubmit((formValues) => {
         if (user) {
             const reviewRequest: ClientReviewRequest = {
                 userId: user.id,
                 productId: orderItem.orderItemVariant.variantProduct.productId,
-                ratingScore: values.rating,
-                content: values.review,
+                ratingScore: formValues.rating,
+                content: formValues.review,
                 status: 1,
             };
             createReviewApi.mutate(reviewRequest);
-            Modal.destroyAll();
+            modals.closeAll();
         }
     });
 
     return (
-        <Space direction="vertical" style={{ width: "100%" }}>
-            <Space>
+        <Stack>
+            <Group spacing="xs">
                 <Image
+                    radius="md"
                     width={40}
                     height={40}
                     src={
                         orderItem.orderItemVariant.variantProduct
-                            .productThumbnail || ""
+                            .productThumbnail || undefined
                     }
                     alt={orderItem.orderItemVariant.variantProduct.productName}
-                    preview={false}
-                    style={{ borderRadius: 8 }}
                 />
-                <Text>
+                <Text size="sm">
                     {orderItem.orderItemVariant.variantProduct.productName}
                 </Text>
-            </Space>
-            <Title level={5}>Vui lòng đánh giá</Title>
-            <Space
-                direction="vertical"
-                style={{ alignItems: "center", marginBottom: 8 }}
-            >
-                <Text strong>Vui lòng đánh giá</Text>
-                {/* Use Rate from antd if needed */}
-                <Space>★ {form.values.rating}</Space>
-                <Text type="secondary">
+            </Group>
+
+            <Stack spacing="xs" align="center" mb="md">
+                <Text size="lg" weight={500}>
+                    Vui lòng đánh giá
+                </Text>
+                <Rating
+                    style={{ maxWidth: 180 }}
+                    {...form.getInputProps("rating")}
+                    isRequired
+                />
+                <Text size="sm" color="dimmed">
                     {ratingNameMap[form.values.rating]}
                 </Text>
-            </Space>
-            <Space direction="vertical" style={{ width: "100%" }}>
-                {/* Use Input.TextArea from antd */}
-                <textarea
-                    rows={4}
-                    placeholder="Hãy chia sẻ cảm nhận, đánh giá của bạn..."
-                    value={form.values.review}
-                    onChange={(e) =>
-                        form.setFieldValue("review", e.target.value)
-                    }
-                    style={{ width: "100%" }}
-                />
-            </Space>
-            <Space style={{ justifyContent: "flex-end", width: "100%" }}>
-                <Button onClick={() => Modal.destroyAll()}>Đóng</Button>
-                <Button type="primary" onClick={handleFormSubmit}>
+            </Stack>
+
+            <Textarea
+                required
+                data-autofocus
+                placeholder="Hãy chia sẻ cảm nhận, đánh giá của bạn về sản phẩm này nhé."
+                autosize
+                minRows={4}
+                radius="md"
+                {...form.getInputProps("review")}
+            />
+
+            <Group position="right">
+                <Button variant="default" radius="md" onClick={modals.closeAll}>
+                    Đóng
+                </Button>
+                <Button type="submit" radius="md" onClick={handleFormSubmit}>
                     Gửi đánh giá
                 </Button>
-            </Space>
-        </Space>
+            </Group>
+        </Stack>
     );
 }
 
@@ -634,11 +824,10 @@ function useGetOrderApi(orderCode: string) {
         queryKey: ["client-api", "orders", "getOrder", orderCode],
         queryFn: () =>
             FetchUtils.getWithToken(ResourceURL.CLIENT_ORDER + "/" + orderCode),
-
-        placeholderData: (previousData) => previousData,
     });
 
-    useEffect(() => {
+    // Handle error separately with useEffect
+    React.useEffect(() => {
         if (isErrorOrderResponse) {
             NotifyUtils.simpleFailed("Lấy dữ liệu không thành công");
         }
@@ -649,6 +838,7 @@ function useGetOrderApi(orderCode: string) {
 
 function useCancelOrderApi(orderCode: string) {
     const queryClient = useQueryClient();
+
     return useMutation<Empty, ErrorMessage, void>({
         mutationFn: () =>
             FetchUtils.putWithToken(
@@ -669,6 +859,7 @@ function useCancelOrderApi(orderCode: string) {
 
 function useCreateReviewApi() {
     const queryClient = useQueryClient();
+
     return useMutation<ClientReviewResponse, ErrorMessage, ClientReviewRequest>(
         {
             mutationFn: (requestBody) =>
@@ -679,21 +870,20 @@ function useCreateReviewApi() {
 
             onSuccess: (response) => {
                 NotifyUtils.simpleSuccess(
-                    <Text>
-                        Đã thêm đánh giá cho sản phẩm{" "}
-                        <a
-                            href={
+                    <Text inherit>
+                        <span>Đã thêm đánh giá cho sản phẩm </span>
+                        <Anchor
+                            component={Link}
+                            to={
                                 "/product/" + response.reviewProduct.productSlug
                             }
+                            inherit
                         >
                             {response.reviewProduct.productName}
-                        </a>
-                        . Vui lòng đợi duyệt để hiển thị.
+                        </Anchor>
+                        <span>. Vui lòng đợi duyệt để hiển thị.</span>
                     </Text>,
                 );
-                void queryClient.invalidateQueries({
-                    queryKey: ["client-api", "orders"],
-                });
                 void queryClient.invalidateQueries({
                     queryKey: ["client-api", "orders", "getOrder"],
                 });
