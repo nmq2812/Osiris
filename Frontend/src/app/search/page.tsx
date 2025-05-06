@@ -1,28 +1,27 @@
 "use client";
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import {
+    Layout,
     Card,
     Checkbox,
-    Container,
-    Grid,
-    Group,
+    Col,
+    Divider,
+    Empty,
     Pagination,
     Radio,
-    RadioGroup,
+    Row,
     Skeleton,
-    Stack,
-    Text,
-    Title,
-    useMantineTheme,
-} from "@mantine/core";
-
+    Space,
+    Typography,
+    theme,
+} from "antd";
 import {
-    AlertTriangle,
-    ArrowsDownUp,
-    ChartCandle,
-    Marquee,
-} from "tabler-icons-react";
+    AlertOutlined,
+    SortAscendingOutlined,
+    AreaChartOutlined,
+    SearchOutlined,
+} from "@ant-design/icons";
 import ClientProductCard from "@/components/ClientProductCard";
 import ApplicationConstants from "@/constants/ApplicationConstants";
 import ResourceURL from "@/constants/ResourceURL";
@@ -32,9 +31,12 @@ import FetchUtils, { ListResponse, ErrorMessage } from "@/utils/FetchUtils";
 import NotifyUtils from "@/utils/NotifyUtils";
 import { useQuery } from "@tanstack/react-query";
 
-function ClientSearch() {
-    const theme = useMantineTheme();
+const { Title, Text } = Typography;
 
+const { Content } = Layout;
+
+// Tạo component riêng sử dụng useSearchParams để bọc trong Suspense
+function SearchResults() {
     const searchParams = useSearchParams();
     const searchQuery = searchParams.get("q");
     useTitle(`Kết quả tìm kiếm cho "${searchQuery}"`);
@@ -52,6 +54,7 @@ function ClientSearch() {
         newable: true,
         saleable: activeSaleable,
     };
+
     const {
         data: productResponses,
         isLoading: isLoadingProductResponses,
@@ -76,144 +79,158 @@ function ClientSearch() {
 
     if (isLoadingProductResponses) {
         resultFragment = (
-            <Stack>
+            <Space direction="vertical" style={{ width: "100%" }}>
                 {Array(5)
                     .fill(0)
                     .map((_, index) => (
-                        <Skeleton key={index} height={50} radius="md" />
+                        <Skeleton key={index} active />
                     ))}
-            </Stack>
+            </Space>
         );
     }
 
     if (isErrorProductResponses) {
         resultFragment = (
-            <Stack
-                my={theme.spacing.xl}
-                sx={{ alignItems: "center", color: theme.colors.pink[6] }}
-            >
-                <AlertTriangle size={125} strokeWidth={1} />
-                <Text size="xl" weight={500}>
+            <div style={{ textAlign: "center", padding: 24 }}>
+                <AlertOutlined style={{ fontSize: 64, color: "#f5222d" }} />
+                <Typography.Title level={4} style={{ marginTop: 16 }}>
                     Đã có lỗi xảy ra
-                </Text>
-            </Stack>
+                </Typography.Title>
+            </div>
         );
     }
 
     if (products && products.totalElements === 0) {
         resultFragment = (
-            <Stack
-                my={theme.spacing.xl}
-                sx={{ alignItems: "center", color: theme.colors.blue[6] }}
-            >
-                <Marquee size={125} strokeWidth={1} />
-                <Text size="xl" weight={500}>
-                    Không có sản phẩm
-                </Text>
-            </Stack>
+            <Empty
+                image={Empty.PRESENTED_IMAGE_SIMPLE}
+                description="Không có sản phẩm"
+                style={{ margin: "48px 0" }}
+            />
         );
     }
 
     if (products && products.totalElements > 0) {
         resultFragment = (
             <>
-                <Grid mt={theme.spacing.xs}>
+                <Row gutter={[16, 16]} style={{ marginTop: 16 }}>
                     {products.content.map((product, index) => (
-                        <Grid.Col key={index} span={6} sm={4} md={3}>
+                        <Col key={index} xs={12} sm={8} md={6}>
                             <ClientProductCard
                                 product={product}
                                 search={searchQuery || ""}
                             />
-                        </Grid.Col>
+                        </Col>
                     ))}
-                </Grid>
+                </Row>
 
-                <Group position="apart" mt={theme.spacing.lg}>
+                <div
+                    style={{
+                        display: "flex",
+                        justifyContent: "space-between",
+                        marginTop: 24,
+                    }}
+                >
                     <Pagination
-                        page={activePage}
-                        total={products.totalPages}
-                        onChange={(page: number) =>
+                        current={activePage}
+                        total={products.totalElements}
+                        pageSize={
+                            ApplicationConstants.DEFAULT_CLIENT_SEARCH_PAGE_SIZE
+                        }
+                        onChange={(page) =>
                             page !== activePage && setActivePage(page)
                         }
+                        showSizeChanger={false}
                     />
                     <Text>
-                        <Text component="span" weight={500}>
-                            Trang {activePage}
-                        </Text>
-                        <span> / {products.totalPages}</span>
+                        <Text strong>Trang {activePage}</Text> /{" "}
+                        {products.totalPages}
                     </Text>
-                </Group>
+                </div>
             </>
         );
     }
 
     return (
+        <Space direction="vertical" size="large" style={{ width: "100%" }}>
+            <Card>
+                <Title level={2}>
+                    Kết quả tìm kiếm cho "
+                    <Text type="warning" style={{ display: "inline" }}>
+                        {searchQuery}
+                    </Text>
+                    "
+                </Title>
+            </Card>
+
+            <Space direction="vertical" size="large" style={{ width: "100%" }}>
+                <div
+                    style={{
+                        display: "flex",
+                        justifyContent: "space-between",
+                        alignItems: "center",
+                    }}
+                >
+                    <Space>
+                        <SortAscendingOutlined />
+                        <Text strong style={{ marginRight: 8 }}>
+                            Sắp xếp theo
+                        </Text>
+                        <Radio.Group
+                            value={activeSort || ""}
+                            onChange={(e) =>
+                                setActiveSort(e.target.value || null)
+                            }
+                        >
+                            <Radio value="">Mới nhất</Radio>
+                            <Radio value="lowest-price">Giá thấp → cao</Radio>
+                            <Radio value="highest-price">Giá cao → thấp</Radio>
+                        </Radio.Group>
+                    </Space>
+                    <Text>{products?.totalElements || 0} sản phẩm</Text>
+                </div>
+
+                <Space>
+                    <AreaChartOutlined />
+                    <Text strong style={{ marginRight: 8 }}>
+                        Lọc theo
+                    </Text>
+                    <Checkbox
+                        checked={activeSaleable}
+                        onChange={(e) => {
+                            setActiveSaleable(e.target.checked);
+                            setActivePage(1);
+                        }}
+                    >
+                        Chỉ tính còn hàng
+                    </Checkbox>
+                </Space>
+
+                {resultFragment}
+            </Space>
+        </Space>
+    );
+}
+
+// Component chính không sử dụng trực tiếp useSearchParams
+function ClientSearch() {
+    return (
         <main>
-            <Container size="xl">
-                <Stack spacing={theme.spacing.xl * 1.5}>
-                    <Card radius="md" shadow="sm" p="lg">
-                        <Title order={2}>
-                            Kết quả tìm kiếm cho &quot;
-                            <Text component="span" color="yellow" inherit>
-                                {searchQuery}
-                            </Text>
-                            &quot;
-                        </Title>
-                    </Card>
-
-                    <Stack spacing="lg">
-                        <Group position="apart">
-                            <Group spacing="xs">
-                                <ArrowsDownUp size={20} />
-                                <Text weight={500} mr={theme.spacing.xs}>
-                                    Sắp xếp theo
-                                </Text>
-                                <RadioGroup
-                                    value={activeSort || ""}
-                                    onChange={(value) =>
-                                        setActiveSort(
-                                            (value as
-                                                | ""
-                                                | "lowest-price"
-                                                | "highest-price") || null,
-                                        )
-                                    }
-                                >
-                                    <Radio value="" label="Mới nhất" />
-                                    <Radio
-                                        value="lowest-price"
-                                        label="Giá thấp → cao"
-                                    />
-                                    <Radio
-                                        value="highest-price"
-                                        label="Giá cao → thấp"
-                                    />
-                                </RadioGroup>
-                            </Group>
-                            <Text>{products?.totalElements || 0} sản phẩm</Text>
-                        </Group>
-
-                        <Group spacing="xs">
-                            <ChartCandle size={20} />
-                            <Text weight={500} mr={theme.spacing.xs}>
-                                Lọc theo
-                            </Text>
-                            <Checkbox
-                                label="Chỉ tính còn hàng"
-                                checked={activeSaleable}
-                                onChange={(event) => {
-                                    setActiveSaleable(
-                                        event.currentTarget.checked,
-                                    );
-                                    setActivePage(1);
-                                }}
-                            />
-                        </Group>
-
-                        {resultFragment}
-                    </Stack>
-                </Stack>
-            </Container>
+            <Content
+                style={{ maxWidth: 1200, margin: "0 auto", padding: "0 16px" }}
+            >
+                <Suspense
+                    fallback={
+                        <Card style={{ marginTop: 16 }}>
+                            <Skeleton active />
+                            <Divider />
+                            <Skeleton active />
+                        </Card>
+                    }
+                >
+                    <SearchResults />
+                </Suspense>
+            </Content>
         </main>
     );
 }
