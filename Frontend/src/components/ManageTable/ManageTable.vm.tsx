@@ -1,11 +1,13 @@
 "use client";
 import React from "react";
-import { Modal, Typography, theme } from "antd";
+import { Typography, theme, Modal as AntModal } from "antd"; // Giữ lại Typography của Ant Design
+import { Modal } from "@mantine/core"; // Thay đổi sang Modal của Mantine
 import useDeleteByIdApi from "@/hooks/use-delete-by-id-api";
 import BaseResponse from "@/models/BaseResponse";
 import useAppStore from "@/stores/use-app-store";
 import { ManageTableProps } from "./ManageTable";
 import EntityDetailTable from "../EntityDetailTable";
+import { useDisclosure } from "@mantine/hooks";
 
 const { Text } = Typography;
 const { useToken } = theme;
@@ -19,6 +21,12 @@ function useManageTableViewModel<T extends BaseResponse>({
 }: ManageTableProps<T>) {
     const { token } = useToken();
     const deleteByIdApi = useDeleteByIdApi(resourceUrl, resourceKey);
+
+    // State cho Modal của Mantine
+    const [opened, { open, close }] = useDisclosure(false);
+    const [selectedEntityId, setSelectedEntityId] = React.useState<
+        number | null
+    >(null);
 
     const { selection, setSelection, activePage, setActivePage } =
         useAppStore();
@@ -44,27 +52,13 @@ function useManageTableViewModel<T extends BaseResponse>({
     };
 
     const handleViewEntityButton = (entityId: number) => {
-        Modal.info({
-            title: <strong>Thông tin chi tiết</strong>,
-            content: (
-                <EntityDetailTable
-                    entityDetailTableRowsFragment={
-                        entityDetailTableRowsFragment
-                    }
-                    resourceUrl={resourceUrl}
-                    resourceKey={resourceKey}
-                    entityId={entityId}
-                />
-            ),
-            width: 800,
-            maskClosable: true,
-            centered: true,
-            okText: "Đóng",
-        });
+        // Lưu ID và mở modal
+        setSelectedEntityId(entityId);
+        open();
     };
 
     const handleDeleteEntityButton = (entityId: number) => {
-        Modal.confirm({
+        AntModal.confirm({
             title: <strong>Xác nhận xóa</strong>,
             content: <Text>Xóa phần tử có ID {entityId}?</Text>,
             okText: "Xóa",
@@ -95,6 +89,14 @@ function useManageTableViewModel<T extends BaseResponse>({
         handleToggleRowCheckbox,
         handleViewEntityButton,
         handleDeleteEntityButton,
+        modalProps: {
+            opened,
+            onClose: close,
+            selectedEntityId,
+            entityDetailTableRowsFragment,
+            resourceUrl,
+            resourceKey,
+        },
     };
 }
 

@@ -2,12 +2,20 @@
 import { EntityPropertySchema } from "@/datas/EntityProperty";
 import BaseResponse from "@/models/BaseResponse";
 import { ListResponse } from "@/utils/FetchUtils";
-import { Group, ActionIcon, Checkbox, Table } from "@mantine/core";
+import {
+    Group,
+    ActionIcon,
+    Checkbox,
+    Table,
+    Modal,
+    Title,
+} from "@mantine/core";
 import React from "react";
 import { Eye, Link, Edit, Trash } from "tabler-icons-react";
 import useManageTableViewModel from "./ManageTable.vm";
 import useManageTableStyles from "./ManageTable.styles";
 import { usePathname, useRouter } from "next/navigation";
+import EntityDetailTable from "../EntityDetailTable";
 
 export interface ManageTableProps<T> {
     listResponse: ListResponse<T>;
@@ -31,6 +39,7 @@ function ManageTable<T extends BaseResponse>(props: ManageTableProps<T>) {
         handleToggleRowCheckbox,
         handleViewEntityButton,
         handleDeleteEntityButton,
+        modalProps,
     } = useManageTableViewModel<T>(props);
 
     const entitiesTableHeadsFragment = (
@@ -112,19 +121,41 @@ function ManageTable<T extends BaseResponse>(props: ManageTableProps<T>) {
     });
 
     return (
-        <Table
-            horizontalSpacing="sm"
-            verticalSpacing="sm"
-            highlightOnHover
-            striped
-            sx={(theme) => ({
-                borderRadius: theme.radius.sm,
-                overflow: "hidden",
-            })}
-        >
-            <thead>{entitiesTableHeadsFragment}</thead>
-            <tbody>{entitiesTableRowsFragment}</tbody>
-        </Table>
+        <>
+            <Table
+                horizontalSpacing="sm"
+                verticalSpacing="sm"
+                highlightOnHover
+                striped
+                sx={(theme) => ({
+                    borderRadius: theme.radius.sm,
+                    overflow: "hidden",
+                })}
+            >
+                <thead>{entitiesTableHeadsFragment}</thead>
+                <tbody>{entitiesTableRowsFragment}</tbody>
+            </Table>
+
+            {/* Mantine Modal */}
+            <Modal
+                opened={modalProps.opened}
+                onClose={modalProps.onClose}
+                title={<Title order={4}>Thông tin chi tiết</Title>}
+                size="xl"
+                centered
+            >
+                {modalProps.selectedEntityId && (
+                    <EntityDetailTable
+                        entityDetailTableRowsFragment={
+                            modalProps.entityDetailTableRowsFragment
+                        }
+                        resourceUrl={modalProps.resourceUrl}
+                        resourceKey={modalProps.resourceKey}
+                        entityId={modalProps.selectedEntityId}
+                    />
+                )}
+            </Modal>
+        </>
     );
 }
 
