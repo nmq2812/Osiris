@@ -371,7 +371,7 @@ export default function ChatWidget() {
             <div className="fixed bottom-6 right-6 z-50">
                 <button
                     onClick={() => setOpen(!open)}
-                    className="bg-red-500 text-white p-4 rounded-full shadow-lg hover:bg-red-600 transition"
+                    className="bg-red-500 text-white p-4 rounded-full shadow-lg hover:bg-blue-600 transition"
                 >
                     <MessageCircle />
                 </button>

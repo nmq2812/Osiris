@@ -16,14 +16,14 @@ class ResourceURL {
     static EMPLOYEE = apiPath + "/employees";
     static OFFICE = apiPath + "/offices";
     static DEPARTMENT = apiPath + "/departments";
-    static JOB_TYPE = apiPath + "/job-types";
-    static JOB_LEVEL = apiPath + "/job-levels";
-    static JOB_TITLE = apiPath + "/job-titles";
+    static JOB_TYPE = apiPath + "/job_types";
+    static JOB_LEVEL = apiPath + "/job_levels";
+    static JOB_TITLE = apiPath + "/job_titles";
 
     static CUSTOMER = apiPath + "/customers";
-    static CUSTOMER_GROUP = apiPath + "/customer-groups";
-    static CUSTOMER_STATUS = apiPath + "/customer-status";
-    static CUSTOMER_RESOURCE = apiPath + "/customer-resources";
+    static CUSTOMER_GROUP = apiPath + "/customer_groups";
+    static CUSTOMER_STATUS = apiPath + "/customer_status";
+    static CUSTOMER_RESOURCE = apiPath + "/customer_resources";
 
     static PRODUCT = apiPath + "/products";
     static CATEGORY = apiPath + "/categories";
@@ -36,33 +36,33 @@ class ResourceURL {
     static SPECIFICATION = apiPath + "/specifications";
     static VARIANT = apiPath + "/variants";
 
-    static PRODUCT_INVENTORY = apiPath + "/product-inventories";
-    static VARIANT_INVENTORY = apiPath + "/variant-inventories";
+    static PRODUCT_INVENTORY = apiPath + "/product_inventories";
+    static VARIANT_INVENTORY = apiPath + "/variant_inventories";
     static WAREHOUSE = apiPath + "/warehouses";
     static PURCHASE_ORDER = apiPath + "/purchase_orders";
-    static PURCHASE_ORDER_VARIANT = apiPath + "/purchase-order-variants";
+    static PURCHASE_ORDER_VARIANT = apiPath + "/purchase_order_variants";
     static DESTINATION = apiPath + "/destinations";
     static DOCKET = apiPath + "/dockets";
-    static DOCKET_VARIANT = apiPath + "/docket-variants";
-    static DOCKET_REASON = apiPath + "/docket-reasons";
+    static DOCKET_VARIANT = apiPath + "/docket_variants";
+    static DOCKET_REASON = apiPath + "/docket_reasons";
     static COUNT = apiPath + "/counts";
-    static COUNT_VARIANT = apiPath + "/count-variants";
+    static COUNT_VARIANT = apiPath + "/count_variants";
     static TRANSFER = apiPath + "/transfers";
-    static TRANSFER_VARIANT = apiPath + "/transfer-variants";
+    static TRANSFER_VARIANT = apiPath + "/transfer_variants";
 
     static ORDER = apiPath + "/orders";
-    static ORDER_VARIANT = apiPath + "/order-variants";
-    static ORDER_RESOURCE = apiPath + "/order-resources";
-    static ORDER_CANCELLATION_REASON = apiPath + "/order-cancellation-reasons";
+    static ORDER_VARIANT = apiPath + "/order_variants";
+    static ORDER_RESOURCE = apiPath + "/order_resources";
+    static ORDER_CANCELLATION_REASON = apiPath + "/order_cancellation_reasons";
 
     static WAYBILL = apiPath + "/waybills";
 
     static REVIEW = apiPath + "/reviews";
 
-    static REWARD_STRATEGY = apiPath + "/reward-strategies";
+    static REWARD_STRATEGY = apiPath + "/rewardStrategys";
 
     static VOUCHER = apiPath + "/vouchers";
-    static PAYMENT_METHOD = apiPath + "/payment-methods";
+    static PAYMENT_METHOD = apiPath + "/paymentMethods";
     static PROMOTION = apiPath + "/promotions";
 
     static ROOM = apiPath + "/rooms";
@@ -86,16 +86,16 @@ class ResourceURL {
     static CLIENT_REVIEW_PRODUCT = ResourceURL.CLIENT_REVIEW + "/products";
     static CLIENT_NOTIFICATION = clientApiPath + "/notifications";
     static CLIENT_NOTIFICATION_INIT_EVENTS =
-        ResourceURL.CLIENT_NOTIFICATION + "/init-events";
+        ResourceURL.CLIENT_NOTIFICATION + "/init_events";
     static CLIENT_NOTIFICATION_EVENTS =
         ResourceURL.CLIENT_NOTIFICATION + "/events";
     static CLIENT_CART = clientApiPath + "/carts";
-    static CLIENT_PAYMENT_METHOD = clientApiPath + "/payment-methods";
+    static CLIENT_PAYMENT_METHOD = clientApiPath + "/payment_methods";
     static CLIENT_ORDER = clientApiPath + "/orders";
     static CLIENT_ORDER_CANCEL = ResourceURL.CLIENT_ORDER + "/cancel";
     static CLIENT_CHAT = clientApiPath + "/chat";
-    static CLIENT_CHAT_GET_ROOM = ResourceURL.CLIENT_CHAT + "/get-room";
-    static CLIENT_CHAT_CREATE_ROOM = ResourceURL.CLIENT_CHAT + "/create-room";
+    static CLIENT_CHAT_GET_ROOM = ResourceURL.CLIENT_CHAT + "/get_room";
+    static CLIENT_CHAT_CREATE_ROOM = ResourceURL.CLIENT_CHAT + "/create_room";
     static CLIENT_REWARD = clientApiPath + "/rewards";
 
     // AUTHENTICATION
@@ -103,12 +103,12 @@ class ResourceURL {
     static ADMIN_USER_INFO = apiPath + "/auth/info";
     static CLIENT_REGISTRATION = apiPath + "/auth/registration";
     static CLIENT_REGISTRATION_RESEND_TOKEN = (userId: number) =>
-        apiPath + `/auth/registration/${userId}/resend-token`;
+        apiPath + `/auth/registration/${userId}/resend_token`;
     static CLIENT_REGISTRATION_CONFIRM = apiPath + "/auth/registration/confirm";
     static CLIENT_REGISTRATION_CHANGE_EMAIL = (userId: number) =>
-        apiPath + `/auth/registration/${userId}/change-email`;
-    static CLIENT_FORGOT_PASSWORD = apiPath + "/auth/forgot-password";
-    static CLIENT_RESET_PASSWORD = apiPath + "/auth/reset-password";
+        apiPath + `/auth/registration/${userId}/change_email`;
+    static CLIENT_FORGOT_PASSWORD = apiPath + "/auth/forgot_password";
+    static CLIENT_RESET_PASSWORD = apiPath + "/auth/reset_password";
 }
 
 export default ResourceURL;
