@@ -366,6 +366,7 @@ function HeaderSection() {
                         md={5}
                         lg={4}
                         onClick={() => router.replace("/")}
+                        style={{ cursor: "pointer" }}
                     >
                         <OsirisLogo></OsirisLogo>
                     </Col>
