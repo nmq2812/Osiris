@@ -1,4 +1,5 @@
-import React from "react";
+"use client";
+import React, { useState } from "react";
 import {
     Button,
     Card,
@@ -17,16 +18,40 @@ import useDocketReasonCreateViewModel from "../DocketReasonCreate.vm";
 
 function DocketReasonCreate() {
     const {
-        form: mantineForm, // Đổi tên để tránh xung đột với Ant Design Form
-        handleFormSubmit,
+        form: mantineForm,
+        handleFormSubmit: mantineHandleFormSubmit,
         statusSelectList,
     } = useDocketReasonCreateViewModel();
 
-    // Chuyển đổi giá trị form từ Mantine sang Ant Design
-    const initialValues = {
+    // State to track form values independently from Mantine form
+    const [formValues, setFormValues] = useState({
         name: mantineForm.values.name,
         status: mantineForm.values.status,
+    });
+
+    // Properly handle form submission with Ant Design
+    const onFinish = (values: any) => {
+        // Update Mantine form values first
+        mantineForm.setValues(values);
+
+        // Then trigger the Mantine form submission in the next tick
+        setTimeout(() => {
+            mantineHandleFormSubmit();
+        }, 0);
     };
+
+    // Handle form reset
+    const handleReset = () => {
+        mantineForm.reset();
+        setFormValues({
+            name: mantineForm.values.name,
+            status: mantineForm.values.status,
+        });
+        form.resetFields();
+    };
+
+    // Use Ant Design form instance
+    const [form] = Form.useForm();
 
     return (
         <Space
@@ -43,9 +68,10 @@ function DocketReasonCreate() {
 
             <Card>
                 <Form
+                    form={form}
                     layout="vertical"
-                    initialValues={initialValues}
-                    onFinish={handleFormSubmit}
+                    initialValues={formValues}
+                    onFinish={onFinish}
                 >
                     <Row gutter={16}>
                         <Col xs={24} md={12}>
@@ -101,9 +127,7 @@ function DocketReasonCreate() {
                             justifyContent: "space-between",
                         }}
                     >
-                        <Button onClick={() => mantineForm.reset()}>
-                            Mặc định
-                        </Button>
+                        <Button onClick={handleReset}>Mặc định</Button>
                         <Button type="primary" htmlType="submit">
                             Thêm
                         </Button>
