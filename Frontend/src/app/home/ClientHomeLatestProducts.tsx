@@ -86,7 +86,7 @@ function ClientHomeLatestProducts() {
         resultFragment = (
             <div className="grid">
                 {products.content.map((product, index) => (
-                    <div key={index} className="grid-col">
+                    <div key={index} className="grid-col w-3xs">
                         <ClientProductCard product={product} />
                     </div>
                 ))}
