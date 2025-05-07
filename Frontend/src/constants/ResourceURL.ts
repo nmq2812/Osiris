@@ -90,7 +90,7 @@ class ResourceURL {
     static CLIENT_NOTIFICATION_EVENTS =
         ResourceURL.CLIENT_NOTIFICATION + "/events";
     static CLIENT_CART = clientApiPath + "/carts";
-    static CLIENT_PAYMENT_METHOD = clientApiPath + "/payment_methods";
+    static CLIENT_PAYMENT_METHOD = clientApiPath + "/payment-methods";
     static CLIENT_ORDER = clientApiPath + "/orders";
     static CLIENT_ORDER_CANCEL = ResourceURL.CLIENT_ORDER + "/cancel";
     static CLIENT_CHAT = clientApiPath + "/chat";

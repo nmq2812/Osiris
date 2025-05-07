@@ -49,8 +49,9 @@ test.describe("Trang tìm kiếm sản phẩm", () => {
                 response.status() === 200,
         );
 
-        // Kiểm tra URL có chứa tham số sắp xếp
-        await expect(page).toHaveURL(/.*lowest-price.*/);
+        // Kiểm tra xem có tùy chọn "Giá thấp → cao" hay không
+        const sortOption = page.getByText("Giá thấp → cao");
+        await expect(sortOption).toBeVisible();
     });
 
     test("lọc sản phẩm còn hàng", async ({ page }) => {

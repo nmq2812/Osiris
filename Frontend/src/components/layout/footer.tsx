@@ -222,7 +222,7 @@ function ClientFooter() {
                             © 2025 Osiris Corporation. Bảo lưu mọi quyền.
                         </Text>
                     </Col>
-                    <Col>
+                    {/* <Col>
                         <Space size="small">
                             <div className="border border-gray-300 rounded px-3 py-1">
                                 <img
@@ -257,7 +257,7 @@ function ClientFooter() {
                                 />
                             </div>
                         </Space>
-                    </Col>
+                    </Col> */}
                 </Row>
             </div>
         </Footer>

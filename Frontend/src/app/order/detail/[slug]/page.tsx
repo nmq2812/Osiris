@@ -1,5 +1,5 @@
 "use client";
-import React from "react";
+import React, { Suspense } from "react";
 import {
     Anchor,
     Badge,
@@ -897,4 +897,32 @@ function useCreateReviewApi() {
     );
 }
 
-export default ClientOrderDetail;
+function ClientOrderDetailPage() {
+    return <ClientOrderDetail />;
+}
+
+export default function OrderDetailPage() {
+    return (
+        <Suspense
+            fallback={
+                <Container size="xl">
+                    <Card radius="md" shadow="sm" p="lg">
+                        <Stack>
+                            {Array(5)
+                                .fill(0)
+                                .map((_, index) => (
+                                    <Skeleton
+                                        key={index}
+                                        height={50}
+                                        radius="md"
+                                    />
+                                ))}
+                        </Stack>
+                    </Card>
+                </Container>
+            }
+        >
+            <ClientOrderDetailPage />
+        </Suspense>
+    );
+}

@@ -1,5 +1,5 @@
 "use client";
-import React, { useEffect, useState } from "react";
+import React, { Suspense, useEffect, useState } from "react";
 import {
     Badge,
     Button,
@@ -20,7 +20,11 @@ import {
     OrderedListOutlined,
 } from "@ant-design/icons";
 import Link from "next/link";
-import { useQuery } from "@tanstack/react-query";
+import {
+    QueryClient,
+    QueryClientProvider,
+    useQuery,
+} from "@tanstack/react-query";
 import ClientUserNavbar from "@/components/ClientUserNavbar";
 import ApplicationConstants from "@/constants/ApplicationConstants";
 import FetchUtils, { ErrorMessage, ListResponse } from "@/utils/FetchUtils";
@@ -353,4 +357,39 @@ function useGetAllOrdersApi(activePage: number) {
     return { orderResponses, isLoadingOrderResponses, isErrorOrderResponses };
 }
 
-export default ClientOrder;
+const queryClient = new QueryClient({
+    defaultOptions: {
+        queries: {
+            retry: 1,
+        },
+    },
+});
+
+export default function OrderPage() {
+    return (
+        <QueryClientProvider client={queryClient}>
+            <Suspense
+                fallback={
+                    <div
+                        className="container mx-auto px-4"
+                        style={{ maxWidth: 1200 }}
+                    >
+                        <Space direction="vertical" style={{ width: "100%" }}>
+                            {Array(5)
+                                .fill(0)
+                                .map((_, index) => (
+                                    <Skeleton
+                                        key={index}
+                                        active
+                                        paragraph={{ rows: 3 }}
+                                    />
+                                ))}
+                        </Space>
+                    </div>
+                }
+            >
+                <ClientOrder />
+            </Suspense>
+        </QueryClientProvider>
+    );
+}
