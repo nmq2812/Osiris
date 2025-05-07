@@ -20,6 +20,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.net.URI;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -46,25 +47,11 @@ public class ImageController {
     }
 
     @GetMapping("/{imageName:.+}")
-    public ResponseEntity<Resource> serveImage(@PathVariable String imageName, HttpServletRequest request) {
-        Resource resource = imageService.load(imageName);
-
-        String contentType = null;
-
-        try {
-            contentType = request.getServletContext().getMimeType(resource.getFile().getAbsolutePath());
-        } catch (IOException ex) {
-            log.info("Could not determine file type.");
-        }
-
-        if (contentType == null) {
-            contentType = "application/octet-stream";
-        }
-
-        return ResponseEntity.status(HttpStatus.OK)
-                .contentType(MediaType.parseMediaType(contentType))
-                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + resource.getFilename() + "\"")
-                .body(resource);
+    public ResponseEntity<Void> serveImage(@PathVariable String imageName) {
+        String imageUrl = imageService.load(imageName);
+        return ResponseEntity.status(HttpStatus.FOUND) // HTTP 302
+                .location(URI.create(imageUrl))
+                .build();
     }
 
     @DeleteMapping("/by-name/{imageName:.+}")
@@ -91,7 +78,7 @@ public class ImageController {
         return ResponseEntity.status(HttpStatus.OK).body(imageService.findAll(page, size, sort, filter, search, all));
     }
 
-    @GetMapping("/{id}")
+    @GetMapping("/by-id/{id}")
     public ResponseEntity<ImageResponse> getImage(@PathVariable("id") Long id) {
         return ResponseEntity.status(HttpStatus.OK).body(imageService.findById(id));
     }
