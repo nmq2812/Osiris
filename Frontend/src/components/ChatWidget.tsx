@@ -319,7 +319,9 @@ export default function ChatWidget() {
                 role: "model",
                 parts: [
                     {
-                        text: "bạn là một chatbox hỗ trợ tôi mua gundam và figure",
+                        text:
+                            "giẩ sử tôi là khách hàng còn bạn là một chatbox hỗ trợ tôi mua gundam và figure với các thông tin sau:" +
+                            mock_product_db.toString(),
                     },
                 ],
             },
