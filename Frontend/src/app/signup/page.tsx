@@ -198,6 +198,27 @@ function ClientSignupStepOne({ nextStep }: { nextStep: () => void }) {
         { all: 1 },
     );
 
+    // Get district data based on selected province
+    const { data: districtListResponse } = useGetAllApi<DistrictResponse>(
+        DistrictConfigs.resourceUrl,
+        DistrictConfigs.resourceKey,
+        {
+            all: 1,
+            filter: `province.id==${selectedProvinceId || 0}`,
+        },
+    );
+
+    // Get ward data based on selected district
+    const { data: wardListResponse } = useGetAllApi<WardResponse>(
+        WardConfigs.resourceUrl,
+        WardConfigs.resourceKey,
+        {
+            all: 1,
+            filter: `district.id==${selectedDistrictId || 0}`,
+        },
+    );
+
+    // Process province data
     useEffect(() => {
         if (provinceListResponse?.content) {
             const selectList: SelectOption[] = provinceListResponse.content.map(
@@ -210,6 +231,32 @@ function ClientSignupStepOne({ nextStep }: { nextStep: () => void }) {
         }
     }, [provinceListResponse]);
 
+    // Process district data
+    useEffect(() => {
+        if (districtListResponse?.content) {
+            const selectList: SelectOption[] = districtListResponse.content.map(
+                (item) => ({
+                    value: String(item.id),
+                    label: item.name,
+                }),
+            );
+            setDistrictSelectList(selectList);
+        }
+    }, [districtListResponse]);
+
+    // Process ward data
+    useEffect(() => {
+        if (wardListResponse?.content) {
+            const selectList: SelectOption[] = wardListResponse.content.map(
+                (item) => ({
+                    value: String(item.id),
+                    label: item.name,
+                }),
+            );
+            setWardSelectList(selectList);
+        }
+    }, [wardListResponse]);
+
     // Handle province change to load districts
     const handleProvinceChange = (provinceId: string) => {
         setSelectedProvinceId(provinceId);
@@ -218,49 +265,11 @@ function ClientSignupStepOne({ nextStep }: { nextStep: () => void }) {
         setSelectedDistrictId(null);
     };
 
-    // Get district data based on selected province
-    useGetAllApi<DistrictResponse>(
-        DistrictConfigs.resourceUrl,
-        DistrictConfigs.resourceKey,
-        {
-            all: 1,
-            filter: `province.id==${selectedProvinceId || 0}`,
-        },
-        (districtListResponse) => {
-            const selectList: SelectOption[] = districtListResponse.content.map(
-                (item) => ({
-                    value: String(item.id),
-                    label: item.name,
-                }),
-            );
-            setDistrictSelectList(selectList);
-        },
-    );
-
     // Handle district change to load wards
     const handleDistrictChange = (districtId: string) => {
         setSelectedDistrictId(districtId);
         form.setFieldValue("address.wardId", null);
     };
-
-    // Get ward data based on selected district
-    useGetAllApi<WardResponse>(
-        WardConfigs.resourceUrl,
-        WardConfigs.resourceKey,
-        {
-            all: 1,
-            filter: `district.id==${selectedDistrictId || 0}`,
-        },
-        (wardListResponse) => {
-            const selectList: SelectOption[] = wardListResponse.content.map(
-                (item) => ({
-                    value: String(item.id),
-                    label: item.name,
-                }),
-            );
-            setWardSelectList(selectList);
-        },
-    );
 
     const registerUserApi = useMutation<
         RegistrationResponse,
