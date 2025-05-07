@@ -1,3 +1,4 @@
+"use client";
 import React from "react";
 import { Button, Stack, Text, useMantineTheme } from "@mantine/core";
 import { Check } from "tabler-icons-react";

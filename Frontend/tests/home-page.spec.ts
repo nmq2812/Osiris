@@ -65,7 +65,7 @@ test.describe("Kiểm thử Trang Chủ", () => {
         page,
     }) => {
         // Tìm thẻ sản phẩm và nhấp vào nó
-        const productCard = page.locator(".ant-card").first();
+        const productCard = page.locator("product-card").first();
         await productCard.click();
 
         // Kiểm tra điều hướng đến trang chi tiết sản phẩm

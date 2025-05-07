@@ -1,7 +1,6 @@
+"use client";
 import React from "react";
-
 import { Button, Stack, Text, useMantineTheme } from "@mantine/core";
-
 import { X } from "tabler-icons-react";
 import OsirisLogo from "@/components/OsirisLogo";
 import useTitle from "@/hooks/use-title";

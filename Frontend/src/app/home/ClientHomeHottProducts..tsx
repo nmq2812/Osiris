@@ -90,7 +90,7 @@ function ClientHomeHotProducts() {
                 {products.content.map((product, index) => (
                     <div
                         key={index}
-                        className="flex-shrink-0"
+                        className="product-card flex-shrink-0"
                         style={{ minWidth: "280px" }}
                     >
                         <ClientProductCard product={product} />
