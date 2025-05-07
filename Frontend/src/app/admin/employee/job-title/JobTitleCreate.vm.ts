@@ -23,15 +23,14 @@ function useJobTitleCreateViewModel() {
             status: Number(formValues.status),
         };
 
-        console.log("Submitting job title data:", requestBody);
         createApi.mutate(requestBody, {
             onSuccess: (response) => {
-                console.log("Job title created successfully:", response);
+                alert("Job title created successfully");
                 // Reset form sau khi tạo thành công
                 form.reset();
             },
             onError: (error) => {
-                console.error("Error creating job title:", error);
+                alert("Error creating job title: " + error);
             },
         });
     });

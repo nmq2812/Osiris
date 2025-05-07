@@ -29,7 +29,7 @@ function useDepartmentCreateViewModel() {
                 form.reset();
             },
             onError: (error) => {
-                console.error("Error creating department:", error);
+                alert("Error creating department: " + error);
             },
         });
     });

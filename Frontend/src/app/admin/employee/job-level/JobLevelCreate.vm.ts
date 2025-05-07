@@ -23,15 +23,14 @@ function useJobLevelCreateViewModel() {
             status: Number(formValues.status),
         };
 
-        console.log("Submitting job level data:", requestBody);
         createApi.mutate(requestBody, {
             onSuccess: (response) => {
-                console.log("Job level created successfully:", response);
+                alert("Job level created successfully");
                 // Reset form sau khi tạo thành công
                 form.reset();
             },
             onError: (error) => {
-                console.error("Error creating job level:", error);
+                alert("Error creating job level:" + error);
             },
         });
     });

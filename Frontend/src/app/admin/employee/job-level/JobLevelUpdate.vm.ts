@@ -37,7 +37,7 @@ function useJobLevelUpdateViewModel(id: number) {
                     name: jobLevelResponse.name,
                     status: String(jobLevelResponse.status),
                 };
-                console.log("Job level data loaded:", jobLevelResponse);
+
                 form.setValues(formValues);
                 setPrevFormValues(formValues);
             }
@@ -60,13 +60,12 @@ function useJobLevelUpdateViewModel(id: number) {
                 status: Number(formValues.status),
             };
 
-            console.log("Submitting job level data:", requestBody);
             updateApi.mutate(requestBody, {
                 onSuccess: (response) => {
-                    console.log("Job level updated successfully:", response);
+                    alert("Job level updated successfully");
                 },
                 onError: (error) => {
-                    console.error("Error updating job level:", error);
+                    alert("Error updating job level: " + error);
                 },
             });
         } else {

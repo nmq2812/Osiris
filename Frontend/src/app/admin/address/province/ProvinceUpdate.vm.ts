@@ -64,9 +64,10 @@ function useProvinceUpdateViewModel(id: number) {
             updateApi.mutate(requestBody, {
                 onSuccess: (response) => {
                     // Có thể thêm thông báo thành công ở đây
+                    alert("Cập nhật thành công!");
                 },
                 onError: (error) => {
-                    console.error("Error updating province:", error);
+                    alert("Cập nhật thất bại!");
                     // Có thể thêm xử lý lỗi ở đây
                 },
             });

@@ -60,14 +60,13 @@ function useDepartmentUpdateViewModel(id: number) {
                 status: Number(formValues.status),
             };
 
-            console.log("Submitting department data:", requestBody);
             updateApi.mutate(requestBody, {
                 onSuccess: (response) => {
-                    console.log("Department updated successfully:", response);
+                    alert("Department updated successfully: " + response);
                     // Có thể thêm thông báo thành công ở đây
                 },
                 onError: (error) => {
-                    console.error("Error updating department:", error);
+                    alert("Error updating department: " + error);
                     // Có thể thêm xử lý lỗi ở đây
                 },
             });
