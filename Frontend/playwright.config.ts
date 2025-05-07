@@ -11,7 +11,13 @@ export default defineConfig({
     forbidOnly: !!process.env.CI,
     retries: process.env.CI ? 2 : 1, // Thêm retry cho cả local test
     workers: process.env.CI ? 1 : undefined,
-    reporter: [["html"], ["list"]],
+    reporter: [
+        ["html"], // Báo cáo HTML
+        ["list"], // Danh sách ngắn gọn
+        ["dot"], // Hiển thị dấu chấm cho mỗi test
+        ["line"], // Hiển thị từng dòng cho mỗi test
+        ["junit", { outputFile: "test-results/junit-report.xml" }], // Xuất báo cáo JUnit
+    ],
 
     use: {
         /* Đổi baseURL thành URL production */

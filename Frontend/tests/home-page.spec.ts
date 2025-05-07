@@ -65,10 +65,30 @@ test.describe("Kiểm thử Trang Chủ", () => {
         page,
     }) => {
         // Tìm thẻ sản phẩm và nhấp vào nó
-        const productCard = page.locator("product-card").first();
+        const productCard = page.locator(".flex-shrink-0").first();
+        console.log("productCard", productCard);
         await productCard.click();
 
         // Kiểm tra điều hướng đến trang chi tiết sản phẩm
         await expect(page).toHaveURL(/\/product\//);
+    });
+
+    test("hiển thị footer đúng cách", async ({ page }) => {
+        // Kiểm tra footer tồn tại
+        const footer = page.locator("footer");
+        await expect(footer).toBeVisible();
+
+        // Kiểm tra có các liên kết trong footer
+        const footerLinks = footer.locator("a");
+        const linkCount = await footerLinks.count();
+        expect(linkCount).toBeGreaterThan(0);
+
+        // Kiểm tra nội dung footer không trống
+        const footerText = (await footer.textContent()) ?? "";
+        expect(footerText.trim().length).toBeGreaterThan(0);
+
+        // Kiểm tra thông tin liên hệ hiển thị
+        const contactInfo = footer.getByText(/Địa chỉ liên hệ/i);
+        await expect(contactInfo).toBeVisible();
     });
 });
