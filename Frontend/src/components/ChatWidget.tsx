@@ -368,7 +368,7 @@ export default function ChatWidget() {
     return (
         <>
             {/* Bong bóng chat */}
-            <div className="fixed bottom-6 right-6 z-50">
+            <div className="chat-widget fixed bottom-6 right-6 z-50">
                 <button
                     onClick={() => setOpen(!open)}
                     className="bg-blue-500 text-white p-4 rounded-full shadow-lg hover:bg-blue-600 transition"
