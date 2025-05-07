@@ -239,6 +239,10 @@ function HeaderSection() {
         return <DefaultHeader></DefaultHeader>;
     }
 
+    if (pathName.startsWith("/payment")) {
+        return null;
+    }
+
     useEffect(() => {
         if (headerRef.current) {
             setHeaderWidth(headerRef.current.offsetWidth);
