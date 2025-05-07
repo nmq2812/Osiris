@@ -31,8 +31,6 @@ function ClientHomeHotProducts() {
         staleTime: Infinity,
     });
 
-    console.log("productResponses", productResponses);
-
     React.useEffect(() => {
         if (isErrorProductResponses) {
             NotifyUtils.simpleFailed("Lấy dữ liệu không thành công");
