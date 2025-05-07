@@ -192,11 +192,14 @@ function ClientSignupStepOne({ nextStep }: { nextStep: () => void }) {
     );
 
     // Get province data
-    useGetAllApi<ProvinceResponse>(
+    const { data: provinceListResponse } = useGetAllApi<ProvinceResponse>(
         ProvinceConfigs.resourceUrl,
         ProvinceConfigs.resourceKey,
         { all: 1 },
-        (provinceListResponse) => {
+    );
+
+    useEffect(() => {
+        if (provinceListResponse?.content) {
             const selectList: SelectOption[] = provinceListResponse.content.map(
                 (item) => ({
                     value: String(item.id),
@@ -204,8 +207,8 @@ function ClientSignupStepOne({ nextStep }: { nextStep: () => void }) {
                 }),
             );
             setProvinceSelectList(selectList);
-        },
-    );
+        }
+    }, [provinceListResponse]);
 
     // Handle province change to load districts
     const handleProvinceChange = (provinceId: string) => {
