@@ -23,7 +23,7 @@ import WardConfigs from "./WardConfigs";
 
 function WardManage() {
     useResetManagePageState();
-    useInitFilterPanelState(DistrictConfigs.properties);
+    useInitFilterPanelState(WardConfigs.properties);
 
     const {
         isLoading,
