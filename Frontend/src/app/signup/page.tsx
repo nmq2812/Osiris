@@ -120,7 +120,7 @@ function SignupContent() {
         <>
             <Steps
                 current={active}
-                onChange={setActive}
+                onChange={() => {}}
                 items={[
                     {
                         title: "Bước 1",
