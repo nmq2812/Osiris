@@ -34,7 +34,6 @@ import java.time.Instant;
 
 @RestController
 @RequestMapping("/api/auth")
-@CrossOrigin(AppConstants.FRONTEND_HOST)
 public class AuthController {
 
     private final AuthenticationManager authenticationManager;

@@ -1,5 +1,14 @@
+"use client";
 import React from "react";
 import { Highlight, Stack } from "@mantine/core";
+import FilterPanel from "@/components/FilterPanel/FilterPanel";
+import ManageHeader from "@/components/ManageHeader";
+import ManageHeaderButtons from "@/components/ManageHeaderButtons";
+import ManageHeaderTitle from "@/components/ManageHeaderTitle";
+import ManageMain from "@/components/ManageMain";
+import ManagePagination from "@/components/ManagePagination/ManagePagination";
+import ManageTable from "@/components/ManageTable/ManageTable";
+import SearchPanel from "@/components/SearchPanel/SearchPanel";
 import useGetAllApi from "@/hooks/use-get-all-api";
 import useInitFilterPanelState from "@/hooks/use-init-filter-panel-state";
 import useResetManagePageState from "@/hooks/use-reset-manage-page-state";

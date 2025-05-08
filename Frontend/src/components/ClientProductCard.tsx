@@ -125,7 +125,7 @@ function ClientProductCard({ product, search }: ClientProductCardProps) {
         <Link href={`/product/${product.productSlug}`} passHref>
             <Card
                 hoverable
-                className="h-full transition-shadow duration-200 hover:shadow-lg"
+                className="h-full transition-shadow duration-200 hover:shadow-lg w-3xs"
                 cover={
                     <div className="relative">
                         <Image

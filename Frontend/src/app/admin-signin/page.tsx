@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { use, useEffect, useState } from "react";
 import {
     Form,
     Input,
@@ -12,7 +12,7 @@ import {
     theme,
 } from "antd";
 import { useRouter } from "next/navigation";
-import { useMutation } from "react-query";
+import { useMutation } from "@tanstack/react-query";
 import { LockOutlined, UserOutlined } from "@ant-design/icons";
 import { z } from "zod";
 import ResourceURL from "@/constants/ResourceURL";
@@ -48,21 +48,32 @@ function AdminSignin() {
     const { user, updateJwtToken, updateUser, resetAdminAuthState } =
         useAdminAuthStore();
 
-    const loginApi = useMutation<JwtResponse, ErrorMessage, LoginRequest>(
-        (requestBody) => FetchUtils.post(ResourceURL.LOGIN, requestBody),
-    );
+    const loginApi = useMutation<JwtResponse, ErrorMessage, LoginRequest>({
+        mutationFn: (requestBody: LoginRequest) =>
+            FetchUtils.post(ResourceURL.LOGIN, requestBody),
+    });
 
-    const userInfoApi = useMutation<UserResponse, ErrorMessage>((_) =>
-        FetchUtils.getWithToken(ResourceURL.ADMIN_USER_INFO, undefined, true),
-    );
+    const userInfoApi = useMutation<UserResponse, ErrorMessage, void>({
+        mutationFn: () =>
+            FetchUtils.getWithToken(
+                ResourceURL.ADMIN_USER_INFO,
+                undefined,
+                true,
+            ),
+    });
 
+    // Kiểm tra xem người dùng đã đăng nhập hay chưa
+    useEffect(() => {
+        if (user) {
+            NotifyUtils.simpleSuccess("Bạn đã đăng nhập rồi!");
+            router.replace("/admin");
+        }
+    }, []);
     // Xử lý đăng nhập
     const handleFormSubmit = async (values: {
         username: string;
         password: string;
     }) => {
-        if (user) return;
-
         try {
             setLoading(true);
             // Xác thực dữ liệu với zod
@@ -76,10 +87,8 @@ function AdminSignin() {
             const jwtResponse = await loginApi.mutateAsync(loginRequest);
             updateJwtToken(jwtResponse.token);
 
-
             const userResponse = await userInfoApi.mutateAsync();
             updateUser(userResponse);
-
 
             router.replace("/admin");
 

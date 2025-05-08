@@ -5,7 +5,6 @@ import {
     Button,
     Card,
     Col,
-    Divider,
     Input,
     Layout,
     Row,
@@ -24,8 +23,11 @@ import { useAuthStore } from "@/stores/authStore";
 import DateUtils from "@/utils/DateUtils";
 import FetchUtils, { ErrorMessage } from "@/utils/FetchUtils";
 import NotifyUtils from "@/utils/NotifyUtils";
-import { useQuery, useQueryClient, useMutation } from "react-query";
+import { useQuery, useQueryClient, useMutation } from "@tanstack/react-query";
 import { useStompClient, useSubscription } from "react-stomp-hooks";
+import { ToMessage } from "@/components/ToMessage";
+import { FromMessage } from "@/components/FromMessage";
+import { MessageInput } from "@/components/MessageInput";
 
 const { Text, Title } = Typography;
 
@@ -250,181 +252,47 @@ function ClientChat() {
     );
 }
 
-export function FromMessage({ message }: { message: MessageResponse }) {
-    return (
-        <Space
-            style={{
-                padding: "0 16px 16px 16px",
-                flexWrap: "nowrap",
-                alignItems: "flex-end",
-                display: "flex",
-            }}
-            size={8}
-        >
-            <Avatar style={{ backgroundColor: "#13c2c2" }}>
-                {message.user.username.toUpperCase().charAt(0)}
-            </Avatar>
-            <div>
-                <Text strong style={{ fontSize: 12, display: "block" }}>
-                    {message.user.fullname}
-                </Text>
-                <Space align="end" size={8}>
-                    <Card
-                        size="small"
-                        style={{
-                            maxWidth: 500,
-                            backgroundColor: "#f0f0f0",
-                            borderRadius: 8,
-                            margin: 0,
-                        }}
-                        bodyStyle={{ padding: "8px 16px" }}
-                    >
-                        <Text>{message.content}</Text>
-                    </Card>
-                    <Text type="secondary" style={{ fontSize: 12 }}>
-                        {DateUtils.isoDateToString(message.createdAt)}
-                    </Text>
-                </Space>
-            </div>
-        </Space>
-    );
-}
-
-export function ToMessage({ message }: { message: MessageResponse }) {
-    return (
-        <div
-            style={{
-                padding: "0 16px 16px 16px",
-                display: "flex",
-                justifyContent: "flex-end",
-                alignItems: "flex-end",
-            }}
-        >
-            <Space align="end" size={8}>
-                <Text type="secondary" style={{ fontSize: 12 }}>
-                    {DateUtils.isoDateToString(message.createdAt)}
-                </Text>
-                <Card
-                    size="small"
-                    style={{
-                        maxWidth: 500,
-                        backgroundColor: "#1890ff",
-                        borderRadius: 8,
-                        margin: 0,
-                    }}
-                    bodyStyle={{ padding: "8px 16px" }}
-                >
-                    <Text style={{ color: "white" }}>{message.content}</Text>
-                </Card>
-            </Space>
-        </div>
-    );
-}
-
-export function MessageInput({
-    roomId,
-    userId,
-}: {
-    roomId: number;
-    userId: number;
-}) {
-    const [message, setMessage] = useState("");
-    const stompClient = useStompClient();
-
-    const handleSendMessageButton = () => {
-        if (message.trim() !== "" && stompClient) {
-            stompClient.publish({
-                destination: "/chat/send/" + roomId,
-                body: JSON.stringify({
-                    content: message.trim(),
-                    status: 1,
-                    userId: userId,
-                    roomId: roomId,
-                }),
-            });
-            setMessage("");
-        }
-    };
-
-    const handleSendMessageInput = (
-        event: React.KeyboardEvent<HTMLInputElement>,
-    ) => {
-        if (event.key === "Enter") {
-            handleSendMessageButton();
-        }
-    };
-
-    return (
-        <div
-            style={{
-                position: "absolute",
-                bottom: 0,
-                left: 0,
-                width: "100%",
-                padding: 16,
-                borderTop: "1px solid #f0f0f0",
-                display: "flex",
-                gap: 8,
-            }}
-        >
-            <Input
-                placeholder="Nhập tin nhắn"
-                value={message}
-                onChange={(e) => setMessage(e.target.value)}
-                onKeyDown={handleSendMessageInput}
-                style={{ flexGrow: 1 }}
-            />
-            <Button
-                type="primary"
-                icon={<SendOutlined />}
-                onClick={handleSendMessageButton}
-                title="Gửi tin nhắn"
-            />
-        </div>
-    );
-}
-
 function useGetRoomApi() {
-    const {
-        data: roomExistenceResponse,
-        isLoading: isLoadingRoomExistenceResponse,
-        isError: isErrorRoomExistenceResponse,
-    } = useQuery<ClientRoomExistenceResponse, ErrorMessage>(
-        ["client-api", "chat", "getRoom"],
-        () => FetchUtils.getWithToken(ResourceURL.CLIENT_CHAT_GET_ROOM),
-        {
-            onError: () =>
-                NotifyUtils.simpleFailed("Lấy dữ liệu không thành công"),
-            refetchOnWindowFocus: false,
-            keepPreviousData: true,
-        },
-    );
+    const { data, isLoading, isError } = useQuery<
+        ClientRoomExistenceResponse,
+        ErrorMessage
+    >({
+        queryKey: ["client-api", "chat", "getRoom"],
+        queryFn: () =>
+            FetchUtils.getWithToken(ResourceURL.CLIENT_CHAT_GET_ROOM),
+        refetchOnWindowFocus: false,
+        placeholderData: (previousData) => previousData,
+    });
+
+    useEffect(() => {
+        if (isError) {
+            NotifyUtils.simpleFailed("Lấy dữ liệu không thành công");
+        }
+    }, [isError]);
 
     return {
-        roomExistenceResponse,
-        isLoadingRoomExistenceResponse,
-        isErrorRoomExistenceResponse,
+        roomExistenceResponse: data as ClientRoomExistenceResponse | undefined,
+        isLoadingRoomExistenceResponse: isLoading,
+        isErrorRoomExistenceResponse: isError,
     };
 }
 
 function useCreateRoomApi() {
     const queryClient = useQueryClient();
 
-    return useMutation<RoomResponse, ErrorMessage, void>(
-        () => FetchUtils.postWithToken(ResourceURL.CLIENT_CHAT_CREATE_ROOM, {}),
-        {
-            onSuccess: () =>
-                queryClient.invalidateQueries([
-                    "client-api",
-                    "chat",
-                    "getRoom",
-                ]),
-            onError: () =>
-                NotifyUtils.simpleFailed(
-                    "Khởi tạo yêu cầu tư vấn không thành công",
-                ),
-        },
-    );
+    return useMutation<RoomResponse, ErrorMessage, void>({
+        mutationFn: () =>
+            FetchUtils.postWithToken(ResourceURL.CLIENT_CHAT_CREATE_ROOM, {}),
+
+        onSuccess: () =>
+            queryClient.invalidateQueries({
+                queryKey: ["client-api", "chat", "getRoom"],
+            }),
+        onError: () =>
+            NotifyUtils.simpleFailed(
+                "Khởi tạo yêu cầu tư vấn không thành công",
+            ),
+    });
 }
 
 export default ClientChat;

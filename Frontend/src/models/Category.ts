@@ -1,6 +1,8 @@
 import BaseResponse from "./BaseResponse";
 
 export interface CategoryResponse extends BaseResponse {
+    createdBy: any;
+    updatedBy: any;
     name: string;
     slug: string;
     description: string | null;

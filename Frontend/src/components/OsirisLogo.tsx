@@ -1,4 +1,3 @@
-
 "use client";
 
 import Image from "next/image";
@@ -6,9 +5,7 @@ import Link from "next/link";
 
 export default function OsirisLogo() {
     return (
-
         <div className="flex items-center">
-
             <Image
                 src="/logo.png"
                 alt="Osiris Logo"
@@ -20,8 +17,6 @@ export default function OsirisLogo() {
             <span className="text-xl font-bold text-blue-600 md:text-2xl">
                 OSIRIS
             </span>
-
         </div>
-
     );
 }

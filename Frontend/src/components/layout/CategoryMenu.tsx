@@ -22,7 +22,7 @@ import { CollectionWrapper } from "@/datas/CollectionWrapper";
 import FetchUtils, { ErrorMessage } from "@/utils/FetchUtils";
 import NotifyUtils from "@/utils/NotifyUtils";
 import PageConfigs from "@/utils/PageConfigs";
-import { useQuery } from "react-query";
+import { useQuery } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 
 const { Link, Text } = Typography;
@@ -41,16 +41,19 @@ function CategoryMenu({
         data: categoryResponses,
         isLoading: isLoadingCategoryResponses,
         isError: isErrorCategoryResponses,
-    } = useQuery<CollectionWrapper<ClientCategoryResponse>, ErrorMessage>(
-        ["client-api", "categories", "getAllCategories"],
-        () => FetchUtils.get(ResourceURL.CLIENT_CATEGORY),
-        {
-            onError: () =>
-                NotifyUtils.simpleFailed("Lấy dữ liệu không thành công"),
-            refetchOnWindowFocus: false,
-            keepPreviousData: true,
-        },
-    );
+    } = useQuery<CollectionWrapper<ClientCategoryResponse>, ErrorMessage>({
+        queryKey: ["client-api", "categories", "getAllCategories"],
+        queryFn: () => FetchUtils.get(ResourceURL.CLIENT_CATEGORY),
+        refetchOnWindowFocus: false,
+        staleTime: Infinity,
+    });
+
+    // Handle error separately with useEffect
+    React.useEffect(() => {
+        if (isErrorCategoryResponses) {
+            NotifyUtils.simpleFailed("Lấy dữ liệu không thành công");
+        }
+    }, [isErrorCategoryResponses]);
 
     const handleAnchor = (path: string) => {
         setOpenedCategoryMenu(false);

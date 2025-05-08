@@ -12,9 +12,9 @@ import {
     Form,
     theme,
 } from "antd";
-import DistrictConfigs from "@/app/admin/district/DistrictConfigs";
-import ProvinceConfigs from "@/app/admin/province/ProvinceConfigs";
-import WardConfigs from "@/app/admin/ward/WardConfigs";
+import DistrictConfigs from "@/app/admin/address/district/DistrictConfigs";
+import ProvinceConfigs from "@/app/admin/address/province/ProvinceConfigs";
+import WardConfigs from "@/app/admin/address/ward/WardConfigs";
 import ClientUserNavbar from "@/components/ClientUserNavbar";
 import ResourceURL from "@/constants/ResourceURL";
 import { ClientPersonalSettingUserRequest } from "@/datas/ClientUI";
@@ -30,7 +30,7 @@ import FetchUtils, { ErrorMessage } from "@/utils/FetchUtils";
 import MessageUtils from "@/utils/MessageUtils";
 import MiscUtils from "@/utils/MiscUtils";
 import NotifyUtils from "@/utils/NotifyUtils";
-import { useMutation } from "react-query";
+import { useMutation } from "@tanstack/react-query";
 import { z } from "zod";
 
 const { Title } = Typography;
@@ -209,22 +209,20 @@ function ClientSettingPersonal() {
         UserResponse,
         ErrorMessage,
         ClientPersonalSettingUserRequest
-    >(
-        (requestBody) =>
+    >({
+        mutationFn: (requestBody) =>
             FetchUtils.postWithToken(
                 ResourceURL.CLIENT_USER_PERSONAL_SETTING,
                 requestBody,
             ),
-        {
-            onSuccess: (userResponse) => {
-                updateUser(userResponse);
-                NotifyUtils.simpleSuccess("Cập nhật thành công");
-                setFormChanged(false);
-            },
-            onError: () =>
-                NotifyUtils.simpleFailed("Cập nhật không thành công"),
+
+        onSuccess: (userResponse) => {
+            updateUser(userResponse);
+            NotifyUtils.simpleSuccess("Cập nhật thành công");
+            setFormChanged(false);
         },
-    );
+        onError: () => NotifyUtils.simpleFailed("Cập nhật không thành công"),
+    });
 
     // Handle form submission
     const handleFormSubmit = async (values: any) => {
@@ -497,7 +495,7 @@ function ClientSettingPersonal() {
                                                         htmlType="submit"
                                                         disabled={!formChanged}
                                                         loading={
-                                                            updatePersonalSettingApi.isLoading
+                                                            updatePersonalSettingApi.isPending
                                                         }
                                                     >
                                                         Cập nhật

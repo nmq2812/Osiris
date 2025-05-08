@@ -1,7 +1,5 @@
 "use client";
-import React, { useEffect, useState } from "react";
-
-// Replace Mantine imports with Ant Design imports
+import React, { useEffect, useState, Suspense } from "react";
 import {
     Button,
     Card,
@@ -15,6 +13,7 @@ import {
     Typography,
     Form,
     Modal,
+    Spin,
 } from "antd";
 
 import {
@@ -24,6 +23,8 @@ import {
     UserOutlined,
 } from "@ant-design/icons";
 
+import { useSearchParams, useRouter } from "next/navigation";
+import { useMutation } from "@tanstack/react-query";
 import ResourceURL from "@/constants/ResourceURL";
 import { RegistrationResponse, RegistrationRequest } from "@/datas/ClientUI";
 import { SelectOption } from "@/datas/SelectOption";
@@ -38,51 +39,29 @@ import { useAuthStore } from "@/stores/authStore";
 import FetchUtils, { ErrorMessage } from "@/utils/FetchUtils";
 import MessageUtils from "@/utils/MessageUtils";
 import NotifyUtils from "@/utils/NotifyUtils";
-import { useSearchParams } from "next/navigation";
-import { useMutation } from "react-query";
-import ProvinceConfigs from "../admin/province/ProvinceConfigs";
-import DistrictConfigs from "../admin/district/DistrictConfigs";
-import WardConfigs from "../admin/ward/WardConfigs";
-import { useRouter } from "next/navigation";
+import ProvinceConfigs from "../admin/address/province/ProvinceConfigs";
+import DistrictConfigs from "../admin/address/district/DistrictConfigs";
+import WardConfigs from "../admin/address/ward/WardConfigs";
 
 const { Text, Title } = Typography;
 const { Content } = Layout;
 
 const genderSelectList: SelectOption[] = [
-    {
-        value: "M",
-        label: "Nam",
-    },
-    {
-        value: "F",
-        label: "Nữ",
-    },
+    { value: "M", label: "Nam" },
+    { value: "F", label: "Nữ" },
 ];
 
+// Component chính - không sử dụng useSearchParams trực tiếp
 function ClientSignup() {
     useTitle();
-
-    const navigate = useRouter().push;
-    const { user, currentSignupUserId } = useAuthStore();
-
-    const searchParams = useSearchParams();
-
-    const userId = searchParams.get("userId") || currentSignupUserId;
-
-    const currentStep = userId ? 1 : 0; // Nếu có userId thì nhảy sang bước 2
-
-    const [active, setActive] = useState(currentStep);
-
-    const nextStep = () =>
-        setActive((current) =>
-            current < 1 ? current + 1 : current === 1 ? 3 : current,
-        );
+    const router = useRouter();
+    const { user } = useAuthStore();
 
     useEffect(() => {
         if (user) {
-            navigate("/");
+            router.push("/");
         }
-    }, [navigate, user]);
+    }, [router, user]);
 
     return (
         <main>
@@ -98,39 +77,23 @@ function ClientSignup() {
                         <Title level={2}>Đăng ký tài khoản</Title>
 
                         <div style={{ width: "100%", maxWidth: 800 }}>
-                            <Steps
-                                current={active}
-                                onChange={setActive}
-                                items={[
-                                    {
-                                        title: "Bước 1",
-                                        description: "Tạo tài khoản",
-                                        icon: <UserOutlined />,
-                                    },
-                                    {
-                                        title: "Bước 2",
-                                        description: "Xác nhận email",
-                                        icon: <MailOutlined />,
-                                    },
-                                    {
-                                        title: "Bước 3",
-                                        description: "Đăng ký thành công",
-                                        icon: <SafetyCertificateOutlined />,
-                                    },
-                                ]}
-                            />
-                            <div style={{ marginTop: 50 }}>
-                                {active === 0 && (
-                                    <ClientSignupStepOne nextStep={nextStep} />
-                                )}
-                                {active === 1 && (
-                                    <ClientSignupStepTwo
-                                        nextStep={nextStep}
-                                        userId={Number(userId) || null}
-                                    />
-                                )}
-                                {active === 3 && <ClientSignupStepThree />}
-                            </div>
+                            <Suspense
+                                fallback={
+                                    <div
+                                        style={{
+                                            padding: 40,
+                                            textAlign: "center",
+                                        }}
+                                    >
+                                        <Spin size="large" />
+                                        <div style={{ marginTop: 16 }}>
+                                            Đang tải...
+                                        </div>
+                                    </div>
+                                }
+                            >
+                                <SignupContent />
+                            </Suspense>
                         </div>
                     </Flex>
                 </Content>
@@ -139,7 +102,58 @@ function ClientSignup() {
     );
 }
 
-// Fix ClientSignupStepOne component with proper state handling
+// Component con sử dụng useSearchParams - được bọc trong Suspense
+function SignupContent() {
+    const searchParams = useSearchParams();
+    const { currentSignupUserId } = useAuthStore();
+
+    const userId = searchParams.get("userId") || currentSignupUserId;
+    const currentStep = userId ? 1 : 0; // Nếu có userId thì nhảy sang bước 2
+    const [active, setActive] = useState(currentStep);
+
+    const nextStep = () =>
+        setActive((current) =>
+            current < 1 ? current + 1 : current === 1 ? 3 : current,
+        );
+
+    return (
+        <>
+            <Steps
+                current={active}
+                onChange={() => {}}
+                items={[
+                    {
+                        title: "Bước 1",
+                        description: "Tạo tài khoản",
+                        icon: <UserOutlined />,
+                    },
+                    {
+                        title: "Bước 2",
+                        description: "Xác nhận email",
+                        icon: <MailOutlined />,
+                    },
+                    {
+                        title: "Bước 3",
+                        description: "Đăng ký thành công",
+                        icon: <SafetyCertificateOutlined />,
+                    },
+                ]}
+            />
+            <div style={{ marginTop: 50 }}>
+                {active === 0 && <ClientSignupStepOne nextStep={nextStep} />}
+                {active === 1 && (
+                    <ClientSignupStepTwo
+                        nextStep={nextStep}
+                        userId={Number(userId) || null}
+                    />
+                )}
+                {active === 3 && <ClientSignupStepThree />}
+            </div>
+        </>
+    );
+}
+
+// Fix ClientSignupStepOne component
 function ClientSignupStepOne({ nextStep }: { nextStep: () => void }) {
     const { updateCurrentSignupUserId } = useAuthStore();
     const [form] = Form.useForm();
@@ -178,11 +192,35 @@ function ClientSignupStepOne({ nextStep }: { nextStep: () => void }) {
     );
 
     // Get province data
-    useGetAllApi<ProvinceResponse>(
+    const { data: provinceListResponse } = useGetAllApi<ProvinceResponse>(
         ProvinceConfigs.resourceUrl,
         ProvinceConfigs.resourceKey,
         { all: 1 },
-        (provinceListResponse) => {
+    );
+
+    // Get district data based on selected province
+    const { data: districtListResponse } = useGetAllApi<DistrictResponse>(
+        DistrictConfigs.resourceUrl,
+        DistrictConfigs.resourceKey,
+        {
+            all: 1,
+            filter: `province.id==${selectedProvinceId || 0}`,
+        },
+    );
+
+    // Get ward data based on selected district
+    const { data: wardListResponse } = useGetAllApi<WardResponse>(
+        WardConfigs.resourceUrl,
+        WardConfigs.resourceKey,
+        {
+            all: 1,
+            filter: `district.id==${selectedDistrictId || 0}`,
+        },
+    );
+
+    // Process province data
+    useEffect(() => {
+        if (provinceListResponse?.content) {
             const selectList: SelectOption[] = provinceListResponse.content.map(
                 (item) => ({
                     value: String(item.id),
@@ -190,9 +228,34 @@ function ClientSignupStepOne({ nextStep }: { nextStep: () => void }) {
                 }),
             );
             setProvinceSelectList(selectList);
-        },
-        { refetchOnWindowFocus: false },
-    );
+        }
+    }, [provinceListResponse]);
+
+    // Process district data
+    useEffect(() => {
+        if (districtListResponse?.content) {
+            const selectList: SelectOption[] = districtListResponse.content.map(
+                (item) => ({
+                    value: String(item.id),
+                    label: item.name,
+                }),
+            );
+            setDistrictSelectList(selectList);
+        }
+    }, [districtListResponse]);
+
+    // Process ward data
+    useEffect(() => {
+        if (wardListResponse?.content) {
+            const selectList: SelectOption[] = wardListResponse.content.map(
+                (item) => ({
+                    value: String(item.id),
+                    label: item.name,
+                }),
+            );
+            setWardSelectList(selectList);
+        }
+    }, [wardListResponse]);
 
     // Handle province change to load districts
     const handleProvinceChange = (provinceId: string) => {
@@ -202,75 +265,28 @@ function ClientSignupStepOne({ nextStep }: { nextStep: () => void }) {
         setSelectedDistrictId(null);
     };
 
-    // Get district data based on selected province
-    useGetAllApi<DistrictResponse>(
-        DistrictConfigs.resourceUrl,
-        DistrictConfigs.resourceKey,
-        {
-            all: 1,
-            filter: `province.id==${selectedProvinceId || 0}`,
-        },
-        (districtListResponse) => {
-            const selectList: SelectOption[] = districtListResponse.content.map(
-                (item) => ({
-                    value: String(item.id),
-                    label: item.name,
-                }),
-            );
-            setDistrictSelectList(selectList);
-        },
-        {
-            refetchOnWindowFocus: false,
-            enabled: !!selectedProvinceId, // Only fetch when province is selected
-        },
-    );
-
     // Handle district change to load wards
     const handleDistrictChange = (districtId: string) => {
         setSelectedDistrictId(districtId);
         form.setFieldValue("address.wardId", null);
     };
 
-    // Get ward data based on selected district
-    useGetAllApi<WardResponse>(
-        WardConfigs.resourceUrl,
-        WardConfigs.resourceKey,
-        {
-            all: 1,
-            filter: `district.id==${selectedDistrictId || 0}`,
-        },
-        (wardListResponse) => {
-            const selectList: SelectOption[] = wardListResponse.content.map(
-                (item) => ({
-                    value: String(item.id),
-                    label: item.name,
-                }),
-            );
-            setWardSelectList(selectList);
-        },
-        {
-            refetchOnWindowFocus: false,
-            enabled: !!selectedDistrictId, // Only fetch when district is selected
-        },
-    );
-
     const registerUserApi = useMutation<
         RegistrationResponse,
         ErrorMessage,
         UserRequest
-    >(
-        (requestBody) =>
+    >({
+        mutationFn: (requestBody) =>
             FetchUtils.post(ResourceURL.CLIENT_REGISTRATION, requestBody),
-        {
-            onSuccess: (registrationResponse) => {
-                NotifyUtils.simpleSuccess("Tạo tài khoản thành công");
-                updateCurrentSignupUserId(registrationResponse.userId);
-                nextStep();
-            },
-            onError: () =>
-                NotifyUtils.simpleFailed("Tạo tài khoản không thành công"),
+
+        onSuccess: (registrationResponse) => {
+            NotifyUtils.simpleSuccess("Tạo tài khoản thành công");
+            updateCurrentSignupUserId(registrationResponse.userId);
+            nextStep();
         },
-    );
+        onError: () =>
+            NotifyUtils.simpleFailed("Tạo tài khoản không thành công"),
+    });
 
     const handleFormSubmit = (values: any) => {
         const requestBody: UserRequest = {
@@ -312,7 +328,13 @@ function ClientSignupStepOne({ nextStep }: { nextStep: () => void }) {
     };
 
     return (
-        <Card variant="outlined" style={{ maxWidth: 500, margin: "auto" }}>
+        <Card
+            style={{
+                maxWidth: 500,
+                margin: "auto",
+                border: "1px solid #d9d9d9",
+            }}
+        >
             <Form
                 form={form}
                 layout="vertical"
@@ -440,7 +462,7 @@ function ClientSignupStepOne({ nextStep }: { nextStep: () => void }) {
                     <Button
                         type="primary"
                         htmlType="submit"
-                        loading={registerUserApi.isLoading}
+                        loading={registerUserApi.isPending}
                     >
                         Đăng ký
                     </Button>
@@ -450,6 +472,7 @@ function ClientSignupStepOne({ nextStep }: { nextStep: () => void }) {
     );
 }
 
+// Fix ClientSignupStepTwo component
 function ClientSignupStepTwo({
     nextStep,
     userId,
@@ -458,8 +481,8 @@ function ClientSignupStepTwo({
     userId: number | null;
 }) {
     const [form] = Form.useForm();
+    const [changeEmailForm] = Form.useForm();
     const { updateCurrentSignupUserId } = useAuthStore();
-    const [changeEmailForm] = Form.useForm(); // Add separate form instance for email change
 
     const initialFormValues = {
         token: "",
@@ -469,66 +492,61 @@ function ClientSignupStepTwo({
         void,
         ErrorMessage,
         RegistrationRequest
-    >(
-        (requestBody) =>
+    >({
+        mutationFn: (requestBody) =>
             FetchUtils.post(
                 ResourceURL.CLIENT_REGISTRATION_CONFIRM,
                 requestBody,
             ),
-        {
-            onSuccess: () => {
-                NotifyUtils.simpleSuccess("Xác nhận tài khoản thành công");
-                updateCurrentSignupUserId(null);
-                nextStep();
-            },
-            onError: () =>
-                NotifyUtils.simpleFailed("Xác nhận tài khoản không thành công"),
+
+        onSuccess: () => {
+            NotifyUtils.simpleSuccess("Xác nhận tài khoản thành công");
+            updateCurrentSignupUserId(null);
+            nextStep();
         },
-    );
+        onError: () =>
+            NotifyUtils.simpleFailed("Xác nhận tài khoản không thành công"),
+    });
 
     const resendRegistrationTokenApi = useMutation<
         Empty,
         ErrorMessage,
         { userId: number }
-    >(
-        (request) =>
+    >({
+        mutationFn: (request) =>
             FetchUtils.get(
                 ResourceURL.CLIENT_REGISTRATION_RESEND_TOKEN(request.userId),
             ),
-        {
-            onSuccess: () => {
-                NotifyUtils.simpleSuccess("Đã gửi lại mã xác nhận thành công");
-                Modal.destroyAll();
-            },
-            onError: () =>
-                NotifyUtils.simpleFailed(
-                    "Gửi lại mã xác nhận không thành công",
-                ),
+
+        onSuccess: () => {
+            NotifyUtils.simpleSuccess("Đã gửi lại mã xác nhận thành công");
+            Modal.destroyAll();
         },
-    );
+        onError: () =>
+            NotifyUtils.simpleFailed("Gửi lại mã xác nhận không thành công"),
+    });
 
     const changeRegistrationEmailApi = useMutation<
         Empty,
         ErrorMessage,
         { userId: number; email: string }
-    >(
-        (request) =>
+    >({
+        mutationFn: (request) =>
             FetchUtils.put(
                 ResourceURL.CLIENT_REGISTRATION_CHANGE_EMAIL(request.userId),
                 {},
                 { email: request.email },
             ),
-        {
-            onSuccess: () => {
-                NotifyUtils.simpleSuccess(
-                    "Đã đổi email thành công và đã gửi lại mã xác nhận mới",
-                );
-                Modal.destroyAll();
-            },
-            onError: () =>
-                NotifyUtils.simpleFailed("Thay đổi email không thành công"),
+
+        onSuccess: () => {
+            NotifyUtils.simpleSuccess(
+                "Đã đổi email thành công và đã gửi lại mã xác nhận mới",
+            );
+            Modal.destroyAll();
         },
-    );
+        onError: () =>
+            NotifyUtils.simpleFailed("Thay đổi email không thành công"),
+    });
 
     const handleFormSubmit = (values: any) => {
         if (userId) {
@@ -552,14 +570,14 @@ function ClientSignupStepTwo({
                 okText: "Gửi",
                 cancelText: "Đóng",
                 okButtonProps: {
-                    loading: resendRegistrationTokenApi.isLoading,
+                    loading: resendRegistrationTokenApi.isPending,
                 },
             });
         }
     };
 
     const handleResendTokenWithNewEmailButton = () => {
-        // Reset form when opening modal
+        // Reset form khi mở modal
         changeEmailForm.resetFields();
 
         Modal.confirm({
@@ -569,14 +587,6 @@ function ClientSignupStepTwo({
                     form={changeEmailForm}
                     layout="vertical"
                     initialValues={{ email: "" }}
-                    onFinish={(values) => {
-                        if (userId) {
-                            changeRegistrationEmailApi.mutate({
-                                userId: userId,
-                                email: values.email,
-                            });
-                        }
-                    }}
                 >
                     <Form.Item
                         name="email"
@@ -598,25 +608,33 @@ function ClientSignupStepTwo({
             ),
             okText: "Thay đổi và Gửi",
             cancelText: "Đóng",
-            onOk: () => {
-                // Trigger form submission
-                changeEmailForm.submit();
-                // Return promise to make modal wait for API response
-                return changeRegistrationEmailApi.isLoading
-                    ? changeRegistrationEmailApi.mutateAsync({
-                          userId: userId as number,
-                          email: changeEmailForm.getFieldValue("email"),
-                      })
-                    : Promise.resolve();
+            onOk: async () => {
+                try {
+                    // Validate form trước
+                    const values = await changeEmailForm.validateFields();
+
+                    // Chỉ tiến hành nếu validation thành công và userId tồn tại
+                    if (userId) {
+                        return changeRegistrationEmailApi.mutateAsync({
+                            userId: userId,
+                            email: values.email,
+                        });
+                    }
+                } catch (error) {
+                    // Validation thất bại
+                    return Promise.reject("Vui lòng nhập email hợp lệ");
+                }
             },
             okButtonProps: {
-                loading: changeRegistrationEmailApi.isLoading,
+                loading: changeRegistrationEmailApi.isPending,
             },
         });
     };
 
     return (
-        <Card variant="outlined" style={{ width: 500, margin: "auto" }}>
+        <Card
+            style={{ width: 500, margin: "auto", border: "1px solid #d9d9d9" }}
+        >
             <Space direction="vertical" size="large">
                 <Form
                     form={form}
@@ -640,7 +658,7 @@ function ClientSignupStepTwo({
                         <Button
                             type="primary"
                             htmlType="submit"
-                            loading={confirmRegistrationApi.isLoading}
+                            loading={confirmRegistrationApi.isPending}
                         >
                             Xác nhận
                         </Button>
@@ -649,16 +667,22 @@ function ClientSignupStepTwo({
 
                 <Divider>hoặc</Divider>
 
-                <Button type="default" onClick={handleResendTokenButton}>
-                    Gửi mã xác nhận lần nữa
-                </Button>
-
-                <Button
-                    type="default"
-                    onClick={handleResendTokenWithNewEmailButton}
+                <Space
+                    direction="vertical"
+                    size="middle"
+                    style={{ width: "100%" }}
                 >
-                    Gửi mã xác nhận lần nữa với email mới
-                </Button>
+                    <Button type="default" onClick={handleResendTokenButton}>
+                        Gửi mã xác nhận lần nữa
+                    </Button>
+
+                    <Button
+                        type="default"
+                        onClick={handleResendTokenWithNewEmailButton}
+                    >
+                        Gửi mã xác nhận lần nữa với email mới
+                    </Button>
+                </Space>
             </Space>
         </Card>
     );
