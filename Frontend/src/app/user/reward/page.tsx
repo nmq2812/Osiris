@@ -1,5 +1,5 @@
 "use client";
-import React from "react";
+import React, { useEffect } from "react";
 import {
     Badge,
     Card,
@@ -23,7 +23,7 @@ import useTitle from "@/hooks/use-title";
 
 import { RewardType } from "@/models/RewardStrategy";
 import DateUtils from "@/utils/DateUtils";
-import { useQuery } from "react-query";
+import { useQuery } from "@tanstack/react-query";
 import FetchUtils, { ErrorMessage } from "@/utils/FetchUtils";
 import ResourceURL from "@/constants/ResourceURL";
 import NotifyUtils from "@/utils/NotifyUtils";
@@ -84,7 +84,16 @@ function ClientReward() {
     }
 
     if (rewardResponse) {
-        const reward = rewardResponse;
+        const reward = rewardResponse as unknown as {
+            rewardTotalScore: number;
+            rewardLogs: Array<{
+                rewardLogId: string;
+                rewardLogType: RewardType;
+                rewardLogScore: number;
+                rewardLogNote: string;
+                rewardLogCreatedAt: string;
+            }>;
+        };
 
         rewardContentFragment = (
             <>
@@ -211,15 +220,17 @@ function useGetRewardApi() {
         data: rewardResponse,
         isLoading: isLoadingRewardResponse,
         isError: isErrorRewardResponse,
-    } = useQuery<ClientRewardResponse, ErrorMessage>(
-        ["client-api", "rewards", "getReward"],
-        () => FetchUtils.getWithToken(ResourceURL.CLIENT_REWARD),
-        {
-            onError: () =>
-                NotifyUtils.simpleFailed("Lấy dữ liệu không thành công"),
-            keepPreviousData: true,
-        },
-    );
+    } = useQuery<ClientRewardResponse, ErrorMessage>({
+        queryKey: ["client-api", "rewards", "getReward"],
+        queryFn: () => FetchUtils.getWithToken(ResourceURL.CLIENT_REWARD),
+        placeholderData: (previousData) => previousData,
+    });
+
+    useEffect(() => {
+        if (isErrorRewardResponse) {
+            NotifyUtils.simpleFailed("Lấy dữ liệu không thành công");
+        }
+    }, [isErrorRewardResponse]);
 
     return { rewardResponse, isLoadingRewardResponse, isErrorRewardResponse };
 }

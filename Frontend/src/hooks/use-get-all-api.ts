@@ -6,9 +6,7 @@ import FetchUtils, {
 } from "@/utils/FetchUtils";
 import FilterUtils from "@/utils/FilterUtils";
 import NotifyUtils from "@/utils/NotifyUtils";
-import { useQuery } from "react-query";
-
-import { UseQueryOptions } from "react-query/types/react/types";
+import { useQuery, UseQueryOptions } from "@tanstack/react-query";
 
 function useGetAllApi<O>(
     resourceUrl: string,
@@ -32,21 +30,20 @@ function useGetAllApi<O>(
 
     const queryKey = [resourceKey, "getAll", requestParams];
 
-    return useQuery<ListResponse<O>, ErrorMessage>(
-        queryKey,
-        () => FetchUtils.getAll<O>(resourceUrl, requestParams),
-        {
-            keepPreviousData: true,
-            onSuccess: successCallback,
-            onError: (error) =>
-                NotifyUtils.simpleFailed(
-                    `Lỗi ${
-                        error.statusCode || "chưa biết"
-                    }: Lấy dữ liệu không thành công`,
-                ),
-            ...options,
-        },
-    );
+    return useQuery<ListResponse<O>, ErrorMessage>({
+        queryKey: queryKey,
+        queryFn: () => FetchUtils.getAll<O>(resourceUrl, requestParams),
+
+        keepPreviousData: true,
+        onSuccess: successCallback,
+        onError: (error: { statusCode: any }) =>
+            NotifyUtils.simpleFailed(
+                `Lỗi ${
+                    error.statusCode || "chưa biết"
+                }: Lấy dữ liệu không thành công`,
+            ),
+        ...options,
+    } as UseQueryOptions<ListResponse<O>, ErrorMessage>);
 }
 
 export default useGetAllApi;

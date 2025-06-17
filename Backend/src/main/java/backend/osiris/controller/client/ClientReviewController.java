@@ -34,7 +34,6 @@ import java.util.List;
 @RestController
 @RequestMapping("/client-api/reviews")
 @AllArgsConstructor
-@CrossOrigin(AppConstants.FRONTEND_HOST)
 public class ClientReviewController {
 
     private ReviewRepository reviewRepository;

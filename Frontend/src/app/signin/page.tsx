@@ -18,7 +18,7 @@ import { z } from "zod";
 import MessageUtils from "@/utils/MessageUtils";
 import { useForm } from "antd/es/form/Form";
 import { JwtResponse, LoginRequest } from "@/models/Authentication";
-import { useMutation } from "react-query";
+import { useMutation } from "@tanstack/react-query";
 import FetchUtils, { ErrorMessage } from "@/utils/FetchUtils";
 import ResourceURL from "@/constants/ResourceURL";
 import NotifyUtils from "@/utils/NotifyUtils";
@@ -59,17 +59,19 @@ const LoginPage = () => {
     const router = useRouter();
     const [form] = useForm();
 
-    const loginApi = useMutation<JwtResponse, ErrorMessage, LoginRequest>(
-        (requestBody) => FetchUtils.post(ResourceURL.LOGIN, requestBody),
-    );
+    const loginApi = useMutation<JwtResponse, ErrorMessage, LoginRequest>({
+        mutationFn: (requestBody) =>
+            FetchUtils.post(ResourceURL.LOGIN, requestBody),
+    });
 
-    const userInfoApi = useMutation<UserResponse, ErrorMessage>((_) =>
-        FetchUtils.getWithToken(ResourceURL.CLIENT_USER_INFO),
-    );
+    const userInfoApi = useMutation<UserResponse, ErrorMessage>({
+        mutationFn: (_) =>
+            FetchUtils.getWithToken(ResourceURL.CLIENT_USER_INFO),
+    });
 
-    const cartApi = useMutation<ClientCartResponse | Empty, ErrorMessage>((_) =>
-        FetchUtils.getWithToken(ResourceURL.CLIENT_CART),
-    );
+    const cartApi = useMutation<ClientCartResponse | Empty, ErrorMessage>({
+        mutationFn: (_) => FetchUtils.getWithToken(ResourceURL.CLIENT_CART),
+    });
 
     useEffect(() => {
         if (openedAlert && user && counter > 0) {
@@ -212,7 +214,7 @@ const LoginPage = () => {
                                         htmlType="submit"
                                         size="large"
                                         block
-                                        loading={loginApi.isLoading}
+                                        loading={loginApi.isPending}
                                     >
                                         Đăng nhập
                                     </Button>

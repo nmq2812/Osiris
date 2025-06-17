@@ -5,6 +5,7 @@ import backend.osiris.entity.authentication.User;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.CriteriaQuery;
+import jakarta.persistence.criteria.Expression;
 import jakarta.persistence.criteria.Root;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Repository;
@@ -23,9 +24,15 @@ public class UserProjectionRepository {
         CriteriaQuery<StatisticResource> query = cb.createQuery(StatisticResource.class);
 
         Root<User> user = query.from(User.class);
-        query.select(cb.construct(StatisticResource.class, user.get("createdAt").as(Instant.class), cb.count(user.get("id"))));
-        query.groupBy(user.get("createdAt").as(Instant.class));
-        query.orderBy(cb.asc(user.get("createdAt")));
+        Expression<Instant> createdAtExpr = user.get("createdAt").as(Instant.class);
+
+        query.select(cb.construct(
+                StatisticResource.class,
+                createdAtExpr,
+                cb.count(user.get("id"))
+        ));
+        query.groupBy(createdAtExpr);
+        query.orderBy(cb.asc(createdAtExpr));
 
         return em.createQuery(query).getResultList();
     }

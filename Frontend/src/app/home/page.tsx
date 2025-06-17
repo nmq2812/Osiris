@@ -6,6 +6,8 @@ import ClientHomeFeaturedCategories from "./ClientHomeFeaturedCategories";
 import ClientHomeLatestProducts from "./ClientHomeLatestProducts";
 import ClientHomeNewsletter from "./ClientHomeNewsletter";
 import useTitle from "@/hooks/use-title";
+import ChatWidget from "@/components/ChatWidget";
+import ClientHomeHotProducts from "./ClientHomeHottProducts.";
 
 const { Content } = Layout;
 
@@ -26,9 +28,11 @@ export default function HomePage() {
                     <ClientHomeBanner />
                     <ClientHomeFeaturedCategories />
                     <ClientHomeLatestProducts />
+                    <ClientHomeHotProducts />
                     <ClientHomeNewsletter />
                 </Space>
             </Content>
+            <ChatWidget></ChatWidget>
         </Layout>
     );
 }

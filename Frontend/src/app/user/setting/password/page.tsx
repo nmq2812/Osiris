@@ -12,7 +12,7 @@ import {
     theme,
 } from "antd";
 import { LockOutlined } from "@ant-design/icons";
-import { useMutation } from "react-query";
+import { useMutation } from "@tanstack/react-query";
 import { z } from "zod";
 import ClientUserNavbar from "@/components/ClientUserNavbar";
 import useTitle from "@/hooks/use-title";
@@ -63,22 +63,20 @@ function ClientSettingPassword() {
         never,
         ErrorMessage,
         ClientPasswordSettingUserRequest
-    >(
-        (requestBody) =>
+    >({
+        mutationFn: (requestBody) =>
             FetchUtils.postWithToken(
                 ResourceURL.CLIENT_USER_PASSWORD_SETTING,
                 requestBody,
             ),
-        {
-            onSuccess: () => {
-                NotifyUtils.simpleSuccess("Cập nhật thành công");
-                form.resetFields();
-                setFormChanged(false);
-            },
-            onError: () =>
-                NotifyUtils.simpleFailed("Cập nhật không thành công"),
+
+        onSuccess: () => {
+            NotifyUtils.simpleSuccess("Cập nhật thành công");
+            form.resetFields();
+            setFormChanged(false);
         },
-    );
+        onError: () => NotifyUtils.simpleFailed("Cập nhật không thành công"),
+    });
 
     // Handle form field changes
     const handleFieldChange = () => {
@@ -282,7 +280,7 @@ function ClientSettingPassword() {
                                                         htmlType="submit"
                                                         disabled={!formChanged}
                                                         loading={
-                                                            updatePasswordSettingApi.isLoading
+                                                            updatePasswordSettingApi.isPending
                                                         }
                                                     >
                                                         Cập nhật

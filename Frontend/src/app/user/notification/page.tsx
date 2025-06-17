@@ -1,5 +1,5 @@
 "use client";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
     Badge,
     Button,
@@ -25,7 +25,7 @@ import {
     InfoCircleOutlined,
 } from "@ant-design/icons";
 import Link from "next/link";
-import { useMutation, useQuery, useQueryClient } from "react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import ClientUserNavbar from "@/components/ClientUserNavbar";
 import useTitle from "@/hooks/use-title";
 import ApplicationConstants from "@/constants/ApplicationConstants";
@@ -347,26 +347,29 @@ function useGetAllNotificationsApi(activePage: number) {
         data: notificationResponses,
         isLoading: isLoadingNotificationResponses,
         isError: isErrorNotificationResponses,
-    } = useQuery<ListResponse<NotificationResponse>, ErrorMessage>(
-        [
+    } = useQuery<ListResponse<NotificationResponse>, ErrorMessage>({
+        queryKey: [
             "client-api",
             "notifications",
             "getAllNotifications",
             requestParams,
             newNotifications.length,
         ],
-        () =>
+        queryFn: () =>
             FetchUtils.getWithToken(
                 ResourceURL.CLIENT_NOTIFICATION,
                 requestParams,
             ),
-        {
-            onError: () =>
-                NotifyUtils.simpleFailed("Lấy dữ liệu không thành công"),
-            refetchOnWindowFocus: false,
-            keepPreviousData: true,
-        },
-    );
+
+        refetchOnWindowFocus: false,
+        placeholderData: (previousData) => previousData,
+    });
+
+    useEffect(() => {
+        if (isErrorNotificationResponses) {
+            NotifyUtils.simpleFailed("Lấy dữ liệu không thành công");
+        }
+    }, [isErrorNotificationResponses]);
 
     return {
         notificationResponses,
@@ -379,18 +382,21 @@ function useUpdateNotificationApi(id: number) {
     const queryClient = useQueryClient();
 
     return useMutation<NotificationResponse, ErrorMessage, NotificationRequest>(
-        (requestBody) =>
-            FetchUtils.putWithToken(
-                ResourceURL.CLIENT_NOTIFICATION + "/" + id,
-                requestBody,
-            ),
         {
+            mutationFn: (requestBody) =>
+                FetchUtils.putWithToken(
+                    ResourceURL.CLIENT_NOTIFICATION + "/" + id,
+                    requestBody,
+                ),
+
             onSuccess: () =>
-                queryClient.invalidateQueries([
-                    "client-api",
-                    "notifications",
-                    "getAllNotifications",
-                ]),
+                queryClient.invalidateQueries({
+                    queryKey: [
+                        "client-api",
+                        "notifications",
+                        "getAllNotifications",
+                    ],
+                }),
             onError: () =>
                 NotifyUtils.simpleFailed("Cập nhật không thành công"),
         },

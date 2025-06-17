@@ -9,6 +9,8 @@ import { UnitResponse } from "./Unit";
 import { VariantPropertyItem, VariantRequest } from "./Variant";
 
 export interface ProductResponse extends BaseResponse {
+    createdBy: any;
+    updatedBy: any;
     name: string;
     code: string;
     slug: string;

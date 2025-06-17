@@ -8,7 +8,7 @@ import { ClientListedProductResponse } from "@/datas/ClientUI";
 import useClientCategoryStore from "@/stores/use-client-category-store";
 import FetchUtils, { ListResponse, ErrorMessage } from "@/utils/FetchUtils";
 import NotifyUtils from "@/utils/NotifyUtils";
-import { useQuery } from "react-query";
+import { useQuery } from "@tanstack/react-query";
 
 const { Text } = Typography;
 const { useToken } = theme;
@@ -167,19 +167,30 @@ function useGetAllCategoryProductsApi(categorySlug: string) {
         data: productResponses,
         isLoading: isLoadingProductResponses,
         isError: isErrorProductResponses,
-    } = useQuery<ListResponse<ClientListedProductResponse>, ErrorMessage>(
-        ["client-api", "products", "getAllProducts", requestParams],
-        () => FetchUtils.get(ResourceURL.CLIENT_PRODUCT, requestParams),
-        {
-            onSuccess: (productResponses) =>
-                totalProducts !== productResponses.totalElements &&
-                updateTotalProducts(productResponses.totalElements),
-            onError: () =>
-                NotifyUtils.simpleFailed("Lấy dữ liệu không thành công"),
-            refetchOnWindowFocus: false,
-            keepPreviousData: true,
-        },
-    );
+    } = useQuery<ListResponse<ClientListedProductResponse>, ErrorMessage>({
+        queryKey: ["client-api", "products", "getAllProducts", requestParams],
+        queryFn: () =>
+            FetchUtils.get(ResourceURL.CLIENT_PRODUCT, requestParams),
+        refetchOnWindowFocus: false,
+        placeholderData: (previousData) => previousData,
+    });
+
+    // Handle success side effect
+    React.useEffect(() => {
+        if (
+            productResponses &&
+            totalProducts !== productResponses.totalElements
+        ) {
+            updateTotalProducts(productResponses.totalElements);
+        }
+    }, [productResponses, totalProducts, updateTotalProducts]);
+
+    // Handle error side effect
+    React.useEffect(() => {
+        if (isErrorProductResponses) {
+            NotifyUtils.simpleFailed("Lấy dữ liệu không thành công");
+        }
+    }, [isErrorProductResponses]);
 
     return {
         productResponses,

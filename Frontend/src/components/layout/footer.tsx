@@ -9,19 +9,18 @@ import {
     InstagramOutlined,
     CustomerServiceOutlined,
 } from "@ant-design/icons";
-import useAdminAuthStore from "@/stores/use-admin-auth-store";
+import { usePathname } from "next/navigation";
 
 const { Footer } = Layout;
 const { Text, Title } = Typography;
 
 function ClientFooter() {
-    const { user } = useAdminAuthStore();
-
-    if (user) {
-        return null; // Không hiển thị footer nếu đã đăng nhập
+    const pathname = usePathname();
+    if (pathname.includes("/admin")) {
+        return null; // Don't render the footer on admin pages
     }
     return (
-        <Footer className="bg-gray-100 pt-16 pb-8 mt-16 border-t border-gray-200">
+        <Footer className="bg-gray-100 pt-16 pb-8 border-t border-gray-200">
             <div className="container mx-auto max-w-7xl px-4">
                 <Row gutter={[32, 48]}>
                     <Col xs={24} md={12}>
@@ -223,7 +222,7 @@ function ClientFooter() {
                             © 2025 Osiris Corporation. Bảo lưu mọi quyền.
                         </Text>
                     </Col>
-                    <Col>
+                    {/* <Col>
                         <Space size="small">
                             <div className="border border-gray-300 rounded px-3 py-1">
                                 <img
@@ -258,7 +257,7 @@ function ClientFooter() {
                                 />
                             </div>
                         </Space>
-                    </Col>
+                    </Col> */}
                 </Row>
             </div>
         </Footer>

@@ -25,7 +25,7 @@ import { CollectionWrapper } from "@/datas/CollectionWrapper";
 import useTitle from "@/hooks/use-title";
 import FetchUtils, { ErrorMessage } from "@/utils/FetchUtils";
 import PageConfigs from "@/utils/PageConfigs";
-import { useQuery } from "react-query";
+import { useQuery } from "@tanstack/react-query";
 
 const { Content } = Layout;
 const { Title, Text, Link } = Typography;
@@ -42,19 +42,22 @@ function ClientAllCategories() {
         isLoading: isLoadingCategoryResponses,
         isError: isErrorCategoryResponses,
         refetch,
-    } = useQuery<CollectionWrapper<ClientCategoryResponse>, ErrorMessage>(
-        ["client-api", "categories", "getAllCategories"],
-        () => FetchUtils.get(ResourceURL.CLIENT_CATEGORY),
-        {
-            onError: () =>
-                api.error({
-                    message: "Lỗi",
-                    description: "Lấy dữ liệu danh mục không thành công",
-                }),
-            refetchOnWindowFocus: false,
-            keepPreviousData: true,
-        },
-    );
+    } = useQuery<CollectionWrapper<ClientCategoryResponse>, ErrorMessage>({
+        queryKey: ["client-api", "categories", "getAllCategories"],
+        queryFn: () => FetchUtils.get(ResourceURL.CLIENT_CATEGORY),
+
+        refetchOnWindowFocus: false,
+        placeholderData: (previousData) => previousData,
+    });
+
+    React.useEffect(() => {
+        if (isErrorCategoryResponses) {
+            api.error({
+                message: "Lỗi",
+                description: "Lấy dữ liệu danh mục không thành công",
+            });
+        }
+    }, [isErrorCategoryResponses, api]);
 
     const handleSearch = (value: string) => {
         setSearchTerm(value.toLowerCase());

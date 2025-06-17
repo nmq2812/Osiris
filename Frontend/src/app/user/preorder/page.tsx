@@ -1,5 +1,5 @@
 "use client";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
     Button,
     Card,
@@ -23,7 +23,7 @@ import {
     DeliveredProcedureOutlined,
 } from "@ant-design/icons";
 import Link from "next/link";
-import { useMutation, useQuery, useQueryClient } from "react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import ClientUserNavbar from "@/components/ClientUserNavbar";
 import useTitle from "@/hooks/use-title";
 import FetchUtils, { ErrorMessage, ListResponse } from "@/utils/FetchUtils";
@@ -328,17 +328,20 @@ function useGetAllPreordersApi(activePage: number) {
         data: preorderResponses,
         isLoading: isLoadingPreorderResponses,
         isError: isErrorPreorderResponses,
-    } = useQuery<ListResponse<ClientPreorderResponse>, ErrorMessage>(
-        ["client-api", "preorders", "getAllPreorders", requestParams],
-        () =>
+    } = useQuery<ListResponse<ClientPreorderResponse>, ErrorMessage>({
+        queryKey: ["client-api", "preorders", "getAllPreorders", requestParams],
+        queryFn: () =>
             FetchUtils.getWithToken(ResourceURL.CLIENT_PREORDER, requestParams),
-        {
-            onError: () =>
-                NotifyUtils.simpleFailed("Lấy dữ liệu không thành công"),
-            refetchOnWindowFocus: false,
-            keepPreviousData: true,
-        },
-    );
+
+        refetchOnWindowFocus: false,
+        placeholderData: (previousData) => previousData,
+    });
+
+    useEffect(() => {
+        if (isErrorPreorderResponses) {
+            NotifyUtils.simpleFailed("Lấy dữ liệu không thành công");
+        }
+    }, [isErrorPreorderResponses]);
 
     return {
         preorderResponses,
@@ -354,43 +357,34 @@ function useUpdatePreorderApi() {
         ClientPreorderResponse,
         ErrorMessage,
         ClientPreorderRequest
-    >(
-        (requestBody) =>
+    >({
+        mutationFn: (requestBody) =>
             FetchUtils.putWithToken(ResourceURL.CLIENT_PREORDER, requestBody),
-        {
-            onSuccess: () => {
-                NotifyUtils.simpleSuccess("Cập nhật thành công");
-                void queryClient.invalidateQueries([
-                    "client-api",
-                    "preorders",
-                    "getAllPreorders",
-                ]);
-            },
-            onError: () =>
-                NotifyUtils.simpleFailed("Cập nhật không thành công"),
+
+        onSuccess: () => {
+            NotifyUtils.simpleSuccess("Cập nhật thành công");
+            void queryClient.invalidateQueries({
+                queryKey: ["client-api", "preorders", "getAllPreorders"],
+            });
         },
-    );
+        onError: () => NotifyUtils.simpleFailed("Cập nhật không thành công"),
+    });
 }
 
 function useDeletePreordersApi() {
     const queryClient = useQueryClient();
 
-    return useMutation<void, ErrorMessage, number[]>(
-        (entityIds) =>
+    return useMutation<void, ErrorMessage, number[]>({
+        mutationFn: (entityIds) =>
             FetchUtils.deleteWithToken(ResourceURL.CLIENT_PREORDER, entityIds),
-        {
-            onSuccess: () => {
-                NotifyUtils.simpleSuccess("Xóa đặt trước sản phẩm thành công");
-                void queryClient.invalidateQueries([
-                    "client-api",
-                    "preorders",
-                    "getAllPreorders",
-                ]);
-            },
-            onError: () =>
-                NotifyUtils.simpleFailed("Xóa đặt trước sản phẩm thất bại"),
+
+        onSuccess: () => {
+            NotifyUtils.simpleSuccess("Xóa đặt trước sản phẩm thành công");
+            void queryClient.invalidateQueries({
+                queryKey: ["client-api", "preorders", "getAllPreorders"],
+            });
         },
-    );
+    });
 }
 
 export default ClientPreorder;

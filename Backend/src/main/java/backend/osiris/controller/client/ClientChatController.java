@@ -31,7 +31,6 @@ import java.util.stream.Collectors;
 @RestController
 @RequestMapping("/client-api/chat")
 @AllArgsConstructor
-@CrossOrigin(AppConstants.FRONTEND_HOST)
 public class ClientChatController {
 
     private UserRepository userRepository;

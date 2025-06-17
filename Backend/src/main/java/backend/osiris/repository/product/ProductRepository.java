@@ -28,9 +28,12 @@ public interface ProductRepository extends JpaRepository<Product, Long>, JpaSpec
         Specification<Product> spec = (root, query, cb) -> {
             Join<Product, Variant> variant = root.join("variants");
             Join<Variant, DocketVariant> docketVariant = variant.join("docketVariants");
+//
+//            query.distinct(true);
+//            query.orderBy(cb.desc(docketVariant.get("docket").get("id")));
 
-            query.distinct(true);
-            query.orderBy(cb.desc(docketVariant.get("docket").get("id")));
+            query.orderBy(cb.desc(cb.max(docketVariant.get("docket").get("id"))));
+            query.groupBy(root.get("id"));
 
             return query.getRestriction();
         };
@@ -122,7 +125,7 @@ public interface ProductRepository extends JpaRepository<Product, Long>, JpaSpec
             }
 
             if ("random".equals(sort)) {
-                orders.add(cb.asc(cb.function("RAND", Void.class)));
+                orders.add(cb.asc(cb.function("RAND", Double.class)));
             }
 
             if (newable) {
