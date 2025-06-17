@@ -11,7 +11,7 @@ public interface ImageService extends CrudService<Long, ImageRequest, ImageRespo
 
     UploadedImageResponse store(MultipartFile image);
 
-    Resource load(String imageName);
+    String load(String imageName);
 
     void delete(String imageName);
 
